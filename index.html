@@ -753,8 +753,8 @@ function setBackendUrl() {
     location.reload();
   }
 }
-// Ctrl+Shift+B to set backend URL
-document.addEventListener("keydown", e => { if (e.ctrlKey && e.shiftKey && e.key === "B") setBackendUrl(); });
+// Ctrl+Shift+U to set backend URL (avoids Chrome's Ctrl+Shift+B bookmark shortcut)
+document.addEventListener("keydown", e => { if (e.ctrlKey && e.shiftKey && e.key === "U") setBackendUrl(); });
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 populateSelects();
