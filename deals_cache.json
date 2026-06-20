@@ -1,0 +1,539 @@
+{
+  "updated_utc": "2026-06-20T21:08:19Z",
+  "boards": {
+    "weekend": {
+      "depart_date": "2026-07-03",
+      "return_date": "2026-07-05",
+      "nights": 2,
+      "deals": [
+        {
+          "city": "Manchester",
+          "country": "England",
+          "code": "MAN",
+          "price": 47,
+          "stops": 0,
+          "total_time": "1h 15m",
+          "airlines": "Ryanair",
+          "via": "Direct"
+        },
+        {
+          "city": "London",
+          "country": "England",
+          "code": "LHR",
+          "price": 72,
+          "stops": 0,
+          "total_time": "1h 25m",
+          "airlines": "Ryanair",
+          "via": "Direct"
+        },
+        {
+          "city": "Edinburgh",
+          "country": "Scotland",
+          "code": "EDI",
+          "price": 185,
+          "stops": 0,
+          "total_time": "1h 20m",
+          "airlines": "Ryanair",
+          "via": "Direct"
+        },
+        {
+          "city": "Milan",
+          "country": "Italy",
+          "code": "MXP",
+          "price": 213,
+          "stops": 0,
+          "total_time": "2h 29m",
+          "airlines": "Ryanair",
+          "via": "Direct"
+        },
+        {
+          "city": "Malaga",
+          "country": "Spain",
+          "code": "AGP",
+          "price": 217,
+          "stops": 0,
+          "total_time": "2h 45m",
+          "airlines": "Ryanair",
+          "via": "Direct"
+        },
+        {
+          "city": "Faro",
+          "country": "Portugal",
+          "code": "FAO",
+          "price": 245,
+          "stops": 0,
+          "total_time": "2h 35m",
+          "airlines": "Ryanair",
+          "via": "Direct"
+        },
+        {
+          "city": "Barcelona",
+          "country": "Spain",
+          "code": "BCN",
+          "price": 263,
+          "stops": 1,
+          "total_time": "14h 35m",
+          "airlines": "KLM",
+          "via": "AMS (10h 40m)"
+        },
+        {
+          "city": "Amsterdam",
+          "country": "Netherlands",
+          "code": "AMS",
+          "price": 267,
+          "stops": 0,
+          "total_time": "1h 45m",
+          "airlines": "KLM",
+          "via": "Direct"
+        },
+        {
+          "city": "Munich",
+          "country": "Germany",
+          "code": "MUC",
+          "price": 277,
+          "stops": 1,
+          "total_time": "10h 35m",
+          "airlines": "KLM",
+          "via": "AMS (7h 25m)"
+        },
+        {
+          "city": "Madrid",
+          "country": "Spain",
+          "code": "MAD",
+          "price": 320,
+          "stops": 1,
+          "total_time": "15h 20m",
+          "airlines": "KLM",
+          "via": "AMS (11h 5m)"
+        },
+        {
+          "city": "Paris",
+          "country": "France",
+          "code": "CDG",
+          "price": 323,
+          "stops": 1,
+          "total_time": "4h 10m",
+          "airlines": "KLM, Air France",
+          "via": "AMS (1h 5m)"
+        },
+        {
+          "city": "Budapest",
+          "country": "Hungary",
+          "code": "BUD",
+          "price": 326,
+          "stops": 1,
+          "total_time": "5h 5m",
+          "airlines": "KLM",
+          "via": "AMS (1h 25m)"
+        },
+        {
+          "city": "Porto",
+          "country": "Portugal",
+          "code": "OPO",
+          "price": 330,
+          "stops": 1,
+          "total_time": "17h 30m",
+          "airlines": "KLM",
+          "via": "AMS (13h 0m)"
+        },
+        {
+          "city": "Krakow",
+          "country": "Poland",
+          "code": "KRK",
+          "price": 336,
+          "stops": 1,
+          "total_time": "16h 55m",
+          "airlines": "KLM",
+          "via": "AMS (13h 20m)"
+        },
+        {
+          "city": "Prague",
+          "country": "Czech Republic",
+          "code": "PRG",
+          "price": 380,
+          "stops": 1,
+          "total_time": "5h 50m",
+          "airlines": "KLM",
+          "via": "AMS (2h 40m)"
+        },
+        {
+          "city": "Berlin",
+          "country": "Germany",
+          "code": "BER",
+          "price": 381,
+          "stops": 1,
+          "total_time": "14h 10m",
+          "airlines": "KLM",
+          "via": "AMS (11h 5m)"
+        },
+        {
+          "city": "Warsaw",
+          "country": "Poland",
+          "code": "WAW",
+          "price": 425,
+          "stops": 1,
+          "total_time": "4h 35m",
+          "airlines": "KLM",
+          "via": "AMS (1h 0m)"
+        },
+        {
+          "city": "Palma",
+          "country": "Spain (Mallorca)",
+          "code": "PMI",
+          "price": 427,
+          "stops": 0,
+          "total_time": "2h 35m",
+          "airlines": "Ryanair",
+          "via": "Direct"
+        },
+        {
+          "city": "Nice",
+          "country": "France",
+          "code": "NCE",
+          "price": 428,
+          "stops": 1,
+          "total_time": "10h 35m",
+          "airlines": "KLM",
+          "via": "AMS (6h 50m)"
+        },
+        {
+          "city": "Rome",
+          "country": "Italy",
+          "code": "FCO",
+          "price": 432,
+          "stops": 1,
+          "total_time": "10h 55m",
+          "airlines": "KLM",
+          "via": "AMS (7h 0m)"
+        },
+        {
+          "city": "Lisbon",
+          "country": "Portugal",
+          "code": "LIS",
+          "price": 451,
+          "stops": 1,
+          "total_time": "5h 40m",
+          "airlines": "KLM",
+          "via": "AMS (0h 55m)"
+        },
+        {
+          "city": "Alicante",
+          "country": "Spain",
+          "code": "ALC",
+          "price": 459,
+          "stops": 1,
+          "total_time": "23h 45m",
+          "airlines": "Aer Lingus, British Airways",
+          "via": "LHR (19h 55m)"
+        },
+        {
+          "city": "Malta",
+          "country": "Malta",
+          "code": "MLA",
+          "price": 461,
+          "stops": 1,
+          "total_time": "25h 25m",
+          "airlines": "Edelweiss Air, KM Malta Airlines",
+          "via": "ZRH (21h 5m)"
+        },
+        {
+          "city": "Geneva",
+          "country": "Switzerland",
+          "code": "GVA",
+          "price": 478,
+          "stops": 1,
+          "total_time": "14h 10m",
+          "airlines": "KLM",
+          "via": "AMS (11h 0m)"
+        },
+        {
+          "city": "Lanzarote",
+          "country": "Spain",
+          "code": "ACE",
+          "price": 479,
+          "stops": 1,
+          "total_time": "22h 45m",
+          "airlines": "Aer Lingus, British Airways",
+          "via": "LHR (17h 15m)"
+        },
+        {
+          "city": "Tenerife",
+          "country": "Spain",
+          "code": "TFS",
+          "price": 566,
+          "stops": 0,
+          "total_time": "4h 5m",
+          "airlines": "Ryanair",
+          "via": "Direct"
+        }
+      ]
+    },
+    "week": {
+      "depart_date": "2026-07-11",
+      "return_date": "2026-07-18",
+      "nights": 7,
+      "deals": [
+        {
+          "city": "Manchester",
+          "country": "England",
+          "code": "MAN",
+          "price": 59,
+          "stops": 0,
+          "total_time": "1h 15m",
+          "airlines": "Ryanair",
+          "via": "Direct"
+        },
+        {
+          "city": "Edinburgh",
+          "country": "Scotland",
+          "code": "EDI",
+          "price": 76,
+          "stops": 0,
+          "total_time": "1h 20m",
+          "airlines": "Ryanair",
+          "via": "Direct"
+        },
+        {
+          "city": "London",
+          "country": "England",
+          "code": "LHR",
+          "price": 81,
+          "stops": 0,
+          "total_time": "1h 25m",
+          "airlines": "Ryanair",
+          "via": "Direct"
+        },
+        {
+          "city": "Paris",
+          "country": "France",
+          "code": "CDG",
+          "price": 150,
+          "stops": 0,
+          "total_time": "1h 45m",
+          "airlines": "Air France",
+          "via": "Direct"
+        },
+        {
+          "city": "Malaga",
+          "country": "Spain",
+          "code": "AGP",
+          "price": 205,
+          "stops": 0,
+          "total_time": "2h 45m",
+          "airlines": "Ryanair",
+          "via": "Direct"
+        },
+        {
+          "city": "Alicante",
+          "country": "Spain",
+          "code": "ALC",
+          "price": 238,
+          "stops": 0,
+          "total_time": "2h 35m",
+          "airlines": "Ryanair",
+          "via": "Direct"
+        },
+        {
+          "city": "Munich",
+          "country": "Germany",
+          "code": "MUC",
+          "price": 276,
+          "stops": 1,
+          "total_time": "15h 10m",
+          "airlines": "Air France",
+          "via": "CDG (11h 50m)"
+        },
+        {
+          "city": "Faro",
+          "country": "Portugal",
+          "code": "FAO",
+          "price": 281,
+          "stops": 0,
+          "total_time": "2h 35m",
+          "airlines": "Ryanair",
+          "via": "Direct"
+        },
+        {
+          "city": "Nice",
+          "country": "France",
+          "code": "NCE",
+          "price": 282,
+          "stops": 0,
+          "total_time": "2h 20m",
+          "airlines": "Aer Lingus",
+          "via": "Direct"
+        },
+        {
+          "city": "Prague",
+          "country": "Czech Republic",
+          "code": "PRG",
+          "price": 288,
+          "stops": 1,
+          "total_time": "11h 25m",
+          "airlines": "Air France",
+          "via": "CDG (8h 0m)"
+        },
+        {
+          "city": "Amsterdam",
+          "country": "Netherlands",
+          "code": "AMS",
+          "price": 348,
+          "stops": 0,
+          "total_time": "1h 40m",
+          "airlines": "KLM",
+          "via": "Direct"
+        },
+        {
+          "city": "Milan",
+          "country": "Italy",
+          "code": "MXP",
+          "price": 350,
+          "stops": 1,
+          "total_time": "16h 35m",
+          "airlines": "Air France",
+          "via": "CDG (13h 15m)"
+        },
+        {
+          "city": "Rome",
+          "country": "Italy",
+          "code": "FCO",
+          "price": 363,
+          "stops": 1,
+          "total_time": "15h 25m",
+          "airlines": "KLM",
+          "via": "AMS (11h 25m)"
+        },
+        {
+          "city": "Porto",
+          "country": "Portugal",
+          "code": "OPO",
+          "price": 386,
+          "stops": 1,
+          "total_time": "16h 0m",
+          "airlines": "KLM",
+          "via": "AMS (11h 35m)"
+        },
+        {
+          "city": "Barcelona",
+          "country": "Spain",
+          "code": "BCN",
+          "price": 387,
+          "stops": 1,
+          "total_time": "15h 30m",
+          "airlines": "KLM",
+          "via": "AMS (11h 40m)"
+        },
+        {
+          "city": "Palma",
+          "country": "Spain (Mallorca)",
+          "code": "PMI",
+          "price": 393,
+          "stops": 1,
+          "total_time": "15h 0m",
+          "airlines": "KLM, Transavia",
+          "via": "AMS (10h 55m)"
+        },
+        {
+          "city": "Berlin",
+          "country": "Germany",
+          "code": "BER",
+          "price": 400,
+          "stops": 1,
+          "total_time": "11h 5m",
+          "airlines": "KLM",
+          "via": "AMS (8h 5m)"
+        },
+        {
+          "city": "Budapest",
+          "country": "Hungary",
+          "code": "BUD",
+          "price": 402,
+          "stops": 1,
+          "total_time": "7h 0m",
+          "airlines": "Aer Lingus, British Airways",
+          "via": "LHR (3h 10m)"
+        },
+        {
+          "city": "Geneva",
+          "country": "Switzerland",
+          "code": "GVA",
+          "price": 406,
+          "stops": 1,
+          "total_time": "9h 30m",
+          "airlines": "Air France",
+          "via": "CDG (6h 35m)"
+        },
+        {
+          "city": "Madrid",
+          "country": "Spain",
+          "code": "MAD",
+          "price": 426,
+          "stops": 1,
+          "total_time": "15h 20m",
+          "airlines": "KLM",
+          "via": "AMS (11h 5m)"
+        },
+        {
+          "city": "Lanzarote",
+          "country": "Spain",
+          "code": "ACE",
+          "price": 451,
+          "stops": 1,
+          "total_time": "12h 5m",
+          "airlines": "Aer Lingus, British Airways",
+          "via": "LHR (6h 20m)"
+        },
+        {
+          "city": "Warsaw",
+          "country": "Poland",
+          "code": "WAW",
+          "price": 460,
+          "stops": 1,
+          "total_time": "4h 25m",
+          "airlines": "KLM",
+          "via": "AMS (1h 0m)"
+        },
+        {
+          "city": "Krakow",
+          "country": "Poland",
+          "code": "KRK",
+          "price": 500,
+          "stops": 1,
+          "total_time": "17h 0m",
+          "airlines": "KLM",
+          "via": "AMS (13h 25m)"
+        },
+        {
+          "city": "Lisbon",
+          "country": "Portugal",
+          "code": "LIS",
+          "price": 502,
+          "stops": 1,
+          "total_time": "15h 45m",
+          "airlines": "Air France",
+          "via": "CDG (11h 20m)"
+        },
+        {
+          "city": "Tenerife",
+          "country": "Spain",
+          "code": "TFS",
+          "price": 513,
+          "stops": 1,
+          "total_time": "14h 55m",
+          "airlines": "Aer Lingus, British Airways",
+          "via": "LHR (9h 25m)"
+        },
+        {
+          "city": "Malta",
+          "country": "Malta",
+          "code": "MLA",
+          "price": 579,
+          "stops": 1,
+          "total_time": "14h 55m",
+          "airlines": "Aer Lingus, British Airways",
+          "via": "LHR (10h 25m)"
+        }
+      ]
+    }
+  }
+}
