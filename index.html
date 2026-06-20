@@ -279,7 +279,7 @@ img{max-width:100%}
 // CONFIG — set your backend URL here after starting Cloudflare Tunnel
 // ══════════════════════════════════════════════════════════════════════════════
 const BACKEND_URL = "https://fantasize-circus-spray.ngrok-free.dev";
-const DEALS_JSON = "deals_cache.json"; // static file, always available
+const DEALS_JSON = "./deals_cache.json"; // static file, always available
 
 // ── Destination data ─────────────────────────────────────────────────────────
 // Confirmed direct routes from Cork ORK (Ryanair + Aer Lingus + others, June 2026)
@@ -369,7 +369,11 @@ const EUROPE = [
   {code:"MAN",city:"Manchester",country:"United Kingdom"},
 ];
 
-// ── State ────────────────────────────────────────────────────────────────────
+// Common headers for all backend requests (ngrok requires this)
+const BACKEND_HEADERS = {
+  "Content-Type": "application/json",
+  "ngrok-skip-browser-warning": "true"
+};
 let cachedDeals = null;
 let currentBoard = "weekend";
 let budgetMax = 0;
@@ -410,7 +414,10 @@ async function loadDeals() {
   // Try backend first (freshest data), fall back to static file
   try {
     if (BACKEND_URL) {
-      const r = await fetch(BACKEND_URL + "/api/deals", {signal: AbortSignal.timeout(5000)});
+      const r = await fetch(BACKEND_URL + "/api/deals", {
+        signal: AbortSignal.timeout(5000),
+        headers: {"ngrok-skip-browser-warning": "true"}
+      });
       if (r.ok) { cachedDeals = await r.json(); renderDeals(); return; }
     }
   } catch(e) {}
@@ -498,7 +505,10 @@ async function checkBackend() {
     showOfflineBanners(true); return;
   }
   try {
-    const r = await fetch(BACKEND_URL + "/api/health", {signal: AbortSignal.timeout(4000)});
+    const r = await fetch(BACKEND_URL + "/api/health", {
+      signal: AbortSignal.timeout(4000),
+      headers: {"ngrok-skip-browser-warning": "true"}
+    });
     if (r.ok) {
       backendOnline = true;
       el.className = "nav-status status-on"; el.textContent = "● Live search on";
@@ -684,7 +694,7 @@ async function searchDirectWindow() {
     progBar.style.width = `${Math.round((done/total)*100)}%`;
     try {
       const r = await fetch(BACKEND_URL + "/api/search/direct", {
-        method:"POST", headers:{"Content-Type":"application/json"},
+        method:"POST", headers:BACKEND_HEADERS,
         body: JSON.stringify({dest_code:dest, outbound_date:date, return_date:null})
       });
       const data = await r.json();
@@ -700,13 +710,13 @@ async function searchDirectWindow() {
     progBar.style.width = `${Math.round((done/total)*100)}%`;
     try {
       const r = await fetch(BACKEND_URL + "/api/search/direct", {
-        method:"POST", headers:{"Content-Type":"application/json"},
+        method:"POST", headers:BACKEND_HEADERS,
         body: JSON.stringify({dest_code:"ORK", outbound_date:date, return_date:null,
                               departure_override:dest})
       });
       // Fallback: search as round trip from ORK, same date, pick the return leg price
       const r2 = await fetch(BACKEND_URL + "/api/search/direct", {
-        method:"POST", headers:{"Content-Type":"application/json"},
+        method:"POST", headers:BACKEND_HEADERS,
         body: JSON.stringify({dest_code:dest, outbound_date:addDays(date,-nights), return_date:date})
       });
       const data = await r2.json();
@@ -737,7 +747,7 @@ async function searchEurope() {
 
   try {
     const r = await fetch(BACKEND_URL + "/api/search/all", {
-      method:"POST", headers:{"Content-Type":"application/json"},
+      method:"POST", headers:BACKEND_HEADERS,
       body: JSON.stringify({dest_code:dest, outbound_date:out, return_date:ret||null})
     });
     const data = await r.json();
