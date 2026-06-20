@@ -178,26 +178,41 @@ img{max-width:100%}
 <section id="tab-direct" class="tab-content">
   <div class="section-hdr">
     <h2>🛫 Direct flights from Cork</h2>
-    <p>Search nonstop fares across a date range — all airports per city checked.</p>
+    <p>Pick a destination and a centre date — we scan ±7 days and show the cheapest price for each day.</p>
   </div>
   <div id="directOffline" class="offline-banner" style="display:none">
     ⚠️ Live search requires the backend (your PC). Start the backend and Cloudflare Tunnel to enable this.
   </div>
-  <div class="search-form" id="directForm">
+  <div class="search-form">
     <div class="form-row">
       <div class="form-group">
         <label>Destination</label>
         <select id="directDest"></select>
       </div>
       <div class="form-group">
-        <label>Outbound date</label>
+        <label>Centre date</label>
         <input type="date" id="directDate">
       </div>
       <div class="form-group">
-        <label>Return date</label>
-        <input type="date" id="directReturn">
+        <label>Nights away</label>
+        <select id="directNights">
+          <option value="0">One-way</option>
+          <option value="2">2 nights (weekend)</option>
+          <option value="4">4 nights</option>
+          <option value="7" selected>7 nights (1 week)</option>
+          <option value="14">14 nights (2 weeks)</option>
+        </select>
       </div>
-      <button class="search-btn" id="directSearch" onclick="searchDirect()">Search</button>
+      <button class="search-btn" id="directSearch" onclick="searchDirectWindow()">Search ±7 days</button>
+    </div>
+  </div>
+  <div id="directProgress" style="display:none;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--gray);margin-bottom:6px">
+      <span id="directProgressText">Searching...</span>
+      <span id="directProgressCount"></span>
+    </div>
+    <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden">
+      <div id="directProgressBar" style="height:100%;background:linear-gradient(90deg,var(--blue),var(--green));width:0%;transition:width 0.3s;border-radius:2px"></div>
     </div>
   </div>
   <div id="directResults"></div>
@@ -475,7 +490,6 @@ function populateSelects() {
   const ret = new Date(out); ret.setDate(ret.getDate() + 7);
   const fmt = d => d.toISOString().split("T")[0];
   document.getElementById("directDate").value = fmt(out);
-  document.getElementById("directReturn").value = fmt(ret);
   document.getElementById("europeDate").value = fmt(out);
   document.getElementById("europeReturn").value = fmt(ret);
   document.getElementById("directDate").min = fmt(today);
@@ -492,34 +506,107 @@ function updateCities() {
   });
 }
 
-// ── Live search: Direct ──────────────────────────────────────────────────────
-async function searchDirect() {
-  if (!backendOnline) return;
-  const dest = document.getElementById("directDest").value;
-  const out = document.getElementById("directDate").value;
-  const ret = document.getElementById("directReturn").value;
-  const box = document.getElementById("directResults");
-  box.innerHTML = '<div class="loading"><div class="spinner"></div><br>Searching…</div>';
+// ── Live search: Direct ±7 days ─────────────────────────────────────────────
+function addDays(dateStr, n) {
+  const d = new Date(dateStr + "T12:00:00");
+  d.setDate(d.getDate() + n);
+  return d.toISOString().split("T")[0];
+}
 
-  try {
-    const r = await fetch(BACKEND_URL + "/api/search/direct", {
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({dest_code:dest, outbound_date:out, return_date:ret||null})
-    });
-    const data = await r.json();
-    if (!data || data.detail) { box.innerHTML = `<p style="color:var(--coral)">No nonstop flights found. Try the Europe tab for connecting routes.</p>`; return; }
-    box.innerHTML = `
-      <div class="deal-card cheapest" style="max-width:400px">
-        <div style="font-size:12px;color:var(--gray)">Cheapest nonstop</div>
-        <div class="deal-price">€${data.price} <small>${ret ? 'return' : 'one-way'}</small></div>
-        <div class="deal-meta">
-          <span>🛫 ${data.airlines}</span><span>⏱ ${data.total_time}</span>
-          <span>${data.departure} → ${data.arrival}</span>
-          <span>📍 ${data.arrival_airport}</span>
-        </div>
-        <a class="deal-book" href="https://www.google.com/travel/flights?q=Flights+to+${data.arrival_airport||dest}+from+ORK+on+${out}${ret?'+through+'+ret:'+oneway'}" target="_blank">Book →</a>
-      </div>`;
-  } catch(e) { box.innerHTML = `<p style="color:var(--coral)">Search failed: ${e.message}</p>`; }
+function fmtDateShort(ds) {
+  return new Date(ds + "T12:00:00").toLocaleDateString("en-IE", {weekday:"short", day:"numeric", month:"short"});
+}
+
+async function searchDirectWindow() {
+  if (!backendOnline) return;
+  const dest     = document.getElementById("directDest").value;
+  const centre   = document.getElementById("directDate").value;
+  const nights   = parseInt(document.getElementById("directNights").value) || 0;
+  const box      = document.getElementById("directResults");
+  const prog     = document.getElementById("directProgress");
+  const progBar  = document.getElementById("directProgressBar");
+  const progTxt  = document.getElementById("directProgressText");
+  const progCnt  = document.getElementById("directProgressCount");
+  const destName = document.getElementById("directDest").selectedOptions[0]?.textContent || dest;
+
+  // Build ±7 day window
+  const today = new Date().toISOString().split("T")[0];
+  const dates = [];
+  for (let i = -7; i <= 7; i++) {
+    const d = addDays(centre, i);
+    if (d >= today) dates.push(d);
+  }
+
+  box.innerHTML = "";
+  prog.style.display = "block";
+  document.getElementById("directSearch").disabled = true;
+
+  const results = []; // {date, data}
+
+  for (let i = 0; i < dates.length; i++) {
+    const date = dates[i];
+    const retDate = nights > 0 ? addDays(date, nights) : null;
+    progTxt.textContent = `Checking ${fmtDateShort(date)}…`;
+    progCnt.textContent = `${i+1}/${dates.length}`;
+    progBar.style.width = `${Math.round(((i+1)/dates.length)*100)}%`;
+
+    try {
+      const r = await fetch(BACKEND_URL + "/api/search/direct", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({dest_code:dest, outbound_date:date, return_date:retDate})
+      });
+      const data = await r.json();
+      if (data && data.price) results.push({date, retDate, data});
+    } catch(e) {}
+
+    // Small delay to avoid hammering
+    await new Promise(r => setTimeout(r, 300));
+  }
+
+  prog.style.display = "none";
+  document.getElementById("directSearch").disabled = false;
+
+  if (!results.length) {
+    box.innerHTML = `<p style="color:var(--coral);padding:20px 0">No nonstop flights found for ${destName} in this window. Try the Anywhere in Europe tab for connecting options.</p>`;
+    return;
+  }
+
+  // Find cheapest
+  const minPrice = Math.min(...results.map(r => r.data.price));
+  const tripLabel = nights > 0 ? `${nights}-night return` : "one-way";
+
+  // Summary bar
+  const cheapest = results.find(r => r.data.price === minPrice);
+  box.innerHTML = `
+    <div style="background:rgba(0,179,104,.08);border:1px solid rgba(0,179,104,.3);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+      <span style="font-size:22px">🏆</span>
+      <div>
+        <div style="font-size:12px;color:var(--gray)">Cheapest ${tripLabel} to ${destName}</div>
+        <div style="font-weight:800;font-size:18px;color:var(--green)">€${minPrice} · ${fmtDateShort(cheapest.date)}${cheapest.retDate ? ' → ' + fmtDateShort(cheapest.retDate) : ''} · ${cheapest.data.airlines}</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--gray);margin-bottom:12px">All ${results.length} dates with flights — click any to book · 🟢 cheapest day</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px" id="directGrid"></div>`;
+
+  const grid = document.getElementById("directGrid");
+  results.forEach(({date, retDate, data}) => {
+    const isCheapest = data.price === minPrice;
+    const card = document.createElement("a");
+    card.href = `https://www.google.com/travel/flights?q=Flights+to+${data.arrival_airport||dest}+from+ORK+on+${date}${retDate?'+through+'+retDate:'+oneway'}`;
+    card.target = "_blank";
+    card.rel = "noopener";
+    card.style.cssText = `display:block;text-decoration:none;border-radius:10px;padding:12px;border:${isCheapest?'2px solid var(--green)':'1px solid var(--border)'};background:${isCheapest?'rgba(0,179,104,.06)':'var(--card)'};transition:.15s;`;
+    card.innerHTML = `
+      <div style="font-size:11px;color:var(--gray);margin-bottom:2px">${fmtDateShort(date)}</div>
+      ${retDate ? `<div style="font-size:10px;color:var(--gray);margin-bottom:4px">back ${fmtDateShort(retDate)}</div>` : ''}
+      <div style="font-weight:800;font-size:20px;color:${isCheapest?'var(--green)':'var(--blue)'}">€${data.price}</div>
+      <div style="font-size:11px;color:var(--gray);margin-top:4px">${data.airlines}</div>
+      <div style="font-size:11px;color:var(--gray)">${data.departure||''} ${data.arrival?'→ '+data.arrival:''}</div>
+      <div style="font-size:11px;color:var(--gray)">${data.total_time||''}</div>
+      ${isCheapest ? '<div style="font-size:10px;color:var(--green);font-weight:700;margin-top:4px">🟢 CHEAPEST</div>' : ''}
+      <div style="margin-top:8px;background:var(--blue);color:white;border-radius:6px;padding:5px;text-align:center;font-size:11px;font-weight:700">Book →</div>`;
+    grid.appendChild(card);
+  });
 }
 
 // ── Live search: Europe (all options) ────────────────────────────────────────
