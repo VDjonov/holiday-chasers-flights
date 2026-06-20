@@ -1,0 +1,44 @@
+name: Refresh flight deals
+
+# Runs the deal scan on a schedule and commits deals_cache.json back to the repo.
+# Streamlit Cloud then auto-redeploys with the fresh deals — visitors pay zero quota.
+
+on:
+  schedule:
+    # Weekly: every Monday at 07:00 UTC.
+    # 2 boards × ~26 destinations ≈ 52 searches/run × ~4.3 weeks ≈ 225/month —
+    # fits the free 250 tier. Add a second cron line (e.g. Thursday) only if you
+    # upgrade your SerpApi plan, since twice-weekly would be ~450/month.
+    - cron: "0 7 * * 1"
+  # Also allow manual runs from the GitHub "Actions" tab
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run the deal scan
+        env:
+          SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
+          SERPAPI_KEY2: ${{ secrets.SERPAPI_KEY2 }}
+          SERPAPI_KEY3: ${{ secrets.SERPAPI_KEY3 }}
+        run: python refresh_deals.py
+
+      - name: Commit the updated cache
+        run: |
+          git config user.name "deal-bot"
+          git config user.email "deal-bot@users.noreply.github.com"
+          git add deals_cache.json
+          git commit -m "Refresh flight deals" || echo "No changes to commit"
+          git push
