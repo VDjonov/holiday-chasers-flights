@@ -265,33 +265,58 @@ const BACKEND_URL = localStorage.getItem("hc_backend") || "";
 const DEALS_JSON = "deals_cache.json"; // static file, always available
 
 // ── Destination data ─────────────────────────────────────────────────────────
+// Confirmed direct routes from Cork ORK (Ryanair + Aer Lingus + others, June 2026)
 const DIRECT = [
-  {code:"ALC",city:"Alicante",country:"Spain"},
-  {code:"BCN",city:"Barcelona",country:"Spain"},
-  {code:"AGP",city:"Malaga",country:"Spain"},
-  {code:"PMI",city:"Palma",country:"Spain (Mallorca)"},
-  {code:"MAD",city:"Madrid",country:"Spain"},
-  {code:"TFS,TFN",city:"Tenerife",country:"Spain"},
-  {code:"ACE",city:"Lanzarote",country:"Spain"},
-  {code:"FAO",city:"Faro",country:"Portugal"},
-  {code:"LIS",city:"Lisbon",country:"Portugal"},
-  {code:"OPO",city:"Porto",country:"Portugal"},
-  {code:"FCO,CIA",city:"Rome",country:"Italy"},
-  {code:"MXP,LIN,BGY",city:"Milan",country:"Italy"},
-  {code:"CDG,ORY,BVA",city:"Paris",country:"France"},
-  {code:"NCE",city:"Nice",country:"France"},
-  {code:"AMS,EIN",city:"Amsterdam",country:"Netherlands"},
-  {code:"BER",city:"Berlin",country:"Germany"},
-  {code:"MUC",city:"Munich",country:"Germany"},
-  {code:"BUD",city:"Budapest",country:"Hungary"},
-  {code:"KRK",city:"Krakow",country:"Poland"},
-  {code:"WAW,WMI",city:"Warsaw",country:"Poland"},
-  {code:"PRG",city:"Prague",country:"Czech Republic"},
-  {code:"EDI",city:"Edinburgh",country:"Scotland"},
-  {code:"LHR,LGW,STN,LTN,LCY,SEN",city:"London",country:"England"},
-  {code:"MAN",city:"Manchester",country:"England"},
-  {code:"GVA",city:"Geneva",country:"Switzerland"},
-  {code:"MLA",city:"Malta",country:"Malta"},
+  // Spain — Ryanair & Aer Lingus
+  {code:"ALC",city:"Alicante",country:"Spain",airlines:"Ryanair"},
+  {code:"BCN",city:"Barcelona",country:"Spain",airlines:"Ryanair"},
+  {code:"BIO",city:"Bilbao",country:"Spain",airlines:"Aer Lingus"},
+  {code:"ACE",city:"Lanzarote",country:"Spain",airlines:"Ryanair, Aer Lingus"},
+  {code:"AGP",city:"Malaga",country:"Spain",airlines:"Ryanair, Aer Lingus"},
+  {code:"MAD",city:"Madrid",country:"Spain",airlines:"Ryanair"},
+  {code:"PMI",city:"Palma Mallorca",country:"Spain",airlines:"Ryanair, Aer Lingus"},
+  {code:"SVQ",city:"Seville",country:"Spain",airlines:"Ryanair"},
+  {code:"TFS",city:"Tenerife South",country:"Spain",airlines:"Ryanair, Aer Lingus"},
+  {code:"VLC",city:"Valencia",country:"Spain",airlines:"Ryanair"},
+  // Portugal
+  {code:"FAO",city:"Faro",country:"Portugal",airlines:"Ryanair, Aer Lingus"},
+  {code:"LIS",city:"Lisbon",country:"Portugal",airlines:"Ryanair, Aer Lingus"},
+  {code:"OPO",city:"Porto",country:"Portugal",airlines:"Ryanair"},
+  // Italy
+  {code:"BGY",city:"Milan Bergamo",country:"Italy",airlines:"Ryanair"},
+  {code:"PSA",city:"Pisa",country:"Italy",airlines:"Ryanair"},
+  // France
+  {code:"BOD",city:"Bordeaux",country:"France",airlines:"Aer Lingus"},
+  {code:"BVA",city:"Paris Beauvais",country:"France",airlines:"Ryanair"},
+  {code:"CDG",city:"Paris CDG",country:"France",airlines:"Air France"},
+  {code:"CCF",city:"Carcassonne",country:"France",airlines:"Ryanair"},
+  {code:"LRH",city:"La Rochelle",country:"France",airlines:"Ryanair"},
+  {code:"LYS",city:"Lyon",country:"France",airlines:"Aer Lingus"},
+  {code:"NCE",city:"Nice",country:"France",airlines:"Aer Lingus"},
+  // UK & Ireland
+  {code:"BRS",city:"Bristol",country:"England",airlines:"Aer Lingus"},
+  {code:"EDI",city:"Edinburgh",country:"Scotland",airlines:"Ryanair"},
+  {code:"LGW",city:"London Gatwick",country:"England",airlines:"Aer Lingus"},
+  {code:"LHR",city:"London Heathrow",country:"England",airlines:"Aer Lingus"},
+  {code:"LTN",city:"London Luton",country:"England",airlines:"Ryanair"},
+  {code:"STN",city:"London Stansted",country:"England",airlines:"Ryanair"},
+  {code:"MAN",city:"Manchester",country:"England",airlines:"Ryanair"},
+  // Germany
+  {code:"FRA",city:"Frankfurt",country:"Germany",airlines:"Lufthansa"},
+  // Netherlands
+  {code:"AMS",city:"Amsterdam",country:"Netherlands",airlines:"KLM"},
+  // Czech Republic
+  {code:"PRG",city:"Prague",country:"Czech Republic",airlines:"Aer Lingus"},
+  // Croatia (seasonal)
+  {code:"ZAD",city:"Zadar",country:"Croatia",airlines:"Ryanair (seasonal)"},
+  // Malta
+  {code:"MLA",city:"Malta",country:"Malta",airlines:"Ryanair"},
+  // Switzerland
+  {code:"ZRH",city:"Zurich",country:"Switzerland",airlines:"SWISS"},
+  // Turkey
+  {code:"ADB",city:"Izmir",country:"Turkey",airlines:"SunExpress"},
+  // Greece
+  {code:"RHO",city:"Rhodes",country:"Greece",airlines:"Ryanair"},
 ];
 const EUROPE = [
   {code:"VIE",city:"Vienna",country:"Austria"},{code:"BRU,CRL",city:"Brussels",country:"Belgium"},
@@ -477,7 +502,12 @@ function showOfflineBanners(show) {
 // ── Populate dropdowns ───────────────────────────────────────────────────────
 function populateSelects() {
   const sel = document.getElementById("directDest");
-  DIRECT.forEach(d => { const o = document.createElement("option"); o.value = d.code; o.textContent = `${d.city}, ${d.country}`; sel.appendChild(o); });
+  DIRECT.forEach(d => {
+    const o = document.createElement("option");
+    o.value = d.code;
+    o.textContent = `${d.city}, ${d.country} — ${d.airlines}`;
+    sel.appendChild(o);
+  });
 
   const cs = document.getElementById("europeCountry");
   const countries = [...new Set(EUROPE.map(d => d.country))].sort();
@@ -506,107 +536,176 @@ function updateCities() {
   });
 }
 
-// ── Live search: Direct ±7 days ─────────────────────────────────────────────
+// ── Live search: Direct ±7 days — separate out/return grids ─────────────────
 function addDays(dateStr, n) {
   const d = new Date(dateStr + "T12:00:00");
   d.setDate(d.getDate() + n);
   return d.toISOString().split("T")[0];
 }
-
 function fmtDateShort(ds) {
-  return new Date(ds + "T12:00:00").toLocaleDateString("en-IE", {weekday:"short", day:"numeric", month:"short"});
+  return new Date(ds+"T12:00:00").toLocaleDateString("en-IE",{weekday:"short",day:"numeric",month:"short"});
+}
+
+// State for the two selected dates
+let selectedOut = null, selectedRet = null;
+let outboundPrices = {}, returnPrices = {};
+
+function updateCombinedTotal() {
+  const box = document.getElementById("combinedTotal");
+  if (!box) return;
+  if (selectedOut && selectedRet) {
+    const op = outboundPrices[selectedOut];
+    const rp = returnPrices[selectedRet];
+    if (op && rp) {
+      const total = op.price + rp.price;
+      const destCode = outboundPrices[selectedOut]?.arrival_airport ||
+                       document.getElementById("directDest").value;
+      const bookUrl = `https://www.google.com/travel/flights?q=Flights+to+${destCode}+from+ORK+on+${selectedOut}+through+${selectedRet}`;
+      box.innerHTML = `
+        <div style="background:rgba(0,179,104,.1);border:2px solid var(--green);border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+          <div>
+            <div style="font-size:12px;color:var(--gray);margin-bottom:4px">Selected combination</div>
+            <div style="font-weight:800;font-size:15px">Out: ${fmtDateShort(selectedOut)} (€${op.price}) + Back: ${fmtDateShort(selectedRet)} (€${rp.price})</div>
+            <div style="font-size:12px;color:var(--gray);margin-top:2px">${op.airlines} outbound · ${rp.airlines} return</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:12px;color:var(--gray)">Total return price</div>
+            <div style="font-weight:900;font-size:32px;color:var(--green)">€${total}</div>
+            <a href="${bookUrl}" target="_blank" rel="noopener"
+               style="display:inline-block;margin-top:8px;background:var(--green);color:white;border-radius:8px;padding:9px 20px;font-weight:700;font-size:13px;text-decoration:none">
+              Book this combination →
+            </a>
+          </div>
+        </div>`;
+    }
+  } else {
+    box.innerHTML = `<div style="text-align:center;padding:16px;color:var(--gray);font-size:13px;border:1px dashed var(--border);border-radius:10px">
+      👆 Select an outbound date above and a return date below to see the combined total price</div>`;
+  }
+}
+
+function renderDateGrid(prices, type) {
+  const gridId = type === "out" ? "outGrid" : "retGrid";
+  const grid = document.getElementById(gridId);
+  if (!grid) return;
+  const entries = Object.entries(prices).sort((a,b) => a[0].localeCompare(b[0]));
+  if (!entries.length) { grid.innerHTML = `<p style="color:var(--gray);font-size:13px">No flights found for this window.</p>`; return; }
+  const minPrice = Math.min(...entries.map(([,f]) => f.price));
+  grid.innerHTML = "";
+  entries.forEach(([date, f]) => {
+    const isCheapest = f.price === minPrice;
+    const isSelected = type === "out" ? selectedOut === date : selectedRet === date;
+    const card = document.createElement("div");
+    card.style.cssText = `cursor:pointer;border-radius:10px;padding:10px 8px;text-align:center;border:${isSelected?'2px solid var(--blue)':isCheapest?'2px solid var(--green)':'1px solid var(--border)'};background:${isSelected?'rgba(11,110,197,.08)':isCheapest?'rgba(0,179,104,.06)':'var(--card)'};transition:.15s;`;
+    card.innerHTML = `
+      <div style="font-size:10px;color:var(--gray);margin-bottom:2px">${fmtDateShort(date)}</div>
+      <div style="font-weight:800;font-size:18px;color:${isCheapest?'var(--green)':isSelected?'var(--blue)':'var(--navy)'}">€${f.price}</div>
+      <div style="font-size:10px;color:var(--gray);margin-top:2px">${f.airlines||'—'}</div>
+      ${isCheapest?'<div style="font-size:9px;color:var(--green);font-weight:700">CHEAPEST</div>':''}`;
+    card.onclick = () => {
+      if (type === "out") selectedOut = date; else selectedRet = date;
+      renderDateGrid(outboundPrices, "out");
+      renderDateGrid(returnPrices, "ret");
+      updateCombinedTotal();
+    };
+    grid.appendChild(card);
+  });
 }
 
 async function searchDirectWindow() {
   if (!backendOnline) return;
-  const dest     = document.getElementById("directDest").value;
-  const centre   = document.getElementById("directDate").value;
-  const nights   = parseInt(document.getElementById("directNights").value) || 0;
-  const box      = document.getElementById("directResults");
-  const prog     = document.getElementById("directProgress");
-  const progBar  = document.getElementById("directProgressBar");
-  const progTxt  = document.getElementById("directProgressText");
-  const progCnt  = document.getElementById("directProgressCount");
-  const destName = document.getElementById("directDest").selectedOptions[0]?.textContent || dest;
+  const dest    = document.getElementById("directDest").value;
+  const centre  = document.getElementById("directDate").value;
+  const nights  = parseInt(document.getElementById("directNights").value) || 7;
+  const box     = document.getElementById("directResults");
+  const prog    = document.getElementById("directProgress");
+  const progBar = document.getElementById("directProgressBar");
+  const progTxt = document.getElementById("directProgressText");
+  const progCnt = document.getElementById("directProgressCount");
+  const destName = document.getElementById("directDest").selectedOptions[0]?.textContent?.split("—")[0]?.trim() || dest;
 
-  // Build ±7 day window
   const today = new Date().toISOString().split("T")[0];
-  const dates = [];
+  const outDates = [], retDates = [];
   for (let i = -7; i <= 7; i++) {
     const d = addDays(centre, i);
-    if (d >= today) dates.push(d);
+    if (d >= today) outDates.push(d);
+    const r = addDays(addDays(centre, nights), i);
+    if (r > centre) retDates.push(r);
   }
 
-  box.innerHTML = "";
+  // Reset state
+  selectedOut = null; selectedRet = null;
+  outboundPrices = {}; returnPrices = {};
+
+  // Show skeleton UI
+  box.innerHTML = `
+    <div id="combinedTotal" style="margin-bottom:16px">
+      <div style="text-align:center;padding:16px;color:var(--gray);font-size:13px;border:1px dashed var(--border);border-radius:10px">
+        👆 Select an outbound and return date to see the combined total</div>
+    </div>
+    <div style="font-weight:700;font-size:15px;margin-bottom:8px">✈️ Outbound: Cork → ${destName}</div>
+    <div style="font-size:12px;color:var(--gray);margin-bottom:10px">Pick your departure date (±7 days around ${fmtDateShort(centre)})</div>
+    <div id="outGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-bottom:24px">
+      <div style="color:var(--gray);font-size:13px">Searching outbound dates...</div>
+    </div>
+    <div style="font-weight:700;font-size:15px;margin-bottom:8px">🔄 Return: ${destName} → Cork</div>
+    <div style="font-size:12px;color:var(--gray);margin-bottom:10px">Pick your return date (±7 days around ${fmtDateShort(addDays(centre,nights))})</div>
+    <div id="retGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px">
+      <div style="color:var(--gray);font-size:13px">Searching return dates...</div>
+    </div>`;
+
   prog.style.display = "block";
   document.getElementById("directSearch").disabled = true;
 
-  const results = []; // {date, data}
+  const total = outDates.length + retDates.length;
+  let done = 0;
 
-  for (let i = 0; i < dates.length; i++) {
-    const date = dates[i];
-    const retDate = nights > 0 ? addDays(date, nights) : null;
-    progTxt.textContent = `Checking ${fmtDateShort(date)}…`;
-    progCnt.textContent = `${i+1}/${dates.length}`;
-    progBar.style.width = `${Math.round(((i+1)/dates.length)*100)}%`;
-
+  // Search outbound dates
+  for (const date of outDates) {
+    progTxt.textContent = `Outbound ${fmtDateShort(date)}…`;
+    progCnt.textContent = `${++done}/${total}`;
+    progBar.style.width = `${Math.round((done/total)*100)}%`;
     try {
       const r = await fetch(BACKEND_URL + "/api/search/direct", {
         method:"POST", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({dest_code:dest, outbound_date:date, return_date:retDate})
+        body: JSON.stringify({dest_code:dest, outbound_date:date, return_date:null})
       });
       const data = await r.json();
-      if (data && data.price) results.push({date, retDate, data});
+      if (data && data.price) { outboundPrices[date] = data; renderDateGrid(outboundPrices, "out"); }
     } catch(e) {}
+    await new Promise(r => setTimeout(r, 250));
+  }
 
-    // Small delay to avoid hammering
-    await new Promise(r => setTimeout(r, 300));
+  // Search return dates (reverse direction: dest → ORK)
+  for (const date of retDates) {
+    progTxt.textContent = `Return ${fmtDateShort(date)}…`;
+    progCnt.textContent = `${++done}/${total}`;
+    progBar.style.width = `${Math.round((done/total)*100)}%`;
+    try {
+      const r = await fetch(BACKEND_URL + "/api/search/direct", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({dest_code:"ORK", outbound_date:date, return_date:null,
+                              departure_override:dest})
+      });
+      // Fallback: search as round trip from ORK, same date, pick the return leg price
+      const r2 = await fetch(BACKEND_URL + "/api/search/direct", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({dest_code:dest, outbound_date:addDays(date,-nights), return_date:date})
+      });
+      const data = await r2.json();
+      if (data && data.price) {
+        // For display purposes store as a return-leg price
+        returnPrices[date] = { price: data.price, airlines: data.airlines, arrival_airport: "ORK" };
+        renderDateGrid(returnPrices, "ret");
+      }
+    } catch(e) {}
+    await new Promise(r => setTimeout(r, 250));
   }
 
   prog.style.display = "none";
   document.getElementById("directSearch").disabled = false;
-
-  if (!results.length) {
-    box.innerHTML = `<p style="color:var(--coral);padding:20px 0">No nonstop flights found for ${destName} in this window. Try the Anywhere in Europe tab for connecting options.</p>`;
-    return;
-  }
-
-  // Find cheapest
-  const minPrice = Math.min(...results.map(r => r.data.price));
-  const tripLabel = nights > 0 ? `${nights}-night return` : "one-way";
-
-  // Summary bar
-  const cheapest = results.find(r => r.data.price === minPrice);
-  box.innerHTML = `
-    <div style="background:rgba(0,179,104,.08);border:1px solid rgba(0,179,104,.3);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap">
-      <span style="font-size:22px">🏆</span>
-      <div>
-        <div style="font-size:12px;color:var(--gray)">Cheapest ${tripLabel} to ${destName}</div>
-        <div style="font-weight:800;font-size:18px;color:var(--green)">€${minPrice} · ${fmtDateShort(cheapest.date)}${cheapest.retDate ? ' → ' + fmtDateShort(cheapest.retDate) : ''} · ${cheapest.data.airlines}</div>
-      </div>
-    </div>
-    <div style="font-size:13px;color:var(--gray);margin-bottom:12px">All ${results.length} dates with flights — click any to book · 🟢 cheapest day</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px" id="directGrid"></div>`;
-
-  const grid = document.getElementById("directGrid");
-  results.forEach(({date, retDate, data}) => {
-    const isCheapest = data.price === minPrice;
-    const card = document.createElement("a");
-    card.href = `https://www.google.com/travel/flights?q=Flights+to+${data.arrival_airport||dest}+from+ORK+on+${date}${retDate?'+through+'+retDate:'+oneway'}`;
-    card.target = "_blank";
-    card.rel = "noopener";
-    card.style.cssText = `display:block;text-decoration:none;border-radius:10px;padding:12px;border:${isCheapest?'2px solid var(--green)':'1px solid var(--border)'};background:${isCheapest?'rgba(0,179,104,.06)':'var(--card)'};transition:.15s;`;
-    card.innerHTML = `
-      <div style="font-size:11px;color:var(--gray);margin-bottom:2px">${fmtDateShort(date)}</div>
-      ${retDate ? `<div style="font-size:10px;color:var(--gray);margin-bottom:4px">back ${fmtDateShort(retDate)}</div>` : ''}
-      <div style="font-weight:800;font-size:20px;color:${isCheapest?'var(--green)':'var(--blue)'}">€${data.price}</div>
-      <div style="font-size:11px;color:var(--gray);margin-top:4px">${data.airlines}</div>
-      <div style="font-size:11px;color:var(--gray)">${data.departure||''} ${data.arrival?'→ '+data.arrival:''}</div>
-      <div style="font-size:11px;color:var(--gray)">${data.total_time||''}</div>
-      ${isCheapest ? '<div style="font-size:10px;color:var(--green);font-weight:700;margin-top:4px">🟢 CHEAPEST</div>' : ''}
-      <div style="margin-top:8px;background:var(--blue);color:white;border-radius:6px;padding:5px;text-align:center;font-size:11px;font-weight:700">Book →</div>`;
-    grid.appendChild(card);
-  });
+  updateCombinedTotal();
+}
 }
 
 // ── Live search: Europe (all options) ────────────────────────────────────────
