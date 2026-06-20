@@ -254,7 +254,23 @@ img{max-width:100%}
   <div id="europeResults"></div>
 </section>
 
-<!-- ═══ FOOTER ═══ -->
+<!-- ═══ BACKEND CONNECT MODAL ═══ -->
+<div id="connectModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:white;border-radius:16px;padding:28px;max-width:480px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+    <div style="font-family:var(--font-display);font-weight:800;font-size:18px;margin-bottom:6px;color:var(--navy)">⚙️ Connect live search</div>
+    <div style="font-size:13px;color:var(--gray);margin-bottom:18px;line-height:1.6">
+      Paste your Cloudflare Tunnel URL to enable live flight search.<br>
+      The deal board always works without this.
+    </div>
+    <input id="modalUrlInput" type="text"
+      placeholder="https://xxxx-xxxx.trycloudflare.com"
+      style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;color:var(--navy);margin-bottom:14px;box-sizing:border-box;outline:none">
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button onclick="closeModal()" style="padding:9px 18px;border:1px solid var(--border);border-radius:8px;background:white;color:var(--gray);font-size:13px;cursor:pointer;font-family:inherit">Cancel</button>
+      <button onclick="saveModalUrl()" style="padding:9px 20px;border:none;border-radius:8px;background:var(--blue);color:white;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Connect →</button>
+    </div>
+  </div>
+</div>
 <footer class="footer">
   Holiday Chasers Cork · Real prices from Google Flights · Prices indicative — confirmed at booking<br>
   <a href="https://djonov.wixsite.com/holiday-chasers-cork" target="_blank">holidaychaserscork.com</a>
@@ -750,14 +766,29 @@ async function searchEurope() {
 
 // ── Backend URL config (stored in localStorage) ──────────────────────────────
 function setBackendUrl() {
-  const url = prompt("Enter your Cloudflare Tunnel URL (e.g. https://abc123.trycloudflare.com).\nLeave empty to use deal boards only.", BACKEND_URL);
-  if (url !== null) {
-    localStorage.setItem("hc_backend", url.trim());
-    location.reload();
-  }
+  const modal = document.getElementById("connectModal");
+  const input = document.getElementById("modalUrlInput");
+  input.value = BACKEND_URL || "";
+  modal.style.display = "flex";
+  setTimeout(() => input.focus(), 100);
 }
-// Ctrl+Shift+U to set backend URL (avoids Chrome's Ctrl+Shift+B bookmark shortcut)
-document.addEventListener("keydown", e => { if (e.ctrlKey && e.shiftKey && e.key === "U") setBackendUrl(); });
+function closeModal() {
+  document.getElementById("connectModal").style.display = "none";
+}
+function saveModalUrl() {
+  const url = document.getElementById("modalUrlInput").value.trim();
+  localStorage.setItem("hc_backend", url);
+  closeModal();
+  location.reload();
+}
+// Close modal on background click
+document.getElementById("connectModal").addEventListener("click", function(e) {
+  if (e.target === this) closeModal();
+});
+// Enter key submits
+document.getElementById("modalUrlInput").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") saveModalUrl();
+});
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 populateSelects();
