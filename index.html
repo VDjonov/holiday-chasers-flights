@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Holiday Chasers Cork — Cheap Flights from Cork Airport</title>
+<meta name="description" content="Find the cheapest return flights from Cork Airport to Europe. Weekend breaks, week-long holidays — real prices, updated weekly.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Reset & base ──────────────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0B1D3A; --blue:#0B6EC5; --sky:#E8F4FD; --coral:#E8634A;
+  --green:#00B368; --white:#F7F9FC; --card:#FFFFFF; --gray:#6B7A8D;
+  --border:#E0E6ED; --shadow:0 2px 12px rgba(11,29,58,.08);
+  --radius:12px; --font-display:'Plus Jakarta Sans',sans-serif;
+  --font-body:'Inter',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);color:var(--navy);background:var(--white);line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--blue);text-decoration:none}
+button{font-family:var(--font-body);cursor:pointer}
+img{max-width:100%}
+
+/* ── Nav ────────────────────────────────────────────────────────────────── */
+.nav{position:sticky;top:0;z-index:100;background:var(--navy);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;box-shadow:0 2px 16px rgba(0,0,0,.15)}
+.nav-brand{font-family:var(--font-display);font-weight:800;font-size:18px;color:#fff;display:flex;align-items:center;gap:8px}
+.nav-brand span{font-size:22px}
+.nav-status{font-size:12px;padding:4px 10px;border-radius:20px;font-weight:600}
+.status-on{background:rgba(0,179,104,.2);color:#00B368}
+.status-off{background:rgba(107,122,141,.2);color:var(--gray)}
+
+/* ── Hero ───────────────────────────────────────────────────────────────── */
+.hero{background:linear-gradient(135deg,var(--navy) 0%,#0d3a6e 50%,var(--blue) 100%);padding:48px 24px 40px;text-align:center;color:#fff}
+.hero h1{font-family:var(--font-display);font-size:clamp(28px,5vw,44px);font-weight:800;margin-bottom:8px;letter-spacing:-.5px}
+.hero p{font-size:clamp(14px,2.5vw,18px);opacity:.8;max-width:560px;margin:0 auto 24px}
+.hero-stats{display:flex;gap:24px;justify-content:center;flex-wrap:wrap}
+.hero-stat{text-align:center}
+.hero-stat .val{font-family:var(--font-display);font-size:28px;font-weight:800;color:var(--green)}
+.hero-stat .lbl{font-size:12px;opacity:.6;margin-top:2px}
+
+/* ── Tabs ───────────────────────────────────────────────────────────────── */
+.tabs-bar{display:flex;gap:4px;padding:12px 24px;background:var(--card);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tab-btn{padding:10px 18px;border:none;border-radius:8px;font-size:13px;font-weight:600;color:var(--gray);background:transparent;white-space:nowrap;transition:.15s}
+.tab-btn.active{background:var(--blue);color:#fff}
+.tab-btn:hover:not(.active){background:var(--sky)}
+.tab-content{display:none;padding:24px;max-width:1100px;margin:0 auto}
+.tab-content.active{display:block}
+
+/* ── Budget filter ──────────────────────────────────────────────────────── */
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
+.filter-bar label{font-size:13px;font-weight:600;color:var(--gray)}
+.filter-btn{padding:6px 14px;border:1.5px solid var(--border);border-radius:20px;font-size:13px;font-weight:600;color:var(--navy);background:var(--card);transition:.15s}
+.filter-btn.active{border-color:var(--blue);background:var(--blue);color:#fff}
+.filter-btn:hover:not(.active){border-color:var(--blue);color:var(--blue)}
+
+/* ── Trip toggle ────────────────────────────────────────────────────────── */
+.trip-toggle{display:flex;gap:4px;margin-bottom:16px;background:var(--sky);border-radius:8px;padding:3px;width:fit-content}
+.trip-toggle button{padding:8px 18px;border:none;border-radius:6px;font-size:13px;font-weight:600;color:var(--gray);background:transparent;transition:.15s}
+.trip-toggle button.active{background:var(--card);color:var(--navy);box-shadow:var(--shadow)}
+
+/* ── Deal cards ─────────────────────────────────────────────────────────── */
+.deal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.deal-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:18px;transition:.2s;position:relative;overflow:hidden}
+.deal-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(11,29,58,.1)}
+.deal-card.cheapest{border-color:var(--green)}
+.deal-card.cheapest::before{content:"CHEAPEST";position:absolute;top:12px;right:-28px;background:var(--green);color:#fff;font-size:10px;font-weight:700;padding:3px 32px;transform:rotate(45deg);letter-spacing:.5px}
+.deal-city{font-family:var(--font-display);font-size:20px;font-weight:800;margin-bottom:2px}
+.deal-country{font-size:13px;color:var(--gray);margin-bottom:12px}
+.deal-price{font-family:var(--font-display);font-size:32px;font-weight:800;color:var(--blue)}
+.deal-price small{font-size:14px;font-weight:500;color:var(--gray)}
+.deal-meta{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0 14px;font-size:12px;color:var(--gray)}
+.deal-meta span{display:flex;align-items:center;gap:4px}
+.deal-book{display:block;text-align:center;padding:10px;border-radius:8px;background:var(--blue);color:#fff;font-weight:700;font-size:13px;transition:.15s}
+.deal-book:hover{background:#0958a5}
+
+/* ── Section headers ────────────────────────────────────────────────────── */
+.section-hdr{margin-bottom:20px}
+.section-hdr h2{font-family:var(--font-display);font-size:22px;font-weight:800}
+.section-hdr p{font-size:14px;color:var(--gray);margin-top:4px}
+.updated-tag{display:inline-block;font-size:11px;color:var(--gray);background:var(--sky);padding:3px 10px;border-radius:12px;margin-top:8px}
+
+/* ── Live search form ───────────────────────────────────────────────────── */
+.search-form{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px}
+.form-row{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
+.form-group{display:flex;flex-direction:column;gap:4px;flex:1;min-width:160px}
+.form-group label{font-size:12px;font-weight:600;color:var(--gray)}
+.form-group select,.form-group input{padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:var(--font-body);color:var(--navy);background:var(--card)}
+.form-group select:focus,.form-group input:focus{outline:none;border-color:var(--blue)}
+.search-btn{padding:10px 24px;border:none;border-radius:8px;background:var(--coral);color:#fff;font-weight:700;font-size:14px;height:40px;white-space:nowrap;transition:.15s}
+.search-btn:hover{background:#d1533d}
+.search-btn:disabled{opacity:.5;cursor:default}
+
+/* ── Results table ──────────────────────────────────────────────────────── */
+.results-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:16px}
+.results-table th{text-align:left;font-size:11px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;padding:8px 10px;border-bottom:2px solid var(--border)}
+.results-table td{padding:10px;border-bottom:1px solid var(--border);vertical-align:middle}
+.results-table tr:hover{background:var(--sky)}
+.price-cell{font-family:var(--font-display);font-weight:800;color:var(--blue);font-size:16px}
+.cheapest-row .price-cell{color:var(--green)}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.tag-direct{background:rgba(0,179,104,.1);color:var(--green)}
+.tag-stops{background:rgba(232,99,74,.1);color:var(--coral)}
+
+/* ── Loading / offline ──────────────────────────────────────────────────── */
+.loading{text-align:center;padding:40px;color:var(--gray)}
+.loading .spinner{display:inline-block;width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.offline-banner{background:#FFF5F3;border:1px solid #F5D0C9;border-radius:var(--radius);padding:14px 18px;margin-bottom:16px;font-size:13px;color:var(--coral);display:flex;align-items:center;gap:10px}
+
+/* ── Footer ─────────────────────────────────────────────────────────────── */
+.footer{text-align:center;padding:32px 24px;font-size:12px;color:var(--gray);border-top:1px solid var(--border);margin-top:40px}
+.footer a{color:var(--blue)}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+@media(max-width:600px){
+  .hero{padding:32px 16px 28px}
+  .tabs-bar{padding:8px 12px}
+  .tab-content{padding:16px}
+  .deal-grid{grid-template-columns:1fr}
+  .form-row{flex-direction:column}
+  .hero-stats{gap:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══ -->
+<nav class="nav">
+  <div class="nav-brand"><span>✈️</span> Holiday Chasers Cork</div>
+  <div id="backendStatus" class="nav-status status-off">● Offline</div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <h1>Cheap flights from Cork</h1>
+  <p>Real return prices to 60+ European destinations. Updated weekly, always free.</p>
+  <div class="hero-stats" id="heroStats"></div>
+</section>
+
+<!-- ═══ TABS ═══ -->
+<div class="tabs-bar">
+  <button class="tab-btn active" data-tab="deals">🔥 Deal Board</button>
+  <button class="tab-btn" data-tab="direct">🛫 Direct Flights</button>
+  <button class="tab-btn" data-tab="europe">🌍 Anywhere in Europe</button>
+</div>
+
+<!-- ═══ TAB: DEAL BOARD ═══ -->
+<section id="tab-deals" class="tab-content active">
+  <div class="section-hdr">
+    <h2>🔥 Cheapest escapes from Cork</h2>
+    <p>Return flights ranked by price — weekend or full week.</p>
+    <div class="updated-tag" id="dealsUpdated"></div>
+  </div>
+
+  <div class="trip-toggle" id="boardToggle">
+    <button class="active" data-board="weekend">🏖️ Weekend</button>
+    <button data-board="week">✈️ One week</button>
+  </div>
+
+  <div class="filter-bar">
+    <label>Budget:</label>
+    <button class="filter-btn active" data-max="0">All</button>
+    <button class="filter-btn" data-max="50">Under €50</button>
+    <button class="filter-btn" data-max="100">Under €100</button>
+    <button class="filter-btn" data-max="150">Under €150</button>
+  </div>
+
+  <div id="dealCards" class="deal-grid"></div>
+  <div id="dealsLoading" class="loading"><div class="spinner"></div><br>Loading deals…</div>
+  <div id="dealsEmpty" style="display:none;text-align:center;padding:40px;color:var(--gray)">
+    No deals match this budget. Try a higher limit or switch trip type.
+  </div>
+</section>
+
+<!-- ═══ TAB: DIRECT FLIGHTS ═══ -->
+<section id="tab-direct" class="tab-content">
+  <div class="section-hdr">
+    <h2>🛫 Direct flights from Cork</h2>
+    <p>Search nonstop fares across a date range — all airports per city checked.</p>
+  </div>
+  <div id="directOffline" class="offline-banner" style="display:none">
+    ⚠️ Live search requires the backend (your PC). Start the backend and Cloudflare Tunnel to enable this.
+  </div>
+  <div class="search-form" id="directForm">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Destination</label>
+        <select id="directDest"></select>
+      </div>
+      <div class="form-group">
+        <label>Outbound date</label>
+        <input type="date" id="directDate">
+      </div>
+      <div class="form-group">
+        <label>Return date</label>
+        <input type="date" id="directReturn">
+      </div>
+      <button class="search-btn" id="directSearch" onclick="searchDirect()">Search</button>
+    </div>
+  </div>
+  <div id="directResults"></div>
+</section>
+
+<!-- ═══ TAB: ANYWHERE IN EUROPE ═══ -->
+<section id="tab-europe" class="tab-content">
+  <div class="section-hdr">
+    <h2>🌍 Anywhere in Europe</h2>
+    <p>Reach any European city — including connections. Great for places with no direct Cork route.</p>
+  </div>
+  <div id="europeOffline" class="offline-banner" style="display:none">
+    ⚠️ Live search requires the backend (your PC). Start the backend and Cloudflare Tunnel to enable this.
+  </div>
+  <div class="search-form" id="europeForm">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Country</label>
+        <select id="europeCountry" onchange="updateCities()"></select>
+      </div>
+      <div class="form-group">
+        <label>City</label>
+        <select id="europeCity"></select>
+      </div>
+      <div class="form-group">
+        <label>Outbound date</label>
+        <input type="date" id="europeDate">
+      </div>
+      <div class="form-group">
+        <label>Return date</label>
+        <input type="date" id="europeReturn">
+      </div>
+      <button class="search-btn" id="europeSearch" onclick="searchEurope()">Search</button>
+    </div>
+  </div>
+  <div id="europeResults"></div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer">
+  Holiday Chasers Cork · Real prices from Google Flights · Prices indicative — confirmed at booking<br>
+  <a href="https://djonov.wixsite.com/holiday-chasers-cork" target="_blank">holidaychaserscork.com</a>
+</footer>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════════
+// CONFIG — set your backend URL here after starting Cloudflare Tunnel
+// ══════════════════════════════════════════════════════════════════════════════
+const BACKEND_URL = localStorage.getItem("hc_backend") || "";
+const DEALS_JSON = "deals_cache.json"; // static file, always available
+
+// ── Destination data ─────────────────────────────────────────────────────────
+const DIRECT = [
+  {code:"ALC",city:"Alicante",country:"Spain"},
+  {code:"BCN",city:"Barcelona",country:"Spain"},
+  {code:"AGP",city:"Malaga",country:"Spain"},
+  {code:"PMI",city:"Palma",country:"Spain (Mallorca)"},
+  {code:"MAD",city:"Madrid",country:"Spain"},
+  {code:"TFS,TFN",city:"Tenerife",country:"Spain"},
+  {code:"ACE",city:"Lanzarote",country:"Spain"},
+  {code:"FAO",city:"Faro",country:"Portugal"},
+  {code:"LIS",city:"Lisbon",country:"Portugal"},
+  {code:"OPO",city:"Porto",country:"Portugal"},
+  {code:"FCO,CIA",city:"Rome",country:"Italy"},
+  {code:"MXP,LIN,BGY",city:"Milan",country:"Italy"},
+  {code:"CDG,ORY,BVA",city:"Paris",country:"France"},
+  {code:"NCE",city:"Nice",country:"France"},
+  {code:"AMS,EIN",city:"Amsterdam",country:"Netherlands"},
+  {code:"BER",city:"Berlin",country:"Germany"},
+  {code:"MUC",city:"Munich",country:"Germany"},
+  {code:"BUD",city:"Budapest",country:"Hungary"},
+  {code:"KRK",city:"Krakow",country:"Poland"},
+  {code:"WAW,WMI",city:"Warsaw",country:"Poland"},
+  {code:"PRG",city:"Prague",country:"Czech Republic"},
+  {code:"EDI",city:"Edinburgh",country:"Scotland"},
+  {code:"LHR,LGW,STN,LTN,LCY,SEN",city:"London",country:"England"},
+  {code:"MAN",city:"Manchester",country:"England"},
+  {code:"GVA",city:"Geneva",country:"Switzerland"},
+  {code:"MLA",city:"Malta",country:"Malta"},
+];
+const EUROPE = [
+  {code:"VIE",city:"Vienna",country:"Austria"},{code:"BRU,CRL",city:"Brussels",country:"Belgium"},
+  {code:"SOF",city:"Sofia",country:"Bulgaria"},{code:"DBV",city:"Dubrovnik",country:"Croatia"},
+  {code:"ZAG",city:"Zagreb",country:"Croatia"},{code:"SPU",city:"Split",country:"Croatia"},
+  {code:"LCA",city:"Larnaca",country:"Cyprus"},{code:"PRG",city:"Prague",country:"Czech Republic"},
+  {code:"CPH",city:"Copenhagen",country:"Denmark"},{code:"TLL",city:"Tallinn",country:"Estonia"},
+  {code:"HEL",city:"Helsinki",country:"Finland"},{code:"CDG,ORY",city:"Paris",country:"France"},
+  {code:"NCE",city:"Nice",country:"France"},{code:"LYS",city:"Lyon",country:"France"},
+  {code:"MRS",city:"Marseille",country:"France"},{code:"BER",city:"Berlin",country:"Germany"},
+  {code:"MUC",city:"Munich",country:"Germany"},{code:"FRA",city:"Frankfurt",country:"Germany"},
+  {code:"HAM",city:"Hamburg",country:"Germany"},{code:"ATH",city:"Athens",country:"Greece"},
+  {code:"SKG",city:"Thessaloniki",country:"Greece"},{code:"JTR",city:"Santorini",country:"Greece"},
+  {code:"HER",city:"Heraklion",country:"Greece"},{code:"BUD",city:"Budapest",country:"Hungary"},
+  {code:"KEF",city:"Reykjavik",country:"Iceland"},{code:"FCO",city:"Rome",country:"Italy"},
+  {code:"MXP,LIN",city:"Milan",country:"Italy"},{code:"VCE",city:"Venice",country:"Italy"},
+  {code:"NAP",city:"Naples",country:"Italy"},{code:"BLQ",city:"Bologna",country:"Italy"},
+  {code:"CTA",city:"Catania",country:"Italy"},{code:"RIX",city:"Riga",country:"Latvia"},
+  {code:"VNO",city:"Vilnius",country:"Lithuania"},{code:"MLA",city:"Malta",country:"Malta"},
+  {code:"AMS",city:"Amsterdam",country:"Netherlands"},{code:"OSL",city:"Oslo",country:"Norway"},
+  {code:"WAW",city:"Warsaw",country:"Poland"},{code:"KRK",city:"Krakow",country:"Poland"},
+  {code:"GDN",city:"Gdansk",country:"Poland"},{code:"LIS",city:"Lisbon",country:"Portugal"},
+  {code:"OPO",city:"Porto",country:"Portugal"},{code:"FAO",city:"Faro",country:"Portugal"},
+  {code:"OTP",city:"Bucharest",country:"Romania"},{code:"BTS",city:"Bratislava",country:"Slovakia"},
+  {code:"LJU",city:"Ljubljana",country:"Slovenia"},{code:"BCN",city:"Barcelona",country:"Spain"},
+  {code:"MAD",city:"Madrid",country:"Spain"},{code:"AGP",city:"Malaga",country:"Spain"},
+  {code:"VLC",city:"Valencia",country:"Spain"},{code:"SVQ",city:"Seville",country:"Spain"},
+  {code:"BIO",city:"Bilbao",country:"Spain"},{code:"ARN",city:"Stockholm",country:"Sweden"},
+  {code:"GOT",city:"Gothenburg",country:"Sweden"},{code:"GVA",city:"Geneva",country:"Switzerland"},
+  {code:"ZRH",city:"Zurich",country:"Switzerland"},{code:"IST",city:"Istanbul",country:"Turkey"},
+  {code:"LHR,LGW,STN",city:"London",country:"United Kingdom"},
+  {code:"EDI",city:"Edinburgh",country:"United Kingdom"},
+  {code:"MAN",city:"Manchester",country:"United Kingdom"},
+];
+
+// ── State ────────────────────────────────────────────────────────────────────
+let cachedDeals = null;
+let currentBoard = "weekend";
+let budgetMax = 0;
+let backendOnline = false;
+
+// ── Tab switching ────────────────────────────────────────────────────────────
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
+  });
+});
+
+// ── Board toggle ─────────────────────────────────────────────────────────────
+document.querySelectorAll("#boardToggle button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("#boardToggle button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentBoard = btn.dataset.board;
+    renderDeals();
+  });
+});
+
+// ── Budget filter ────────────────────────────────────────────────────────────
+document.querySelectorAll(".filter-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    budgetMax = parseInt(btn.dataset.max) || 0;
+    renderDeals();
+  });
+});
+
+// ── Load deals ───────────────────────────────────────────────────────────────
+async function loadDeals() {
+  // Try backend first (freshest data), fall back to static file
+  try {
+    if (BACKEND_URL) {
+      const r = await fetch(BACKEND_URL + "/api/deals", {signal: AbortSignal.timeout(5000)});
+      if (r.ok) { cachedDeals = await r.json(); renderDeals(); return; }
+    }
+  } catch(e) {}
+  // Static fallback
+  try {
+    const r = await fetch(DEALS_JSON);
+    if (r.ok) { cachedDeals = await r.json(); renderDeals(); }
+    else { document.getElementById("dealsLoading").innerHTML = "No deals found yet. Check back soon."; }
+  } catch(e) {
+    document.getElementById("dealsLoading").innerHTML = "Could not load deals.";
+  }
+}
+
+function renderDeals() {
+  const grid = document.getElementById("dealCards");
+  const loading = document.getElementById("dealsLoading");
+  const empty = document.getElementById("dealsEmpty");
+  const updated = document.getElementById("dealsUpdated");
+  loading.style.display = "none";
+
+  if (!cachedDeals || !cachedDeals.boards || !cachedDeals.boards[currentBoard]) {
+    empty.style.display = "block"; empty.textContent = "No deals available for this trip type.";
+    grid.innerHTML = ""; return;
+  }
+
+  const board = cachedDeals.boards[currentBoard];
+  let deals = [...board.deals].sort((a,b) => a.price - b.price);
+  if (budgetMax > 0) deals = deals.filter(d => d.price <= budgetMax);
+
+  if (cachedDeals.updated_utc) {
+    try {
+      const d = new Date(cachedDeals.updated_utc);
+      updated.textContent = "Updated " + d.toLocaleDateString("en-IE",{day:"numeric",month:"short",year:"numeric"});
+    } catch(e) { updated.textContent = ""; }
+  }
+
+  // Hero stats
+  if (deals.length) {
+    document.getElementById("heroStats").innerHTML = `
+      <div class="hero-stat"><div class="val">€${deals[0].price}</div><div class="lbl">Cheapest return</div></div>
+      <div class="hero-stat"><div class="val">${deals.length}</div><div class="lbl">Destinations</div></div>
+      <div class="hero-stat"><div class="val">${board.nights}n</div><div class="lbl">${currentBoard==="weekend"?"Weekend":"Week"} trip</div></div>`;
+  }
+
+  if (!deals.length) {
+    empty.style.display = "block";
+    empty.textContent = budgetMax ? `No deals under €${budgetMax}. Try a higher budget.` : "No deals available.";
+    grid.innerHTML = ""; return;
+  }
+  empty.style.display = "none";
+
+  const dep = board.depart_date, ret = board.return_date;
+  grid.innerHTML = deals.map((d, i) => `
+    <div class="deal-card${i === 0 ? ' cheapest' : ''}">
+      <div class="deal-city">${d.city}</div>
+      <div class="deal-country">${d.country}</div>
+      <div class="deal-price">€${d.price} <small>return</small></div>
+      <div class="deal-meta">
+        <span>${d.stops === 0 ? '✅ Direct' : '🔀 ' + d.stops + ' stop(s)'}</span>
+        <span>⏱ ${d.total_time || '—'}</span>
+        <span>🛫 ${d.airlines || '—'}</span>
+      </div>
+      <a class="deal-book" href="https://www.google.com/travel/flights?q=Flights+to+${d.code}+from+ORK+on+${dep}+through+${ret}" target="_blank" rel="noopener">
+        Book on Google Flights →
+      </a>
+    </div>`).join("");
+}
+
+// ── Backend health check ─────────────────────────────────────────────────────
+async function checkBackend() {
+  const el = document.getElementById("backendStatus");
+  if (!BACKEND_URL) {
+    el.className = "nav-status status-off"; el.textContent = "● Deal board only";
+    showOfflineBanners(true); return;
+  }
+  try {
+    const r = await fetch(BACKEND_URL + "/api/health", {signal: AbortSignal.timeout(4000)});
+    if (r.ok) {
+      backendOnline = true;
+      el.className = "nav-status status-on"; el.textContent = "● Live search on";
+      showOfflineBanners(false); return;
+    }
+  } catch(e) {}
+  el.className = "nav-status status-off"; el.textContent = "● Live search off";
+  showOfflineBanners(true);
+}
+
+function showOfflineBanners(show) {
+  document.getElementById("directOffline").style.display = show ? "flex" : "none";
+  document.getElementById("europeOffline").style.display = show ? "flex" : "none";
+  document.getElementById("directSearch").disabled = show;
+  document.getElementById("europeSearch").disabled = show;
+}
+
+// ── Populate dropdowns ───────────────────────────────────────────────────────
+function populateSelects() {
+  const sel = document.getElementById("directDest");
+  DIRECT.forEach(d => { const o = document.createElement("option"); o.value = d.code; o.textContent = `${d.city}, ${d.country}`; sel.appendChild(o); });
+
+  const cs = document.getElementById("europeCountry");
+  const countries = [...new Set(EUROPE.map(d => d.country))].sort();
+  countries.forEach(c => { const o = document.createElement("option"); o.value = c; o.textContent = c; cs.appendChild(o); });
+  updateCities();
+
+  // Default dates: 3 weeks out, 7 nights
+  const today = new Date();
+  const out = new Date(today); out.setDate(out.getDate() + 21);
+  const ret = new Date(out); ret.setDate(ret.getDate() + 7);
+  const fmt = d => d.toISOString().split("T")[0];
+  document.getElementById("directDate").value = fmt(out);
+  document.getElementById("directReturn").value = fmt(ret);
+  document.getElementById("europeDate").value = fmt(out);
+  document.getElementById("europeReturn").value = fmt(ret);
+  document.getElementById("directDate").min = fmt(today);
+  document.getElementById("europeDate").min = fmt(today);
+}
+
+function updateCities() {
+  const country = document.getElementById("europeCountry").value;
+  const sel = document.getElementById("europeCity");
+  sel.innerHTML = "";
+  EUROPE.filter(d => d.country === country).forEach(d => {
+    const o = document.createElement("option"); o.value = d.code;
+    o.textContent = `${d.city} (${d.code})`; sel.appendChild(o);
+  });
+}
+
+// ── Live search: Direct ──────────────────────────────────────────────────────
+async function searchDirect() {
+  if (!backendOnline) return;
+  const dest = document.getElementById("directDest").value;
+  const out = document.getElementById("directDate").value;
+  const ret = document.getElementById("directReturn").value;
+  const box = document.getElementById("directResults");
+  box.innerHTML = '<div class="loading"><div class="spinner"></div><br>Searching…</div>';
+
+  try {
+    const r = await fetch(BACKEND_URL + "/api/search/direct", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({dest_code:dest, outbound_date:out, return_date:ret||null})
+    });
+    const data = await r.json();
+    if (!data || data.detail) { box.innerHTML = `<p style="color:var(--coral)">No nonstop flights found. Try the Europe tab for connecting routes.</p>`; return; }
+    box.innerHTML = `
+      <div class="deal-card cheapest" style="max-width:400px">
+        <div style="font-size:12px;color:var(--gray)">Cheapest nonstop</div>
+        <div class="deal-price">€${data.price} <small>${ret ? 'return' : 'one-way'}</small></div>
+        <div class="deal-meta">
+          <span>🛫 ${data.airlines}</span><span>⏱ ${data.total_time}</span>
+          <span>${data.departure} → ${data.arrival}</span>
+          <span>📍 ${data.arrival_airport}</span>
+        </div>
+        <a class="deal-book" href="https://www.google.com/travel/flights?q=Flights+to+${data.arrival_airport||dest}+from+ORK+on+${out}${ret?'+through+'+ret:'+oneway'}" target="_blank">Book →</a>
+      </div>`;
+  } catch(e) { box.innerHTML = `<p style="color:var(--coral)">Search failed: ${e.message}</p>`; }
+}
+
+// ── Live search: Europe (all options) ────────────────────────────────────────
+async function searchEurope() {
+  if (!backendOnline) return;
+  const dest = document.getElementById("europeCity").value;
+  const out = document.getElementById("europeDate").value;
+  const ret = document.getElementById("europeReturn").value;
+  const city = document.getElementById("europeCity").selectedOptions[0]?.textContent || dest;
+  const box = document.getElementById("europeResults");
+  box.innerHTML = '<div class="loading"><div class="spinner"></div><br>Searching all routes…</div>';
+
+  try {
+    const r = await fetch(BACKEND_URL + "/api/search/all", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({dest_code:dest, outbound_date:out, return_date:ret||null})
+    });
+    const data = await r.json();
+    if (!data.length) { box.innerHTML = '<p style="color:var(--coral)">No routes found. Try a different date.</p>'; return; }
+    const minP = Math.min(...data.map(d=>d.price));
+    box.innerHTML = `
+      <table class="results-table">
+        <thead><tr><th>Price</th><th>Stops</th><th>Total time</th><th>Airlines</th><th>Route</th><th>Dep</th><th>Arr</th><th></th></tr></thead>
+        <tbody>${data.map(d => `
+          <tr class="${d.price===minP?'cheapest-row':''}">
+            <td class="price-cell">€${d.price}</td>
+            <td><span class="tag ${d.stops===0?'tag-direct':'tag-stops'}">${d.stops===0?'Direct':d.stops+' stop(s)'}</span></td>
+            <td>${d.total_time}</td>
+            <td>${d.airlines}</td>
+            <td style="font-size:11px;color:var(--gray)">${d.via}</td>
+            <td>${d.departure}</td>
+            <td>${d.arrival}</td>
+            <td><a class="deal-book" style="padding:6px 12px;font-size:12px" href="https://www.google.com/travel/flights?q=Flights+to+${d.arrival_airport||dest}+from+ORK+on+${out}${ret?'+through+'+ret:'+oneway'}" target="_blank">Book</a></td>
+          </tr>`).join("")}</tbody>
+      </table>
+      <p style="margin-top:12px;font-size:12px;color:var(--gray)">Prices are ${ret?'full return':'one-way'}. Confirmed at booking.</p>`;
+  } catch(e) { box.innerHTML = `<p style="color:var(--coral)">Search failed: ${e.message}</p>`; }
+}
+
+// ── Backend URL config (stored in localStorage) ──────────────────────────────
+function setBackendUrl() {
+  const url = prompt("Enter your Cloudflare Tunnel URL (e.g. https://abc123.trycloudflare.com).\nLeave empty to use deal boards only.", BACKEND_URL);
+  if (url !== null) {
+    localStorage.setItem("hc_backend", url.trim());
+    location.reload();
+  }
+}
+// Ctrl+Shift+B to set backend URL
+document.addEventListener("keydown", e => { if (e.ctrlKey && e.shiftKey && e.key === "B") setBackendUrl(); });
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+populateSelects();
+loadDeals();
+checkBackend();
+// Re-check backend every 30s
+setInterval(checkBackend, 30000);
+</script>
+</body>
+</html>
