@@ -129,7 +129,10 @@ img{max-width:100%}
 <!-- ═══ NAV ═══ -->
 <nav class="nav">
   <div class="nav-brand"><span>✈️</span> Holiday Chasers Cork</div>
-  <div id="backendStatus" class="nav-status status-off">● Offline</div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <div id="backendStatus" class="nav-status status-off">● Offline</div>
+    <button onclick="setBackendUrl()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:4px 12px;color:white;font-size:12px;cursor:pointer;font-family:inherit">⚙️ Connect</button>
+  </div>
 </nav>
 
 <!-- ═══ HERO ═══ -->
