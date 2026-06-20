@@ -129,10 +129,8 @@ img{max-width:100%}
 <!-- ═══ NAV ═══ -->
 <nav class="nav">
   <div class="nav-brand"><span>✈️</span> Holiday Chasers Cork</div>
-  <div style="display:flex;align-items:center;gap:8px">
-    <div id="backendStatus" class="nav-status status-off">● Offline</div>
-    <button onclick="setBackendUrl()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:4px 12px;color:white;font-size:12px;cursor:pointer;font-family:inherit">⚙️ Connect</button>
-  </div>
+  <div id="backendStatus" class="nav-status status-off">● Offline</div>
+</nav>
 </nav>
 
 <!-- ═══ HERO ═══ -->
@@ -184,7 +182,7 @@ img{max-width:100%}
     <p>Pick a destination and a centre date — we scan ±7 days and show the cheapest price for each day.</p>
   </div>
   <div id="directOffline" class="offline-banner" style="display:none">
-    ⚠️ Live search requires the backend (your PC). Start the backend and Cloudflare Tunnel to enable this.
+    ⚠️ Live search is offline — start backend.py and ngrok on your PC to enable this.
   </div>
   <div class="search-form">
     <div class="form-row">
@@ -228,7 +226,7 @@ img{max-width:100%}
     <p>Reach any European city — including connections. Great for places with no direct Cork route.</p>
   </div>
   <div id="europeOffline" class="offline-banner" style="display:none">
-    ⚠️ Live search requires the backend (your PC). Start the backend and Cloudflare Tunnel to enable this.
+    ⚠️ Live search is offline — start backend.py and ngrok on your PC to enable this.
   </div>
   <div class="search-form" id="europeForm">
     <div class="form-row">
@@ -280,7 +278,7 @@ img{max-width:100%}
 // ══════════════════════════════════════════════════════════════════════════════
 // CONFIG — set your backend URL here after starting Cloudflare Tunnel
 // ══════════════════════════════════════════════════════════════════════════════
-const BACKEND_URL = localStorage.getItem("hc_backend") || "";
+const BACKEND_URL = "https://fantasize-circus-spray.ngrok-free.dev";
 const DEALS_JSON = "deals_cache.json"; // static file, always available
 
 // ── Destination data ─────────────────────────────────────────────────────────
