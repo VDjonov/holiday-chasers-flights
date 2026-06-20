@@ -390,12 +390,21 @@ function renderDeals() {
     } catch(e) { updated.textContent = ""; }
   }
 
+  const dep = board.depart_date, ret = board.return_date;
+
+  // Format dates nicely: "Fri 3 Jul → Sun 5 Jul"
+  function fmtD(ds) {
+    return new Date(ds + "T12:00:00").toLocaleDateString("en-IE", {weekday:"short", day:"numeric", month:"short"});
+  }
+  const depFmt = fmtD(dep), retFmt = fmtD(ret);
+
   // Hero stats
   if (deals.length) {
     document.getElementById("heroStats").innerHTML = `
       <div class="hero-stat"><div class="val">€${deals[0].price}</div><div class="lbl">Cheapest return</div></div>
       <div class="hero-stat"><div class="val">${deals.length}</div><div class="lbl">Destinations</div></div>
-      <div class="hero-stat"><div class="val">${board.nights}n</div><div class="lbl">${currentBoard==="weekend"?"Weekend":"Week"} trip</div></div>`;
+      <div class="hero-stat"><div class="val">${board.nights}n</div><div class="lbl">${currentBoard==="weekend"?"Weekend":"Week"} trip</div></div>
+      <div class="hero-stat"><div class="val" style="font-size:16px">${depFmt} → ${retFmt}</div><div class="lbl">Travel dates</div></div>`;
   }
 
   if (!deals.length) {
@@ -405,12 +414,14 @@ function renderDeals() {
   }
   empty.style.display = "none";
 
-  const dep = board.depart_date, ret = board.return_date;
   grid.innerHTML = deals.map((d, i) => `
     <div class="deal-card${i === 0 ? ' cheapest' : ''}">
       <div class="deal-city">${d.city}</div>
       <div class="deal-country">${d.country}</div>
       <div class="deal-price">€${d.price} <small>return</small></div>
+      <div style="font-size:12px;color:#0B6EC5;font-weight:600;margin:-4px 0 8px;letter-spacing:.1px">
+        📅 ${depFmt} → ${retFmt}
+      </div>
       <div class="deal-meta">
         <span>${d.stops === 0 ? '✅ Direct' : '🔀 ' + d.stops + ' stop(s)'}</span>
         <span>⏱ ${d.total_time || '—'}</span>
