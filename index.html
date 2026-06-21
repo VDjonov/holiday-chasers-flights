@@ -122,6 +122,10 @@ img{max-width:100%}
 .deal-perf::before{left:-9px}
 .deal-perf::after{right:-9px}
 .deal-card-bottom{padding:18px 22px 22px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.deal-perperson{text-align:right;flex-shrink:0;padding:6px 0 2px}
+.pp-amount{font-family:var(--font-display);font-size:20px;font-weight:600;color:var(--ink-soft);line-height:1}
+.deal-card.cheapest .pp-amount{color:var(--gold)}
+.pp-label{font-size:10px;color:var(--muted);letter-spacing:.04em;margin-top:3px;text-transform:uppercase;font-family:var(--font-mono)}
 .deal-price-block .deal-dates{font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:.03em;margin-bottom:6px}
 .deal-price{font-family:var(--font-display);font-size:34px;font-weight:600;line-height:1;color:var(--ink)}
 .deal-card.cheapest .deal-price{color:var(--gold)}
@@ -138,7 +142,11 @@ img{max-width:100%}
 .wx-label{color:var(--muted)}
 .wx-tag{margin-left:auto;font-family:var(--font-mono);font-size:9px;letter-spacing:.05em;color:var(--muted);background:var(--cream);padding:2px 7px;border-radius:100px;text-transform:uppercase}
 .wx-loading{color:var(--muted);font-size:11px;font-style:italic}
-.deal-actions{display:flex;gap:8px;padding:16px 22px 22px}
+.deal-actions{display:flex;gap:8px;padding:16px 22px 10px}
+.deal-stays{display:flex;align-items:center;gap:8px;padding:0 22px 22px}
+.stay-label{font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-right:2px;white-space:nowrap}
+.stay-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:9px 8px;border-radius:9px;font-weight:600;font-size:12px;background:var(--cream);color:var(--ink);border:1px solid var(--line);transition:.2s;white-space:nowrap}
+.stay-btn:hover{background:var(--gold-soft);border-color:var(--gold)}
 .deal-book{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:11px 8px;border-radius:10px;font-weight:600;font-size:12px;letter-spacing:.01em;transition:.2s;white-space:nowrap}
 .deal-book.primary{background:var(--ink);color:var(--ivory);flex:1.3}
 .deal-book.primary:hover{background:var(--gold);color:var(--ink)}
@@ -209,6 +217,94 @@ img{max-width:100%}
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
 }
 
+/* ── Clickable card hint ── */
+.deal-clickable{cursor:pointer}
+.deal-viewmore{padding:10px 22px 4px;font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--gold);opacity:0;transition:opacity .2s}
+.deal-card:hover .deal-viewmore{opacity:1}
+@media(hover:none){.deal-viewmore{opacity:1}}
+
+/* ── Detail overlay ── */
+.detail-overlay{position:fixed;inset:0;z-index:500;background:var(--ivory);overflow-y:auto;display:none;animation:detailIn .35s ease}
+.detail-overlay.open{display:block}
+@keyframes detailIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.detail-topbar{position:sticky;top:0;z-index:10;background:rgba(10,27,46,.95);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:58px;border-bottom:1px solid rgba(201,162,75,.25)}
+.detail-back{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:var(--ivory);padding:8px 16px;border-radius:100px;font-size:13px;font-weight:600;font-family:var(--font-body)}
+.detail-back:hover{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+.detail-topbrand{font-family:var(--font-display);color:var(--ivory);font-size:15px;font-weight:600}
+.detail-body{max-width:980px;margin:0 auto;padding-bottom:60px}
+
+/* hero */
+.dt-hero{position:relative;height:340px;overflow:hidden;background:linear-gradient(135deg,#14304F,var(--ink))}
+.dt-hero img{width:100%;height:100%;object-fit:cover}
+.dt-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,27,46,.1) 0%,rgba(10,27,46,.85) 100%)}
+.dt-hero-text{position:absolute;left:0;right:0;bottom:0;padding:32px 28px;z-index:2;color:#fff}
+.dt-hero-eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-soft);margin-bottom:8px}
+.dt-hero-text h1{font-family:var(--font-display);font-size:clamp(32px,6vw,52px);font-weight:600;letter-spacing:-.02em;line-height:1}
+.dt-hero-text .dt-country{font-size:15px;opacity:.85;margin-top:6px}
+
+/* price strip */
+.dt-pricestrip{display:flex;flex-wrap:wrap;gap:0;background:var(--ink);color:var(--ivory)}
+.dt-priceitem{flex:1;min-width:140px;padding:20px 24px;border-right:1px solid rgba(201,162,75,.18)}
+.dt-priceitem:last-child{border-right:none}
+.dt-priceitem .lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(251,248,241,.55);margin-bottom:6px}
+.dt-priceitem .val{font-family:var(--font-display);font-size:24px;font-weight:600;color:var(--gold-soft)}
+.dt-priceitem .val small{font-size:12px;color:rgba(251,248,241,.6);font-family:var(--font-body)}
+
+/* sections */
+.dt-section{padding:36px 28px;border-bottom:1px solid var(--line)}
+.dt-section h2{font-family:var(--font-display);font-size:24px;font-weight:600;letter-spacing:-.01em;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.dt-section .dt-sub{font-size:14px;color:var(--muted);margin-bottom:20px}
+.dt-section p{font-size:15px;line-height:1.7;color:var(--ink-70)}
+
+/* flight detail */
+.dt-leg{display:flex;align-items:center;gap:16px;padding:18px 0;border-bottom:1px dashed var(--line)}
+.dt-leg:last-child{border-bottom:none}
+.dt-leg-dir{font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--gold);width:64px;flex-shrink:0}
+.dt-leg-main{flex:1}
+.dt-leg-route{font-family:var(--font-display);font-size:18px;font-weight:600}
+.dt-leg-info{font-size:12px;color:var(--muted);margin-top:3px}
+
+/* weather strip */
+.dt-wx-grid{display:flex;gap:10px;flex-wrap:wrap}
+.dt-wx-day{flex:1;min-width:90px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+.dt-wx-day .d{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-bottom:6px}
+.dt-wx-day .ic{font-size:24px}
+.dt-wx-day .t{font-family:var(--font-display);font-weight:600;font-size:16px;margin-top:6px}
+.dt-wx-day .t small{color:var(--muted);font-size:12px;font-weight:400}
+
+/* cost grid */
+.dt-cost-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.dt-cost{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px}
+.dt-cost .c-ic{font-size:20px;margin-bottom:6px}
+.dt-cost .c-lbl{font-size:12px;color:var(--muted)}
+.dt-cost .c-val{font-family:var(--font-display);font-size:18px;font-weight:600;margin-top:2px}
+
+/* attractions */
+.dt-attractions{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.dt-attraction{background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.dt-attraction-img{height:130px;background:var(--cream) center/cover;display:block}
+.dt-attraction-body{padding:14px}
+.dt-attraction-body .a-name{font-weight:600;font-size:14px}
+.dt-attraction-body .a-desc{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5}
+
+/* stay options */
+.dt-stay-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.dt-stay{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:22px;text-align:center}
+.dt-stay .s-ic{font-size:30px}
+.dt-stay .s-name{font-family:var(--font-display);font-size:19px;font-weight:600;margin:8px 0 4px}
+.dt-stay .s-price{font-size:13px;color:var(--muted);margin-bottom:16px}
+.dt-stay .s-price b{color:var(--ink);font-size:20px;font-family:var(--font-display)}
+.dt-stay a{display:block;padding:12px;border-radius:10px;background:var(--ink);color:var(--ivory);font-weight:600;font-size:13px;transition:.2s}
+.dt-stay a:hover{background:var(--gold);color:var(--ink)}
+.dt-loading{color:var(--muted);font-style:italic;font-size:14px}
+
+@media(max-width:600px){
+  .dt-hero{height:240px}
+  .dt-section{padding:28px 18px}
+  .dt-stay-cards{grid-template-columns:1fr}
+  .detail-body{padding-bottom:40px}
+}
+
 </style>
 </head>
 <body>
@@ -238,7 +334,7 @@ img{max-width:100%}
 <section id="tab-deals" class="tab-content active">
   <div class="section-hdr">
     <h2>Cheapest escapes from Cork</h2>
-    <p>Return fares ranked low to high — pick a weekend, or browse a full week away.</p>
+    <p>Return fares for a family of four (2 adults + 2 children, aged 5 &amp; 13) — total and per person. Pick a weekend, or browse a full week away.</p>
     <div class="updated-tag" id="dealsUpdated"></div>
   </div>
 
@@ -255,9 +351,9 @@ img{max-width:100%}
   <div class="filter-bar">
     <label>Budget:</label>
     <button class="filter-btn active" data-max="0">All</button>
-    <button class="filter-btn" data-max="50">Under €50</button>
-    <button class="filter-btn" data-max="100">Under €100</button>
-    <button class="filter-btn" data-max="150">Under €150</button>
+    <button class="filter-btn" data-max="75">Under €75pp</button>
+    <button class="filter-btn" data-max="150">Under €150pp</button>
+    <button class="filter-btn" data-max="250">Under €250pp</button>
   </div>
 
   <div id="dealCards" class="deal-grid"></div>
@@ -361,6 +457,15 @@ img{max-width:100%}
     </div>
   </div>
 </div>
+<!-- ═══ DESTINATION DETAIL OVERLAY ═══ -->
+<div id="detailOverlay" class="detail-overlay">
+  <div class="detail-topbar">
+    <button class="detail-back" onclick="closeDetail()">← Back to deals</button>
+    <div class="detail-topbrand">✦ Holiday Chasers Cork</div>
+  </div>
+  <div id="detailBody" class="detail-body"></div>
+</div>
+
 <footer class="footer">
   <div class="foot-brand">✦ Holiday Chasers Cork</div>
   Real fares from Google Flights · prices are indicative and confirmed at booking<br>
@@ -511,6 +616,8 @@ const CITY_COORDS = {
   CDG:[48.86,2.35], BVA:[48.86,2.35], NCE:[43.70,7.27], LYS:[45.76,4.84], BOD:[44.84,-0.58],
   AMS:[52.37,4.90], FRA:[50.11,8.68], PRG:[50.08,14.44], ZRH:[47.37,8.54],
   MLA:[35.90,14.51], ZAD:[44.12,15.23], RHO:[36.43,28.22], ADB:[38.42,27.14],
+  BER:[52.52,13.40], BUD:[47.50,19.04], GVA:[46.20,6.14], KRK:[50.06,19.94],
+  MUC:[48.14,11.58], WAW:[52.23,21.01],
 };
 
 // Map Open-Meteo weather codes to emoji + label
@@ -526,44 +633,71 @@ function weatherIcon(code) {
   return ["🌡️",""];
 }
 
-// Fetch weather for a city on a date. Uses forecast if within ~16 days,
-// otherwise last year's climate for the same date ("typical").
+// Fetch weather for a city on a date. Forecast if within 16 days; otherwise
+// the average of the same date across the last 3 years ("typical").
 const weatherCache = {};
 async function getWeather(code, dateStr) {
   const coords = CITY_COORDS[code];
   if (!coords) return null;
   const key = code + dateStr;
-  if (weatherCache[key]) return weatherCache[key];
+  if (weatherCache[key] !== undefined) return weatherCache[key];
 
   const [lat, lon] = coords;
   const target = new Date(dateStr + "T12:00:00");
   const today = new Date();
   const daysOut = Math.round((target - today) / 86400000);
 
-  let url, typical = false;
-  if (daysOut >= 0 && daysOut <= 15) {
-    url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&start_date=${dateStr}&end_date=${dateStr}&timezone=auto`;
-  } else {
-    // Last year same date — typical climate
-    const ly = new Date(target); ly.setFullYear(ly.getFullYear() - 1);
-    const lyStr = ly.toISOString().split("T")[0];
-    url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min&start_date=${lyStr}&end_date=${lyStr}&timezone=auto`;
-    typical = true;
-  }
   try {
-    const r = await fetch(url);
-    const d = await r.json();
-    if (!d.daily || !d.daily.temperature_2m_max) return null;
-    const result = {
-      tmax: Math.round(d.daily.temperature_2m_max[0]),
-      tmin: Math.round(d.daily.temperature_2m_min[0]),
-      code: d.daily.weather_code[0],
-      rain: d.daily.precipitation_probability_max ? d.daily.precipitation_probability_max[0] : null,
-      typical,
-    };
-    weatherCache[key] = result;
-    return result;
-  } catch(e) { return null; }
+    // Near-term: real forecast
+    if (daysOut >= 0 && daysOut <= 15) {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&start_date=${dateStr}&end_date=${dateStr}&timezone=auto`;
+      const d = await (await fetch(url)).json();
+      if (d.daily && d.daily.temperature_2m_max && d.daily.temperature_2m_max[0] != null) {
+        const result = {
+          tmax: Math.round(d.daily.temperature_2m_max[0]),
+          tmin: Math.round(d.daily.temperature_2m_min[0]),
+          code: d.daily.weather_code[0],
+          rain: d.daily.precipitation_probability_max ? d.daily.precipitation_probability_max[0] : null,
+          typical: false,
+        };
+        weatherCache[key] = result; return result;
+      }
+    }
+
+    // Far-out: average the same date over the last 3 years from the archive.
+    const mmdd = dateStr.slice(5); // "08-07"
+    const years = [target.getFullYear()-1, target.getFullYear()-2, target.getFullYear()-3];
+    const maxes = [], mins = [], codes = [];
+    for (const y of years) {
+      const ds = `${y}-${mmdd}`;
+      const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min&start_date=${ds}&end_date=${ds}&timezone=auto`;
+      try {
+        const d = await (await fetch(url)).json();
+        if (d.daily && d.daily.temperature_2m_max && d.daily.temperature_2m_max[0] != null) {
+          maxes.push(d.daily.temperature_2m_max[0]);
+          mins.push(d.daily.temperature_2m_min[0]);
+          if (d.daily.weather_code && d.daily.weather_code[0] != null) codes.push(d.daily.weather_code[0]);
+        }
+      } catch(e) {}
+    }
+    if (maxes.length) {
+      const avg = a => a.reduce((s,x)=>s+x,0)/a.length;
+      // most common weather code
+      const code2 = codes.length ? codes.sort((a,b)=>
+        codes.filter(v=>v===a).length - codes.filter(v=>v===b).length).pop() : 1;
+      const result = {
+        tmax: Math.round(avg(maxes)),
+        tmin: Math.round(avg(mins)),
+        code: code2,
+        rain: null,
+        typical: true,
+      };
+      weatherCache[key] = result; return result;
+    }
+  } catch(e) {}
+
+  weatherCache[key] = null;
+  return null;
 }
 const BACKEND_HEADERS = {
   "Content-Type": "application/json",
@@ -576,8 +710,12 @@ let backendOnline = false;
 
 // ── Booking deep-links (Path 1: no affiliate yet — add IDs here later) ───────
 function hotelUrl(city, dep, ret) {
-  // Booking.com pre-filled with city + check-in/out dates
-  return `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(city)}&checkin=${dep}&checkout=${ret}&group_adults=2`;
+  // Booking.com: 2 adults, 2 children aged 5 & 13
+  return `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(city)}&checkin=${dep}&checkout=${ret}&group_adults=2&group_children=2&age=5&age=13`;
+}
+function airbnbUrl(city, dep, ret) {
+  // Airbnb: 2 adults + 2 children
+  return `https://www.airbnb.com/s/${encodeURIComponent(city)}/homes?checkin=${dep}&checkout=${ret}&adults=2&children=2`;
 }
 function carUrl(city, dep, ret) {
   // DiscoverCars pre-filled with pickup location + dates
@@ -621,7 +759,8 @@ function populateWeekendPicker() {
   cachedDeals.weekend_boards.forEach((b, i) => {
     const o = document.createElement("option");
     o.value = i;
-    const cheapest = b.deals && b.deals.length ? ` — from €${[...b.deals].sort((a,c)=>a.price-c.price)[0].price}` : "";
+    const trav = cachedDeals.travellers || 4;
+    const cheapest = b.deals && b.deals.length ? ` — from €${Math.round([...b.deals].sort((a,c)=>a.price-c.price)[0].price / trav)}pp` : "";
     o.textContent = (b.label || `Weekend ${i+1}`) + cheapest;
     picker.appendChild(o);
   });
@@ -681,8 +820,9 @@ function renderDeals() {
     grid.innerHTML = ""; return;
   }
 
+  const travellersForFilter = cachedDeals.travellers || 4;
   let deals = [...board.deals].sort((a,b) => a.price - b.price);
-  if (budgetMax > 0) deals = deals.filter(d => d.price <= budgetMax);
+  if (budgetMax > 0) deals = deals.filter(d => (d.price / travellersForFilter) <= budgetMax);
 
   if (cachedDeals.updated_utc) {
     try {
@@ -692,6 +832,7 @@ function renderDeals() {
   }
 
   const dep = board.depart_date, ret = board.return_date;
+  const travellers = cachedDeals.travellers || 4;
 
   // Format dates nicely: "Fri 3 Jul → Sun 5 Jul"
   function fmtD(ds) {
@@ -702,7 +843,7 @@ function renderDeals() {
   // Hero stats
   if (deals.length) {
     document.getElementById("heroStats").innerHTML = `
-      <div class="hero-stat"><div class="val">€${deals[0].price}</div><div class="lbl">Cheapest return</div></div>
+      <div class="hero-stat"><div class="val">€${Math.round(deals[0].price / travellers)}</div><div class="lbl">Cheapest · per person</div></div>
       <div class="hero-stat"><div class="val">${deals.length}</div><div class="lbl">Destinations</div></div>
       <div class="hero-stat"><div class="val">${board.nights}n</div><div class="lbl">${currentBoard==="weekend"?"Weekend":"Week"} trip</div></div>
       <div class="hero-stat"><div class="val" style="font-size:16px">${depFmt} → ${retFmt}</div><div class="lbl">Travel dates</div></div>`;
@@ -710,7 +851,7 @@ function renderDeals() {
 
   if (!deals.length) {
     empty.style.display = "block";
-    empty.textContent = budgetMax ? `No deals under €${budgetMax}. Try a higher budget.` : "No deals available.";
+    empty.textContent = budgetMax ? `No deals under €${budgetMax} per person. Try a higher budget.` : "No deals available.";
     grid.innerHTML = ""; return;
   }
   empty.style.display = "none";
@@ -721,29 +862,40 @@ function renderDeals() {
          </div>`;
     return `
     <div class="deal-card${i === 0 ? ' cheapest' : ''}">
-      ${banner}
-      <div class="deal-card-top">
-        ${i === 0 ? '<div class="deal-badge">Best fare</div>' : ''}
-        <div class="deal-city">${d.city}</div>
-        <div class="deal-country">${d.country}</div>
-      </div>
-      <div class="deal-perf"></div>
-      <div class="deal-card-bottom">
-        <div class="deal-price-block">
-          <div class="deal-dates">${depFmt} — ${retFmt}</div>
-          <div class="deal-price"><sup>€</sup>${d.price}<small>return · per person</small></div>
+      <div class="deal-clickable" onclick='openDetail(${JSON.stringify(d).replace(/'/g,"&#39;")}, "${dep}", "${ret}", ${travellers})'>
+        ${banner}
+        <div class="deal-card-top">
+          ${i === 0 ? '<div class="deal-badge">Best fare</div>' : ''}
+          <div class="deal-city">${d.city}</div>
+          <div class="deal-country">${d.country}</div>
         </div>
+        <div class="deal-perf"></div>
+        <div class="deal-card-bottom">
+          <div class="deal-price-block">
+            <div class="deal-dates">${depFmt} — ${retFmt}</div>
+            <div class="deal-price"><sup>€</sup>${Math.round(d.price / travellers)}<small>per person</small></div>
+          </div>
+          <div class="deal-perperson">
+            <div class="pp-amount">€${d.price}</div>
+            <div class="pp-label">family of 4</div>
+          </div>
+        </div>
+        <div class="deal-meta">
+          <span class="${d.stops === 0 ? 'tag-direct' : ''}">${d.stops === 0 ? '✦ Direct' : d.stops + ' stop' + (d.stops>1?'s':'')}</span>
+          <span>${d.total_time || '—'}</span>
+          <span>${d.airlines || '—'}</span>
+        </div>
+        <div class="deal-weather" id="weather-${d.code}-${i}"><span class="wx-loading">Checking weather…</span></div>
+        <div class="deal-viewmore">View full details &amp; guide →</div>
       </div>
-      <div class="deal-meta">
-        <span class="${d.stops === 0 ? 'tag-direct' : ''}">${d.stops === 0 ? '✦ Direct' : d.stops + ' stop' + (d.stops>1?'s':'')}</span>
-        <span>${d.total_time || '—'}</span>
-        <span>${d.airlines || '—'}</span>
-      </div>
-      <div class="deal-weather" id="weather-${d.code}-${i}"><span class="wx-loading">Checking weather…</span></div>
       <div class="deal-actions">
-        <a class="deal-book primary" href="https://www.google.com/travel/flights?q=Flights+to+${d.code}+from+ORK+on+${dep}+through+${ret}" target="_blank" rel="noopener">✈ Flights</a>
-        <a class="deal-book secondary" href="${hotelUrl(d.city, dep, ret)}" target="_blank" rel="noopener">🏨 Stay</a>
-        <a class="deal-book secondary" href="${carUrl(d.city, dep, ret)}" target="_blank" rel="noopener">🚗 Car</a>
+        <a class="deal-book primary" href="https://www.google.com/travel/flights?q=Flights+to+${d.code}+from+ORK+on+${dep}+through+${ret}+for+2+adults+2+children" target="_blank" rel="noopener">✈ Flights</a>
+        <a class="deal-book secondary" href="${carUrl(d.city, dep, ret)}" target="_blank" rel="noopener">🚗 Car hire</a>
+      </div>
+      <div class="deal-stays">
+        <span class="stay-label">Where to stay</span>
+        <a class="stay-btn" href="${hotelUrl(d.city, dep, ret)}" target="_blank" rel="noopener">🏨 Hotels</a>
+        <a class="stay-btn" href="${airbnbUrl(d.city, dep, ret)}" target="_blank" rel="noopener">🏠 Airbnb</a>
       </div>
     </div>`;
   }).join("");
@@ -1078,6 +1230,220 @@ document.getElementById("connectModal").addEventListener("click", function(e) {
 document.getElementById("modalUrlInput").addEventListener("keydown", function(e) {
   if (e.key === "Enter") saveModalUrl();
 });
+
+// ══════════════════════════════════════════════════════════════════════════════
+// DESTINATION DETAIL PAGE
+// ══════════════════════════════════════════════════════════════════════════════
+
+// Typical daily costs by price tier (EUR). Cities mapped to a tier below.
+// These are honest ballpark figures for trip budgeting, not live prices.
+const COST_TIERS = {
+  budget:  {meal:12, coffee:2.0, beer:3.0, transit:1.5, attraction:8,  hotel:70,  airbnb:55},
+  mid:     {meal:18, coffee:3.0, beer:5.0, transit:2.0, attraction:14, hotel:110, airbnb:85},
+  high:    {meal:28, coffee:4.0, beer:7.0, transit:3.0, attraction:20, hotel:160, airbnb:120},
+  premium: {meal:38, coffee:5.5, beer:9.0, transit:4.0, attraction:26, hotel:220, airbnb:160},
+};
+const CITY_TIER = {
+  // budget
+  KRK:"budget", WAW:"budget", BUD:"budget", PRG:"budget", SVQ:"budget", ALC:"budget",
+  ZAD:"budget", RHO:"budget", ADB:"budget", FAO:"budget", OPO:"budget",
+  // mid
+  LIS:"mid", MAD:"mid", BCN:"mid", AGP:"mid", VLC:"mid", BIO:"mid", PMI:"mid", ACE:"mid",
+  TFS:"mid", BER:"mid", FCO:"mid", BGY:"mid", MXP:"mid", PSA:"mid", MLA:"mid", BRS:"mid",
+  MAN:"mid", EDI:"mid", BOD:"mid", LYS:"mid",
+  // high
+  AMS:"high", FRA:"high", MUC:"high", NCE:"high", LHR:"high", LGW:"high", STN:"high", LTN:"high",
+  CDG:"high", BVA:"high",
+  // premium
+  ZRH:"premium", GVA:"premium",
+};
+function cityCosts(code){ return COST_TIERS[CITY_TIER[code] || "mid"]; }
+
+function addDaysISO(ds, n){ const d=new Date(ds+"T12:00:00"); d.setDate(d.getDate()+n); return d.toISOString().split("T")[0]; }
+
+async function openDetail(d, dep, ret, travellers){
+  const overlay = document.getElementById("detailOverlay");
+  const body = document.getElementById("detailBody");
+  window.scrollTo(0,0);
+  overlay.classList.add("open");
+  document.body.style.overflow = "hidden";
+
+  const perP = Math.round(d.price / travellers);
+  const nights = Math.round((new Date(ret) - new Date(dep)) / 86400000);
+  const costs = cityCosts(d.code);
+  const depFmt = new Date(dep+"T12:00:00").toLocaleDateString("en-IE",{weekday:"long",day:"numeric",month:"long"});
+  const retFmt = new Date(ret+"T12:00:00").toLocaleDateString("en-IE",{weekday:"long",day:"numeric",month:"long"});
+
+  // Skeleton with sections; async parts fill in after
+  body.innerHTML = `
+    <div class="dt-hero" id="dtHero">
+      <div class="dt-hero-text">
+        <div class="dt-hero-eyebrow">Cork (ORK) → ${d.code} · ${nights} night${nights>1?'s':''}</div>
+        <h1>${d.city}</h1>
+        <div class="dt-country">${d.country}</div>
+      </div>
+    </div>
+    <div class="dt-pricestrip">
+      <div class="dt-priceitem"><div class="lbl">Per person</div><div class="val">€${perP}</div></div>
+      <div class="dt-priceitem"><div class="lbl">Family of 4</div><div class="val">€${d.price}</div></div>
+      <div class="dt-priceitem"><div class="lbl">Flight</div><div class="val">${d.stops===0?'Direct':d.stops+' stop'+(d.stops>1?'s':'')} <small>${d.total_time||''}</small></div></div>
+      <div class="dt-priceitem"><div class="lbl">Airline</div><div class="val" style="font-size:16px">${d.airlines||'—'}</div></div>
+    </div>
+
+    <div class="dt-section">
+      <h2>✈️ Your flights</h2>
+      <div class="dt-sub">${depFmt} → ${retFmt}</div>
+      <div class="dt-leg">
+        <div class="dt-leg-dir">OUT</div>
+        <div class="dt-leg-main">
+          <div class="dt-leg-route">Cork (ORK) → ${d.city} (${d.code})</div>
+          <div class="dt-leg-info">${depFmt} · ${d.stops===0?'Direct':d.stops+' stop'+(d.stops>1?'s':'')} · ${d.total_time||''} · ${d.airlines||''}</div>
+        </div>
+      </div>
+      <div class="dt-leg">
+        <div class="dt-leg-dir">RETURN</div>
+        <div class="dt-leg-main">
+          <div class="dt-leg-route">${d.city} (${d.code}) → Cork (ORK)</div>
+          <div class="dt-leg-info">${retFmt} · same airline · prices for 2 adults + 2 children (5 & 13)</div>
+        </div>
+      </div>
+      <div style="margin-top:18px">
+        <a class="deal-book primary" style="display:inline-flex;padding:12px 24px;border-radius:10px" href="https://www.google.com/travel/flights?q=Flights+to+${d.code}+from+ORK+on+${dep}+through+${ret}+for+2+adults+2+children" target="_blank" rel="noopener">✈ See live flight details &amp; book →</a>
+      </div>
+    </div>
+
+    <div class="dt-section">
+      <h2>🌤️ Weather around your trip</h2>
+      <div class="dt-sub" id="dtWxSub">Loading forecast…</div>
+      <div class="dt-wx-grid" id="dtWxGrid"></div>
+    </div>
+
+    <div class="dt-section">
+      <h2>📍 About ${d.city}</h2>
+      <p id="dtAbout" class="dt-loading">Loading city guide…</p>
+    </div>
+
+    <div class="dt-section">
+      <h2>🎟️ What to see</h2>
+      <div class="dt-sub">Top sights near the city centre</div>
+      <div class="dt-attractions" id="dtAttractions"><span class="dt-loading">Finding attractions…</span></div>
+    </div>
+
+    <div class="dt-section">
+      <h2>💶 Typical costs</h2>
+      <div class="dt-sub">Rough per-person guide to help you budget</div>
+      <div class="dt-cost-grid">
+        <div class="dt-cost"><div class="c-ic">🍽️</div><div class="c-lbl">Meal out</div><div class="c-val">€${costs.meal}</div></div>
+        <div class="dt-cost"><div class="c-ic">☕</div><div class="c-lbl">Coffee</div><div class="c-val">€${costs.coffee.toFixed(2)}</div></div>
+        <div class="dt-cost"><div class="c-ic">🍺</div><div class="c-lbl">Beer</div><div class="c-val">€${costs.beer.toFixed(2)}</div></div>
+        <div class="dt-cost"><div class="c-ic">🚌</div><div class="c-lbl">Transit ticket</div><div class="c-val">€${costs.transit.toFixed(2)}</div></div>
+        <div class="dt-cost"><div class="c-ic">🏛️</div><div class="c-lbl">Attraction entry</div><div class="c-val">€${costs.attraction}</div></div>
+      </div>
+    </div>
+
+    <div class="dt-section">
+      <h2>🛏️ Where to stay</h2>
+      <div class="dt-sub">Typical nightly prices for ${nights} night${nights>1?'s':''}. Tap to see live options &amp; book.</div>
+      <div class="dt-stay-cards">
+        <div class="dt-stay">
+          <div class="s-ic">🏨</div>
+          <div class="s-name">Hotels</div>
+          <div class="s-price">typically <b>€${costs.hotel}</b> / night<br><span style="font-size:11px">≈ €${costs.hotel*nights} for ${nights} night${nights>1?'s':''}</span></div>
+          <a href="${hotelUrl(d.city, dep, ret)}" target="_blank" rel="noopener">Search Booking.com →</a>
+        </div>
+        <div class="dt-stay">
+          <div class="s-ic">🏠</div>
+          <div class="s-name">Airbnb</div>
+          <div class="s-price">typically <b>€${costs.airbnb}</b> / night<br><span style="font-size:11px">≈ €${costs.airbnb*nights} for ${nights} night${nights>1?'s':''}</span></div>
+          <a href="${airbnbUrl(d.city, dep, ret)}" target="_blank" rel="noopener">Search Airbnb →</a>
+        </div>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-top:14px">Nightly prices are typical estimates for a family room/place. Live prices and photos are on Booking.com and Airbnb.</p>
+    </div>
+  `;
+
+  // Hero photo
+  fetchCityPhoto(d.code).then(url => {
+    if (!url) return;
+    const hero = document.getElementById("dtHero");
+    const img = new Image(); img.alt = d.city;
+    img.onload = () => hero.insertBefore(img, hero.firstChild);
+    img.src = url;
+  });
+
+  // Weather: 5 days centred on departure
+  loadDetailWeather(d.code, dep);
+  // City description + attractions
+  loadCityAbout(d.code, d.city);
+  loadAttractions(d.code);
+}
+
+function closeDetail(){
+  document.getElementById("detailOverlay").classList.remove("open");
+  document.body.style.overflow = "";
+}
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeDetail(); });
+
+async function loadDetailWeather(code, dep){
+  const grid = document.getElementById("dtWxGrid");
+  const sub = document.getElementById("dtWxSub");
+  const dates = [-1,0,1,2,3].map(o => addDaysISO(dep, o));
+  let anyTypical = false, html = "";
+  for (const ds of dates){
+    const w = await getWeather(code, ds);
+    const lbl = new Date(ds+"T12:00:00").toLocaleDateString("en-IE",{weekday:"short",day:"numeric",month:"short"});
+    if (w){
+      if (w.typical) anyTypical = true;
+      const [ic] = weatherIcon(w.code);
+      html += `<div class="dt-wx-day"><div class="d">${lbl}</div><div class="ic">${ic}</div><div class="t">${w.tmax}° <small>/ ${w.tmin}°</small></div></div>`;
+    } else {
+      html += `<div class="dt-wx-day"><div class="d">${lbl}</div><div class="ic">·</div><div class="t">—</div></div>`;
+    }
+  }
+  grid.innerHTML = html;
+  sub.textContent = anyTypical ? "Typical conditions for these dates (based on recent years)" : "Forecast for your travel dates";
+}
+
+async function loadCityAbout(code, city){
+  const el = document.getElementById("dtAbout");
+  const title = CITY_WIKI[code] || city;
+  try{
+    const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${title}`);
+    const d = await r.json();
+    el.classList.remove("dt-loading");
+    el.textContent = d.extract || "No description available.";
+  }catch(e){ el.classList.remove("dt-loading"); el.textContent = "Could not load city information."; }
+}
+
+async function loadAttractions(code){
+  const box = document.getElementById("dtAttractions");
+  const coords = CITY_COORDS[code];
+  if (!coords){ box.innerHTML = "<span class='dt-loading'>No attractions found.</span>"; return; }
+  const [lat, lon] = coords;
+  try{
+    // Find notable pages near the city centre
+    const geo = await (await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gscoord=${lat}%7C${lon}&gsradius=8000&gslimit=20&format=json&origin=*`)).json();
+    const pages = (geo.query && geo.query.geosearch) || [];
+    // Filter out generic/non-attraction titles
+    const skip = /(airport|station|metro|university|hospital|stadium|street|road|bridge|river|list of|county|district|suburb|tram|railway|line)/i;
+    const picks = pages.filter(p => !skip.test(p.title)).slice(0, 6);
+    if (!picks.length){ box.innerHTML = "<span class='dt-loading'>No attractions found.</span>"; return; }
+    // Fetch thumbnails + extracts
+    const titles = picks.map(p => p.title).join("|");
+    const info = await (await fetch(`https://en.wikipedia.org/w/api.php?action=query&prop=pageimages|extracts&exintro&explaintext&exsentences=1&piprop=thumbnail&pithumbsize=400&titles=${encodeURIComponent(titles)}&format=json&origin=*`)).json();
+    const items = Object.values(info.query.pages);
+    const withImg = items.filter(p => p.thumbnail).slice(0,4);
+    const list = (withImg.length ? withImg : items.slice(0,4));
+    box.innerHTML = list.map(p => `
+      <div class="dt-attraction">
+        ${p.thumbnail ? `<span class="dt-attraction-img" style="background-image:url('${p.thumbnail.source}')"></span>` : `<span class="dt-attraction-img" style="display:flex;align-items:center;justify-content:center;color:var(--gold)">✦</span>`}
+        <div class="dt-attraction-body">
+          <div class="a-name">${p.title}</div>
+          <div class="a-desc">${(p.extract||"").slice(0,90)}${(p.extract||"").length>90?'…':''}</div>
+        </div>
+      </div>`).join("");
+  }catch(e){ box.innerHTML = "<span class='dt-loading'>Could not load attractions.</span>"; }
+}
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 populateSelects();

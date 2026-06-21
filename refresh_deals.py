@@ -24,6 +24,11 @@ import requests
 ORIGIN = "ORK"
 DELAY = 1.0
 
+# ── Passengers: family of four (2 adults + 2 children aged 5 and 13) ──────────
+ADULTS = 2
+CHILDREN_AGES = "5,13"   # SerpApi 'children_ages' — comma separated
+NUM_TRAVELLERS = 4       # for per-person division on the website
+
 # ── How the boards are built ─────────────────────────────────────────────────
 WEEKEND_NIGHTS = 2          # Fri -> Sun
 NUM_WEEKENDS = 4            # how many upcoming weekends to offer
@@ -112,6 +117,7 @@ def cheapest_return(keys, dest_code, out_date, ret_date):
     base = {
         "engine": "google_flights", "departure_id": ORIGIN, "arrival_id": dest_code,
         "outbound_date": out_date, "return_date": ret_date, "type": "1",
+        "adults": str(ADULTS), "children": "2", "children_ages": CHILDREN_AGES,
         "currency": "EUR", "hl": "en", "gl": "ie",
     }
     data = None
@@ -204,6 +210,8 @@ def main():
 
     payload = {
         "updated_utc": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "travellers": NUM_TRAVELLERS,
+        "passenger_label": "2 adults + 2 children (5 & 13)",
         "weekend_boards": weekend_boards,   # list, visitor picks which
         "week_board": week_board,           # single week board
     }
