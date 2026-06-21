@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
 """
-refresh_deals.py — scan all destinations from Cork and save TWO deal boards:
-  • Weekend board  (depart next suitable Friday, 2 nights)
-  • Week board      (depart ~3 weeks out, 7 nights)
+refresh_deals.py — scan all destinations from Cork and save MULTIPLE deal boards:
+  • Several upcoming WEEKENDS (2-night Fri->Sun trips)
+  • One WEEK board (7 nights, ~3 weeks out)
 
-Meant to run on a SCHEDULE (GitHub Actions), NOT per visitor. Writes
-deals_cache.json, which the dashboard reads and shows to everyone instantly —
-so visitor traffic costs ZERO SerpApi quota.
+Visitors pick which weekend from a dropdown — instant, zero quota per visitor.
 
-Reads the SerpApi key from the SERPAPI_KEY environment variable.
+Reads SerpApi keys from env vars SERPAPI_KEY, SERPAPI_KEY2, SERPAPI_KEY3 (rotation).
 
 Local test:
-    set SERPAPI_KEY=your_key        (Windows)
-    export SERPAPI_KEY=your_key     (Mac/Linux)
+    set SERPAPI_KEY=your_key
     python refresh_deals.py
 """
 
@@ -25,10 +22,13 @@ import time
 import requests
 
 ORIGIN = "ORK"
-DELAY = 1.0  # seconds between requests
+DELAY = 1.0
 
-# Boards to build: (label, depart-offset-days, nights). Weekend uses next Friday.
-WEEKEND_NIGHTS = 2
+# ── How the boards are built ─────────────────────────────────────────────────
+WEEKEND_NIGHTS = 2          # Fri -> Sun
+NUM_WEEKENDS = 5            # how many upcoming weekends to offer
+EARLIEST_DATE = "2026-08-01"  # don't show weekends before this date (skip July).
+                              # Set to "" to always just use the next weekends.
 WEEK_DEPART_IN_DAYS = 21
 WEEK_NIGHTS = 7
 
@@ -70,12 +70,26 @@ def fmt_hm(total_min):
     return f"{total_min // 60}h {total_min % 60}m"
 
 
-def next_friday(min_days_out=10):
-    """Next Friday that is at least `min_days_out` days from today."""
-    d = dt.date.today() + dt.timedelta(days=min_days_out)
+def upcoming_fridays(count, earliest=""):
+    """Return the next `count` Fridays, not before `earliest` (YYYY-MM-DD) and
+    at least ~7 days out so flights are bookable."""
+    start = dt.date.today() + dt.timedelta(days=7)
+    if earliest:
+        try:
+            e = dt.date.fromisoformat(earliest)
+            if e > start:
+                start = e
+        except ValueError:
+            pass
+    # advance to the first Friday on/after start
+    d = start
     while d.weekday() != 4:  # 4 = Friday
         d += dt.timedelta(days=1)
-    return d
+    fridays = []
+    for _ in range(count):
+        fridays.append(d)
+        d += dt.timedelta(days=7)
+    return fridays
 
 
 def _is_quota_error(msg):
@@ -85,7 +99,6 @@ def _is_quota_error(msg):
 
 
 def load_keys():
-    """All SerpApi keys from env vars SERPAPI_KEY, SERPAPI_KEY2 … (rotation)."""
     keys = []
     for name in ["SERPAPI_KEY", "SERPAPI_KEY2", "SERPAPI_KEY3",
                  "SERPAPI_KEY4", "SERPAPI_KEY5"]:
@@ -152,7 +165,7 @@ def cheapest_return(keys, dest_code, out_date, ret_date):
 
 
 def build_board(keys, label, out_date, ret_date, nights):
-    print(f"\n=== {label} board · out {out_date} · back {ret_date} ({nights} nights) ===")
+    print(f"\n=== {label} · out {out_date} · back {ret_date} ({nights} nights) ===")
     deals = []
     for i, (code, city, country) in enumerate(DESTINATIONS, 1):
         print(f"  [{i:>2}/{len(DESTINATIONS)}] {city}, {country} …")
@@ -168,38 +181,39 @@ def build_board(keys, label, out_date, ret_date, nights):
 def main():
     keys = load_keys()
     if not keys:
-        print("ERROR: no SERPAPI_KEY (or SERPAPI_KEY2/3) environment variables set.")
+        print("ERROR: no SERPAPI_KEY env vars set.")
         sys.exit(1)
     print(f"Loaded {len(keys)} key(s) for rotation.")
 
     today = dt.date.today()
 
-    # Weekend board: next Friday, 2 nights (Fri -> Sun)
-    we_out = next_friday(min_days_out=10)
-    we_ret = we_out + dt.timedelta(days=WEEKEND_NIGHTS)
+    # ── Weekend boards: next N Fridays (skipping before EARLIEST_DATE) ──
+    weekend_boards = []
+    for friday in upcoming_fridays(NUM_WEEKENDS, EARLIEST_DATE):
+        sun = friday + dt.timedelta(days=WEEKEND_NIGHTS)
+        label = f"Weekend {friday.strftime('%d %b')}"
+        board = build_board(keys, label, friday.isoformat(), sun.isoformat(), WEEKEND_NIGHTS)
+        board["label"] = f"{friday.strftime('%a %d %b')} – {sun.strftime('%a %d %b')}"
+        weekend_boards.append(board)
 
-    # Week board: ~3 weeks out, 7 nights
+    # ── Week board: ~3 weeks out, 7 nights ──
     wk_out = today + dt.timedelta(days=WEEK_DEPART_IN_DAYS)
     wk_ret = wk_out + dt.timedelta(days=WEEK_NIGHTS)
-
-    boards = {
-        "weekend": build_board(keys, "Weekend", we_out.isoformat(),
-                               we_ret.isoformat(), WEEKEND_NIGHTS),
-        "week": build_board(keys, "Week", wk_out.isoformat(),
-                            wk_ret.isoformat(), WEEK_NIGHTS),
-    }
+    week_board = build_board(keys, "Week", wk_out.isoformat(), wk_ret.isoformat(), WEEK_NIGHTS)
+    week_board["label"] = f"{wk_out.strftime('%a %d %b')} – {wk_ret.strftime('%a %d %b')}"
 
     payload = {
         "updated_utc": dt.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "boards": boards,
+        "weekend_boards": weekend_boards,   # list, visitor picks which
+        "week_board": week_board,           # single week board
     }
     with open(OUT_FILE, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, ensure_ascii=False)
 
-    print(f"\nDone. Wrote 2 boards to {os.path.basename(OUT_FILE)}")
-    for key, b in boards.items():
+    print(f"\nDone. Wrote {len(weekend_boards)} weekend board(s) + 1 week board.")
+    for b in weekend_boards:
         if b["deals"]:
-            print(f"  {key}: cheapest €{b['deals'][0]['price']} to {b['deals'][0]['city']}")
+            print(f"  {b['label']}: cheapest €{b['deals'][0]['price']} to {b['deals'][0]['city']}")
 
 
 if __name__ == "__main__":
