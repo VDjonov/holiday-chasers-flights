@@ -279,6 +279,7 @@ img{max-width:100%}
 // CONFIG — set your backend URL here after starting Cloudflare Tunnel
 // ══════════════════════════════════════════════════════════════════════════════
 const BACKEND_URL = "https://fantasize-circus-spray.ngrok-free.dev";
+const NGROK_BYPASS = "?ngrok-skip-browser-warning=true";
 const DEALS_JSON = "./deals_cache.json"; // static file, always available
 
 // ── Destination data ─────────────────────────────────────────────────────────
@@ -369,7 +370,7 @@ const EUROPE = [
   {code:"MAN",city:"Manchester",country:"United Kingdom"},
 ];
 
-// Common headers for all backend requests (ngrok requires this)
+// Common headers for all backend requests
 const BACKEND_HEADERS = {
   "Content-Type": "application/json",
   "ngrok-skip-browser-warning": "true"
@@ -414,7 +415,7 @@ async function loadDeals() {
   // Try backend first (freshest data), fall back to static file
   try {
     if (BACKEND_URL) {
-      const r = await fetch(BACKEND_URL + "/api/deals", {
+      const r = await fetch(BACKEND_URL + "/api/deals" + NGROK_BYPASS, {
         signal: AbortSignal.timeout(5000),
         headers: {"ngrok-skip-browser-warning": "true"}
       });
@@ -505,7 +506,7 @@ async function checkBackend() {
     showOfflineBanners(true); return;
   }
   try {
-    const r = await fetch(BACKEND_URL + "/api/health", {
+    const r = await fetch(BACKEND_URL + "/api/health" + NGROK_BYPASS, {
       signal: AbortSignal.timeout(4000),
       headers: {"ngrok-skip-browser-warning": "true"}
     });
@@ -693,7 +694,7 @@ async function searchDirectWindow() {
     progCnt.textContent = `${++done}/${total}`;
     progBar.style.width = `${Math.round((done/total)*100)}%`;
     try {
-      const r = await fetch(BACKEND_URL + "/api/search/direct", {
+      const r = await fetch(BACKEND_URL + "/api/search/direct" + NGROK_BYPASS, {
         method:"POST", headers:BACKEND_HEADERS,
         body: JSON.stringify({dest_code:dest, outbound_date:date, return_date:null})
       });
@@ -709,13 +710,13 @@ async function searchDirectWindow() {
     progCnt.textContent = `${++done}/${total}`;
     progBar.style.width = `${Math.round((done/total)*100)}%`;
     try {
-      const r = await fetch(BACKEND_URL + "/api/search/direct", {
+      const r = await fetch(BACKEND_URL + "/api/search/direct" + NGROK_BYPASS, {
         method:"POST", headers:BACKEND_HEADERS,
         body: JSON.stringify({dest_code:"ORK", outbound_date:date, return_date:null,
                               departure_override:dest})
       });
       // Fallback: search as round trip from ORK, same date, pick the return leg price
-      const r2 = await fetch(BACKEND_URL + "/api/search/direct", {
+      const r2 = await fetch(BACKEND_URL + "/api/search/direct" + NGROK_BYPASS, {
         method:"POST", headers:BACKEND_HEADERS,
         body: JSON.stringify({dest_code:dest, outbound_date:addDays(date,-nights), return_date:date})
       });
@@ -746,7 +747,7 @@ async function searchEurope() {
   box.innerHTML = '<div class="loading"><div class="spinner"></div><br>Searching all routes…</div>';
 
   try {
-    const r = await fetch(BACKEND_URL + "/api/search/all", {
+    const r = await fetch(BACKEND_URL + "/api/search/all" + NGROK_BYPASS, {
       method:"POST", headers:BACKEND_HEADERS,
       body: JSON.stringify({dest_code:dest, outbound_date:out, return_date:ret||null})
     });
