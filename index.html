@@ -463,37 +463,40 @@ const EUROPE = [
   {code:"MAN",city:"Manchester",country:"United Kingdom"},
 ];
 
-// ── City photos: Wikimedia Commons (free-licensed, stable URLs, no API key) ──
-// Special:FilePath always redirects to the current hosted file at the given width.
-// If any image fails to load, the card falls back to an elegant gradient (see onerror).
-const CITY_PHOTOS = {
-  MAN:"Manchester_City_Centre.jpg",
-  LHR:"London_Big_Ben_Westminster_Bridge.jpg", LGW:"London_Big_Ben_Westminster_Bridge.jpg",
-  STN:"London_Big_Ben_Westminster_Bridge.jpg", LTN:"London_Big_Ben_Westminster_Bridge.jpg",
-  EDI:"Edinburgh_Castle_from_the_North.JPG",
-  BRS:"Clifton_Suspension_Bridge,_Bristol.jpg",
-  FAO:"Faro_January_2014.jpg", LIS:"Lisbon_(36831596786).jpg",
-  OPO:"Porto_-_Ribeira.jpg",
-  BCN:"Sagrada_Familia_01.jpg", MAD:"Plaza_Mayor_de_Madrid_06.jpg",
-  AGP:"Málaga_-_Catedral_y_Alcazaba.jpg", ALC:"Alacant_-_Castell_de_Santa_Bàrbara.jpg",
-  ACE:"Lanzarote_-_Timanfaya.jpg", PMI:"Palma_Cathedral_Mallorca_Spain.jpg",
-  TFS:"Teide_Tenerife.jpg", VLC:"Ciudad_de_las_Artes_y_las_Ciencias.jpg",
-  SVQ:"Plaza_de_España,_Sevilla.jpg", BIO:"Guggenheim_museum_Bilbao.jpg",
-  BGY:"Milan_Cathedral_from_Piazza_del_Duomo.jpg", MXP:"Milan_Cathedral_from_Piazza_del_Duomo.jpg",
-  PSA:"Leaning_Tower_of_Pisa.jpg", FCO:"Colosseo_2020.jpg",
-  CDG:"Tour_Eiffel_Wikimedia_Commons.jpg", BVA:"Tour_Eiffel_Wikimedia_Commons.jpg",
-  NCE:"Nice_-_Promenade_des_Anglais.jpg", LYS:"Lyon_Fourviere.jpg",
-  BOD:"Bordeaux_Place_de_la_Bourse.jpg",
-  AMS:"Amsterdam_Canals_-_July_2006.jpg", FRA:"Frankfurt_Skyline.jpg",
-  PRG:"Prague_Charles_Bridge.jpg", ZRH:"Zürich_-_Limmatquai.jpg",
-  MLA:"Valletta_Malta.jpg", ZAD:"Zadar_Croatia.jpg",
-  RHO:"Rhodes_old_town.jpg", ADB:"Izmir_Clock_Tower.jpg",
+// ── City photos: fetched live from Wikipedia (CORS-enabled, no key, always resolves) ──
+// We map each airport code to a Wikipedia article title, then fetch that page's
+// lead image. This avoids fragile hardcoded filenames and covers every city.
+const CITY_WIKI = {
+  MAN:"Manchester", LHR:"London", LGW:"London", STN:"London", LTN:"London",
+  EDI:"Edinburgh", BRS:"Bristol",
+  FAO:"Faro,_Portugal", LIS:"Lisbon", OPO:"Porto",
+  BCN:"Barcelona", MAD:"Madrid", AGP:"Málaga", ALC:"Alicante",
+  ACE:"Lanzarote", PMI:"Palma_de_Mallorca", TFS:"Tenerife", VLC:"Valencia",
+  SVQ:"Seville", BIO:"Bilbao",
+  BGY:"Milan", MXP:"Milan", PSA:"Pisa", FCO:"Rome",
+  CDG:"Paris", BVA:"Paris", NCE:"Nice", LYS:"Lyon", BOD:"Bordeaux",
+  AMS:"Amsterdam", FRA:"Frankfurt", PRG:"Prague", ZRH:"Zurich",
+  MLA:"Valletta", ZAD:"Zadar", RHO:"Rhodes_(city)", ADB:"İzmir",
+  GVA:"Geneva", MUC:"Munich", BER:"Berlin", BUD:"Budapest",
+  KRK:"Kraków", WAW:"Warsaw",
 };
 
-function cityPhotoUrl(code) {
-  const file = CITY_PHOTOS[code];
-  if (!file) return "";
-  return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(file)}?width=600`;
+const photoUrlCache = {};
+async function fetchCityPhoto(code) {
+  const title = CITY_WIKI[code];
+  if (!title) return "";
+  if (photoUrlCache[code] !== undefined) return photoUrlCache[code];
+  try {
+    const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${title}`);
+    const d = await r.json();
+    const url = (d.originalimage && d.originalimage.source) ||
+                (d.thumbnail && d.thumbnail.source) || "";
+    photoUrlCache[code] = url;
+    return url;
+  } catch(e) {
+    photoUrlCache[code] = "";
+    return "";
+  }
 }
 
 // ── City coordinates (for weather) ───────────────────────────────────────────
@@ -713,15 +716,9 @@ function renderDeals() {
   empty.style.display = "none";
 
   grid.innerHTML = deals.map((d, i) => {
-    const photo = cityPhotoUrl(d.code);
-    const banner = photo
-      ? `<div class="deal-photo">
-           <img src="${photo}" alt="${d.city}" loading="lazy"
-                onload="this.parentElement.classList.add('loaded')"
-                onerror="this.parentElement.classList.add('noimg');this.remove()">
+    const banner = `<div class="deal-photo noimg" id="photo-${d.code}-${i}">
            <span class="deal-route-on-photo">ORK → ${d.code}</span>
-         </div>`
-      : `<div class="deal-photo noimg"><span class="deal-route-on-photo">ORK → ${d.code}</span></div>`;
+         </div>`;
     return `
     <div class="deal-card${i === 0 ? ' cheapest' : ''}">
       ${banner}
@@ -751,8 +748,23 @@ function renderDeals() {
     </div>`;
   }).join("");
 
-  // Load weather for each card asynchronously (doesn't block render)
+  // Load photo + weather for each card asynchronously (doesn't block render)
   deals.forEach((d, i) => {
+    // City photo from Wikipedia
+    fetchCityPhoto(d.code).then(url => {
+      if (!url) return;
+      const ph = document.getElementById(`photo-${d.code}-${i}`);
+      if (!ph) return;
+      const img = new Image();
+      img.alt = d.city;
+      img.onload = () => {
+        ph.classList.remove("noimg");
+        ph.insertBefore(img, ph.firstChild);
+        requestAnimationFrame(() => ph.classList.add("loaded"));
+      };
+      img.src = url;
+    });
+    // Weather
     getWeather(d.code, dep).then(w => {
       const el = document.getElementById(`weather-${d.code}-${i}`);
       if (!el) return;

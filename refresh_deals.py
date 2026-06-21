@@ -26,7 +26,7 @@ DELAY = 1.0
 
 # ── How the boards are built ─────────────────────────────────────────────────
 WEEKEND_NIGHTS = 2          # Fri -> Sun
-NUM_WEEKENDS = 5            # how many upcoming weekends to offer
+NUM_WEEKENDS = 4            # how many upcoming weekends to offer
 EARLIEST_DATE = "2026-08-01"  # don't show weekends before this date (skip July).
                               # Set to "" to always just use the next weekends.
 WEEK_DEPART_IN_DAYS = 21
@@ -203,7 +203,7 @@ def main():
     week_board["label"] = f"{wk_out.strftime('%a %d %b')} – {wk_ret.strftime('%a %d %b')}"
 
     payload = {
-        "updated_utc": dt.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "updated_utc": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "weekend_boards": weekend_boards,   # list, visitor picks which
         "week_board": week_board,           # single week board
     }
