@@ -412,23 +412,18 @@ document.querySelectorAll(".filter-btn").forEach(btn => {
 
 // ── Load deals ───────────────────────────────────────────────────────────────
 async function loadDeals() {
-  // Try backend first (freshest data), fall back to static file
-  try {
-    if (BACKEND_URL) {
-      const r = await fetch(BACKEND_URL + "/api/deals" + NGROK_BYPASS, {
-        signal: AbortSignal.timeout(5000),
-        headers: {"ngrok-skip-browser-warning": "true"}
-      });
-      if (r.ok) { cachedDeals = await r.json(); renderDeals(); return; }
-    }
-  } catch(e) {}
-  // Static fallback
+  // Load the static GitHub file first — always works, instant, no backend needed
   try {
     const r = await fetch(DEALS_JSON);
-    if (r.ok) { cachedDeals = await r.json(); renderDeals(); }
-    else { document.getElementById("dealsLoading").innerHTML = "No deals found yet. Check back soon."; }
+    if (r.ok) {
+      cachedDeals = await r.json();
+      renderDeals();
+      return;
+    } else {
+      document.getElementById("dealsLoading").innerHTML = "No deals found yet. Check back soon.";
+    }
   } catch(e) {
-    document.getElementById("dealsLoading").innerHTML = "Could not load deals.";
+    document.getElementById("dealsLoading").innerHTML = "Could not load deals: " + e.message;
   }
 }
 
@@ -733,7 +728,6 @@ async function searchDirectWindow() {
   prog.style.display = "none";
   document.getElementById("directSearch").disabled = false;
   updateCombinedTotal();
-}
 }
 
 // ── Live search: Europe (all options) ────────────────────────────────────────
