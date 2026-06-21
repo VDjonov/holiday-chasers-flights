@@ -99,7 +99,16 @@ img{max-width:100%}
 .deal-card{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:0;overflow:hidden;transition:transform .25s cubic-bezier(.2,.7,.3,1),box-shadow .25s;box-shadow:var(--shadow-sm)}
 .deal-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
 .deal-card.cheapest{border-color:var(--gold)}
-.deal-card-top{padding:22px 22px 18px;position:relative}
+.deal-photo{position:relative;height:130px;overflow:hidden;border-bottom:1px solid var(--line);background:linear-gradient(135deg,#14304F 0%,var(--ink) 100%)}
+.deal-photo img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .5s}
+.deal-photo.loaded img{opacity:1}
+.deal-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,27,46,0) 45%,rgba(10,27,46,.5) 100%);pointer-events:none}
+.deal-photo.noimg{background:
+    repeating-linear-gradient(135deg,rgba(201,162,75,.06) 0 12px,transparent 12px 24px),
+    linear-gradient(135deg,#14304F 0%,var(--ink) 100%)}
+.deal-photo.noimg::before{content:"✦";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:28px;color:rgba(201,162,75,.4)}
+.deal-photo .deal-route-on-photo{position:absolute;left:16px;bottom:11px;z-index:2;font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.1em;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+.deal-card-top{padding:18px 22px 16px;position:relative}
 .deal-route{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;font-weight:500;color:var(--muted);letter-spacing:.08em;margin-bottom:14px}
 .deal-route .arrow{flex:1;height:1px;background:repeating-linear-gradient(90deg,var(--line) 0 4px,transparent 4px 8px);position:relative}
 .deal-route .arrow::after{content:"✈";position:absolute;right:-2px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--gold);background:var(--paper);padding-left:4px}
@@ -121,10 +130,22 @@ img{max-width:100%}
 .deal-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);padding:0 22px 18px}
 .deal-meta span{display:inline-flex;align-items:center;gap:5px}
 .tag-direct{color:var(--green);font-weight:600}
-.deal-book{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 22px 22px;padding:12px;border-radius:10px;background:var(--ink);color:var(--ivory);font-weight:600;font-size:13px;letter-spacing:.02em;transition:.2s}
-.deal-book:hover{background:var(--gold);color:var(--ink)}
-.deal-card.cheapest .deal-book{background:var(--gold);color:var(--ink)}
-.deal-card.cheapest .deal-book:hover{background:var(--ink);color:var(--ivory)}
+.deal-weather{display:flex;align-items:center;gap:8px;padding:12px 22px;margin:0 22px;border-top:1px dashed var(--line);font-size:12px;color:var(--ink-70);min-height:0}
+.deal-weather:empty{display:none}
+.wx-icon{font-size:18px}
+.wx-temp{font-family:var(--font-display);font-weight:600;font-size:16px;color:var(--ink)}
+.wx-min{font-size:12px;color:var(--muted);font-weight:400}
+.wx-label{color:var(--muted)}
+.wx-tag{margin-left:auto;font-family:var(--font-mono);font-size:9px;letter-spacing:.05em;color:var(--muted);background:var(--cream);padding:2px 7px;border-radius:100px;text-transform:uppercase}
+.wx-loading{color:var(--muted);font-size:11px;font-style:italic}
+.deal-actions{display:flex;gap:8px;padding:16px 22px 22px}
+.deal-book{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:11px 8px;border-radius:10px;font-weight:600;font-size:12px;letter-spacing:.01em;transition:.2s;white-space:nowrap}
+.deal-book.primary{background:var(--ink);color:var(--ivory);flex:1.3}
+.deal-book.primary:hover{background:var(--gold);color:var(--ink)}
+.deal-book.secondary{background:var(--cream);color:var(--ink);border:1px solid var(--line)}
+.deal-book.secondary:hover{background:var(--gold-soft);border-color:var(--gold)}
+.deal-card.cheapest .deal-book.primary{background:var(--gold);color:var(--ink)}
+.deal-card.cheapest .deal-book.primary:hover{background:var(--ink);color:var(--ivory)}
 
 /* ── Search form ── */
 .search-form{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:24px;margin-bottom:24px;box-shadow:var(--shadow-sm)}
@@ -442,7 +463,105 @@ const EUROPE = [
   {code:"MAN",city:"Manchester",country:"United Kingdom"},
 ];
 
-// Common headers for all backend requests
+// ── City photos: Wikimedia Commons (free-licensed, stable URLs, no API key) ──
+// Special:FilePath always redirects to the current hosted file at the given width.
+// If any image fails to load, the card falls back to an elegant gradient (see onerror).
+const CITY_PHOTOS = {
+  MAN:"Manchester_City_Centre.jpg",
+  LHR:"London_Big_Ben_Westminster_Bridge.jpg", LGW:"London_Big_Ben_Westminster_Bridge.jpg",
+  STN:"London_Big_Ben_Westminster_Bridge.jpg", LTN:"London_Big_Ben_Westminster_Bridge.jpg",
+  EDI:"Edinburgh_Castle_from_the_North.JPG",
+  BRS:"Clifton_Suspension_Bridge,_Bristol.jpg",
+  FAO:"Faro_January_2014.jpg", LIS:"Lisbon_(36831596786).jpg",
+  OPO:"Porto_-_Ribeira.jpg",
+  BCN:"Sagrada_Familia_01.jpg", MAD:"Plaza_Mayor_de_Madrid_06.jpg",
+  AGP:"Málaga_-_Catedral_y_Alcazaba.jpg", ALC:"Alacant_-_Castell_de_Santa_Bàrbara.jpg",
+  ACE:"Lanzarote_-_Timanfaya.jpg", PMI:"Palma_Cathedral_Mallorca_Spain.jpg",
+  TFS:"Teide_Tenerife.jpg", VLC:"Ciudad_de_las_Artes_y_las_Ciencias.jpg",
+  SVQ:"Plaza_de_España,_Sevilla.jpg", BIO:"Guggenheim_museum_Bilbao.jpg",
+  BGY:"Milan_Cathedral_from_Piazza_del_Duomo.jpg", MXP:"Milan_Cathedral_from_Piazza_del_Duomo.jpg",
+  PSA:"Leaning_Tower_of_Pisa.jpg", FCO:"Colosseo_2020.jpg",
+  CDG:"Tour_Eiffel_Wikimedia_Commons.jpg", BVA:"Tour_Eiffel_Wikimedia_Commons.jpg",
+  NCE:"Nice_-_Promenade_des_Anglais.jpg", LYS:"Lyon_Fourviere.jpg",
+  BOD:"Bordeaux_Place_de_la_Bourse.jpg",
+  AMS:"Amsterdam_Canals_-_July_2006.jpg", FRA:"Frankfurt_Skyline.jpg",
+  PRG:"Prague_Charles_Bridge.jpg", ZRH:"Zürich_-_Limmatquai.jpg",
+  MLA:"Valletta_Malta.jpg", ZAD:"Zadar_Croatia.jpg",
+  RHO:"Rhodes_old_town.jpg", ADB:"Izmir_Clock_Tower.jpg",
+};
+
+function cityPhotoUrl(code) {
+  const file = CITY_PHOTOS[code];
+  if (!file) return "";
+  return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(file)}?width=600`;
+}
+
+// ── City coordinates (for weather) ───────────────────────────────────────────
+const CITY_COORDS = {
+  MAN:[53.48,-2.24], LHR:[51.51,-0.13], LGW:[51.51,-0.13], STN:[51.51,-0.13], LTN:[51.51,-0.13],
+  EDI:[55.95,-3.19], BRS:[51.45,-2.59],
+  FAO:[37.02,-7.93], LIS:[38.72,-9.14], OPO:[41.16,-8.62],
+  BCN:[41.39,2.17], MAD:[40.42,-3.70], AGP:[36.72,-4.42], ALC:[38.35,-0.48],
+  ACE:[28.96,-13.55], PMI:[39.57,2.65], TFS:[28.05,-16.57], VLC:[39.47,-0.38],
+  SVQ:[37.39,-5.99], BIO:[43.26,-2.93],
+  BGY:[45.46,9.19], MXP:[45.46,9.19], PSA:[43.72,10.40], FCO:[41.90,12.50],
+  CDG:[48.86,2.35], BVA:[48.86,2.35], NCE:[43.70,7.27], LYS:[45.76,4.84], BOD:[44.84,-0.58],
+  AMS:[52.37,4.90], FRA:[50.11,8.68], PRG:[50.08,14.44], ZRH:[47.37,8.54],
+  MLA:[35.90,14.51], ZAD:[44.12,15.23], RHO:[36.43,28.22], ADB:[38.42,27.14],
+};
+
+// Map Open-Meteo weather codes to emoji + label
+function weatherIcon(code) {
+  if (code === 0) return ["☀️","Clear"];
+  if (code <= 2) return ["🌤️","Partly cloudy"];
+  if (code === 3) return ["☁️","Cloudy"];
+  if (code <= 48) return ["🌫️","Foggy"];
+  if (code <= 67) return ["🌧️","Rainy"];
+  if (code <= 77) return ["❄️","Snowy"];
+  if (code <= 82) return ["🌦️","Showers"];
+  if (code <= 99) return ["⛈️","Stormy"];
+  return ["🌡️",""];
+}
+
+// Fetch weather for a city on a date. Uses forecast if within ~16 days,
+// otherwise last year's climate for the same date ("typical").
+const weatherCache = {};
+async function getWeather(code, dateStr) {
+  const coords = CITY_COORDS[code];
+  if (!coords) return null;
+  const key = code + dateStr;
+  if (weatherCache[key]) return weatherCache[key];
+
+  const [lat, lon] = coords;
+  const target = new Date(dateStr + "T12:00:00");
+  const today = new Date();
+  const daysOut = Math.round((target - today) / 86400000);
+
+  let url, typical = false;
+  if (daysOut >= 0 && daysOut <= 15) {
+    url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&start_date=${dateStr}&end_date=${dateStr}&timezone=auto`;
+  } else {
+    // Last year same date — typical climate
+    const ly = new Date(target); ly.setFullYear(ly.getFullYear() - 1);
+    const lyStr = ly.toISOString().split("T")[0];
+    url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min&start_date=${lyStr}&end_date=${lyStr}&timezone=auto`;
+    typical = true;
+  }
+  try {
+    const r = await fetch(url);
+    const d = await r.json();
+    if (!d.daily || !d.daily.temperature_2m_max) return null;
+    const result = {
+      tmax: Math.round(d.daily.temperature_2m_max[0]),
+      tmin: Math.round(d.daily.temperature_2m_min[0]),
+      code: d.daily.weather_code[0],
+      rain: d.daily.precipitation_probability_max ? d.daily.precipitation_probability_max[0] : null,
+      typical,
+    };
+    weatherCache[key] = result;
+    return result;
+  } catch(e) { return null; }
+}
 const BACKEND_HEADERS = {
   "Content-Type": "application/json",
   "ngrok-skip-browser-warning": "true"
@@ -451,6 +570,16 @@ let cachedDeals = null;
 let currentBoard = "weekend";
 let budgetMax = 0;
 let backendOnline = false;
+
+// ── Booking deep-links (Path 1: no affiliate yet — add IDs here later) ───────
+function hotelUrl(city, dep, ret) {
+  // Booking.com pre-filled with city + check-in/out dates
+  return `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(city)}&checkin=${dep}&checkout=${ret}&group_adults=2`;
+}
+function carUrl(city, dep, ret) {
+  // DiscoverCars pre-filled with pickup location + dates
+  return `https://www.discovercars.com/search?pickupLocation=${encodeURIComponent(city)}&pickupDate=${dep}&dropoffDate=${ret}`;
+}
 
 // ── Tab switching ────────────────────────────────────────────────────────────
 document.querySelectorAll(".tab-btn").forEach(btn => {
@@ -583,11 +712,21 @@ function renderDeals() {
   }
   empty.style.display = "none";
 
-  grid.innerHTML = deals.map((d, i) => `
+  grid.innerHTML = deals.map((d, i) => {
+    const photo = cityPhotoUrl(d.code);
+    const banner = photo
+      ? `<div class="deal-photo">
+           <img src="${photo}" alt="${d.city}" loading="lazy"
+                onload="this.parentElement.classList.add('loaded')"
+                onerror="this.parentElement.classList.add('noimg');this.remove()">
+           <span class="deal-route-on-photo">ORK → ${d.code}</span>
+         </div>`
+      : `<div class="deal-photo noimg"><span class="deal-route-on-photo">ORK → ${d.code}</span></div>`;
+    return `
     <div class="deal-card${i === 0 ? ' cheapest' : ''}">
+      ${banner}
       <div class="deal-card-top">
         ${i === 0 ? '<div class="deal-badge">Best fare</div>' : ''}
-        <div class="deal-route">ORK <span class="arrow"></span> ${d.code}</div>
         <div class="deal-city">${d.city}</div>
         <div class="deal-country">${d.country}</div>
       </div>
@@ -603,10 +742,29 @@ function renderDeals() {
         <span>${d.total_time || '—'}</span>
         <span>${d.airlines || '—'}</span>
       </div>
-      <a class="deal-book" href="https://www.google.com/travel/flights?q=Flights+to+${d.code}+from+ORK+on+${dep}+through+${ret}" target="_blank" rel="noopener">
-        View &amp; book →
-      </a>
-    </div>`).join("");
+      <div class="deal-weather" id="weather-${d.code}-${i}"><span class="wx-loading">Checking weather…</span></div>
+      <div class="deal-actions">
+        <a class="deal-book primary" href="https://www.google.com/travel/flights?q=Flights+to+${d.code}+from+ORK+on+${dep}+through+${ret}" target="_blank" rel="noopener">✈ Flights</a>
+        <a class="deal-book secondary" href="${hotelUrl(d.city, dep, ret)}" target="_blank" rel="noopener">🏨 Stay</a>
+        <a class="deal-book secondary" href="${carUrl(d.city, dep, ret)}" target="_blank" rel="noopener">🚗 Car</a>
+      </div>
+    </div>`;
+  }).join("");
+
+  // Load weather for each card asynchronously (doesn't block render)
+  deals.forEach((d, i) => {
+    getWeather(d.code, dep).then(w => {
+      const el = document.getElementById(`weather-${d.code}-${i}`);
+      if (!el) return;
+      if (!w) { el.innerHTML = ""; return; }
+      const [icon, label] = weatherIcon(w.code);
+      el.innerHTML = `
+        <span class="wx-icon">${icon}</span>
+        <span class="wx-temp">${w.tmax}° <span class="wx-min">/ ${w.tmin}°</span></span>
+        <span class="wx-label">${label}${w.rain != null && w.rain >= 30 ? ' · ' + w.rain + '% rain' : ''}</span>
+        <span class="wx-tag">${w.typical ? 'typical for these dates' : 'forecast'}</span>`;
+    });
+  });
 }
 
 // ── Backend health check ─────────────────────────────────────────────────────
