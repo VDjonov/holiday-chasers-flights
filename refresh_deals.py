@@ -32,11 +32,18 @@ NUM_TRAVELLERS = 4       # for per-person division on the website
 # ── How the boards are built ─────────────────────────────────────────────────
 WEEKEND_NIGHTS = 2          # Fri -> Sun
 NUM_WEEKENDS = 4            # how many upcoming weekends to offer
-EARLIEST_DATE = "2026-08-01"  # don't show weekends before this date (skip July).
+EARLIEST_DATE = "2026-08-24"  # start from the last week of August. With NUM_WEEKENDS=4
+                              # this gives: last weekend of Aug + first 3 weekends of Sept.
                               # Set to "" to always just use the next weekends.
-WEEK_DEPART_IN_DAYS = 21
 WEEK_NIGHTS = 7
 NUM_WEEKS = 4              # how many upcoming week-long trips to offer
+                          # (Saturdays from EARLIEST_DATE: last week Aug + 3 weeks Sept)
+
+# ── Price history (for the "cheaper than usual" badge) ───────────────────────
+HISTORY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "price_history.json")
+MAX_HISTORY = 12          # keep up to 12 recent runs per destination (~3 months weekly)
+MIN_HISTORY_POINTS = 3    # need at least this many past prices before judging "cheaper"
+CHEAPER_THRESHOLD = 0.85  # a fare 15%+ below the typical price counts as "cheaper than usual"
 
 DESTINATIONS = [
     ("ALC", "Alicante",   "Spain"),
@@ -123,6 +130,59 @@ def load_keys():
         if v:
             keys.append(v)
     return keys
+
+
+# ── Price history helpers ────────────────────────────────────────────────────
+def load_history():
+    """Load past prices. Shape: {code: {"weekend": [p,...], "week": [p,...]}}"""
+    try:
+        with open(HISTORY_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def save_history(hist):
+    try:
+        with open(HISTORY_FILE, "w", encoding="utf-8") as f:
+            json.dump(hist, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"  (could not write price history: {e})")
+
+
+def _median(vals):
+    s = sorted(vals)
+    n = len(s)
+    if n == 0:
+        return None
+    mid = n // 2
+    return s[mid] if n % 2 else (s[mid-1] + s[mid]) / 2
+
+
+def annotate_with_history(boards, board_type, hist):
+    """For each deal, compare its price to the destination's TYPICAL past price
+    (median of prior runs) and flag is_cheaper / is_new / hist_typical."""
+    for board in boards:
+        for d in board["deals"]:
+            prior = hist.get(d["code"], {}).get(board_type, [])
+            typical = _median(prior) if len(prior) >= MIN_HISTORY_POINTS else None
+            d["hist_typical"] = round(typical) if typical else None
+            d["is_new"] = len(prior) == 0
+            d["is_cheaper"] = bool(typical and d["price"] <= typical * CHEAPER_THRESHOLD)
+
+
+def record_history(boards, board_type, hist):
+    """Record this run's cheapest price per destination (for this board type)."""
+    cheapest = {}
+    for board in boards:
+        for d in board["deals"]:
+            c = cheapest.get(d["code"])
+            if c is None or d["price"] < c:
+                cheapest[d["code"]] = d["price"]
+    for code, price in cheapest.items():
+        hist.setdefault(code, {}).setdefault(board_type, [])
+        hist[code][board_type].append(price)
+        hist[code][board_type] = hist[code][board_type][-MAX_HISTORY:]
 
 
 def cheapest_return(keys, dest_code, out_date, ret_date):
@@ -228,6 +288,14 @@ def main():
         board = build_board(keys, label, sat.isoformat(), wk_ret.isoformat(), WEEK_NIGHTS)
         board["label"] = f"{sat.strftime('%a %d %b')} – {wk_ret.strftime('%a %d %b')}"
         week_boards.append(board)
+
+    # ── Price history: compare to past, then record this run ──
+    hist = load_history()
+    annotate_with_history(weekend_boards, "weekend", hist)  # uses PRIOR prices
+    annotate_with_history(week_boards, "week", hist)
+    record_history(weekend_boards, "weekend", hist)          # then add this run
+    record_history(week_boards, "week", hist)
+    save_history(hist)
 
     payload = {
         "updated_utc": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),

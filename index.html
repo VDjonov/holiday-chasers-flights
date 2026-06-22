@@ -160,6 +160,9 @@ img{max-width:100%}
 .deal-country{font-size:13px;color:var(--muted);margin-top:4px}
 .deal-badge{position:absolute;top:16px;right:18px;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--gold);background:var(--paper);border:1px solid var(--gold);padding:3px 8px;border-radius:100px;text-transform:uppercase;z-index:2}
 .deal-badge.value{color:#2e7d52;border-color:#2e7d52}
+.deal-badge.cheaper{color:#fff;background:#2e7d52;border-color:#2e7d52}
+.deal-badge.newbadge{color:var(--ink);background:var(--gold-soft);border-color:var(--gold)}
+.dt-cheaper-note{background:#eaf5ee;border:1px solid #2e7d52;color:#1e5637;border-radius:10px;padding:12px 16px;font-size:14px;font-weight:600;margin-bottom:16px}
 .deal-fav{position:absolute;top:14px;left:14px;z-index:3;width:34px;height:34px;border-radius:50%;border:none;background:rgba(10,27,46,.55);color:#fff;font-size:17px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.18s;backdrop-filter:blur(4px)}
 .deal-fav:hover{background:rgba(10,27,46,.8);transform:scale(1.08)}
 .deal-fav.on{color:#ff6b6b;background:rgba(255,255,255,.92)}
@@ -1131,6 +1134,11 @@ function renderDeals() {
   const median = pps.length ? pps[Math.floor(pps.length/2)] : 0;
   const valueThreshold = median * 0.7;  // 30%+ below median = great value
   function valueBadge(d){
+    // Priority 1: real price-history flags from the scanner (genuinely true)
+    if (d.is_cheaper) return '<div class="deal-badge cheaper">↓ Cheaper than usual</div>';
+    if (d.is_new) return '<div class="deal-badge newbadge">✦ New route</div>';
+    // Priority 2: fallback heuristic for when no history exists yet — flags fares
+    // notably below this board's median ("stands out right now")
     const pp = perPerson(d);
     if (median && pp <= valueThreshold) return '<div class="deal-badge value">★ Great value</div>';
     return '';
@@ -1669,6 +1677,7 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers){
     <div class="dt-section">
       <h2>✈️ Your flights</h2>
       <div class="dt-sub">${depFmt} → ${retFmt}</div>
+      ${d.is_cheaper && d.hist_typical ? `<div class="dt-cheaper-note">↓ This fare is cheaper than usual for ${d.city} — typically around €${Math.round(d.hist_typical/cacheTravellers)} per person.</div>` : ''}
       <div class="dt-leg">
         <div class="dt-leg-dir">OUT</div>
         <div class="dt-leg-main">
