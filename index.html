@@ -312,6 +312,12 @@ img{max-width:100%}
 
 /* stay options */
 .dt-stay-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.dt-car-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.dt-car{display:flex;flex-direction:column;gap:5px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px;transition:transform .2s,box-shadow .2s,border-color .2s}
+.dt-car:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:var(--gold)}
+.dt-car-name{font-family:var(--font-display);font-size:17px;font-weight:600;color:var(--ink)}
+.dt-car-sub{font-size:12px;color:var(--muted);line-height:1.5;flex:1}
+.dt-car-go{font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--gold);letter-spacing:.03em;margin-top:6px}
 .dt-stay{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:22px;text-align:center}
 .dt-stay .s-ic{font-size:30px}
 .dt-stay .s-name{font-family:var(--font-display);font-size:19px;font-weight:600;margin:8px 0 4px}
@@ -335,8 +341,10 @@ img{max-width:100%}
 .dt-tr-block{margin-bottom:16px}
 .dt-tr-h2{font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
 .dt-tr-opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
-.dt-tr-opt{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.dt-tr-opt{position:relative;display:block;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;transition:transform .2s,box-shadow .2s,border-color .2s}
+.dt-tr-opt:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:var(--gold)}
 .dt-tr-opt.best{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+.dt-tr-cta{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.03em;margin-top:10px;opacity:.85}
 .dt-tr-badge{position:absolute;top:-9px;left:14px;background:var(--gold);color:var(--ink);font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:100px}
 .dt-tr-mode{font-weight:600;font-size:15px;margin-bottom:3px}
 .dt-tr-detail{font-size:12px;color:var(--muted);margin-bottom:10px}
@@ -804,7 +812,18 @@ function changeTravellers(kind, delta){
 }
 let backendOnline = false;
 
-// ── Booking deep-links (Path 1: no affiliate yet — add IDs here later) ───────
+// ── Affiliate IDs ────────────────────────────────────────────────────────────
+// Paste your affiliate IDs here once approved. Empty = plain link (still works,
+// just no commission). See notes in chat for where to sign up.
+const AFFILIATE = {
+  booking:     "",   // Booking.com (hotels) — your aid, e.g. "1234567"
+  discovercars:"",   // DiscoverCars — your affiliate code
+  rentalcars:  "",   // Rentalcars.com — your affiliate/partner code
+  autoeurope:  "",   // Auto Europe — your affiliate code
+  welcomepickups:""  // Welcome Pickups (airport transfers) — your ref code
+};
+
+// ── Booking deep-links ───────────────────────────────────────────────────────
 function hotelUrl(city, dep, ret) {
   // Booking.com public search using the selected group. Children default to age 8.
   const a = selAdults, c = selChildren;
@@ -813,15 +832,38 @@ function hotelUrl(city, dep, ret) {
     + `&group_adults=${a}&no_rooms=1&group_children=${c}`
     + `&req_adults=${a}&req_children=${c}`;
   for (let i=0;i<c;i++) url += `&age=8&req_age=8`;
+  if (AFFILIATE.booking) url += `&aid=${AFFILIATE.booking}`;
   return url;
 }
 function airbnbUrl(city, dep, ret) {
   const a = selAdults, c = selChildren;
   return `https://www.airbnb.com/s/${encodeURIComponent(city)}/homes?checkin=${dep}&checkout=${ret}&adults=${a}&children=${c}`;
 }
-function carUrl(city, dep, ret) {
-  // DiscoverCars pre-filled with pickup location + dates
-  return `https://www.discovercars.com/search?pickupLocation=${encodeURIComponent(city)}&pickupDate=${dep}&dropoffDate=${ret}`;
+
+// Three car-hire comparison sites — pre-filled with city + dates.
+function carUrlDiscover(city, dep, ret) {
+  let u = `https://www.discovercars.com/search?pickupLocation=${encodeURIComponent(city)}&pickupDate=${dep}&dropoffDate=${ret}`;
+  if (AFFILIATE.discovercars) u += `&aff=${AFFILIATE.discovercars}`;
+  return u;
+}
+function carUrlRentalcars(city, dep, ret) {
+  let u = `https://www.rentalcars.com/SearchResults.do?location=${encodeURIComponent(city)}&puDay=${dep.slice(8)}&puMonth=${dep.slice(5,7)}&puYear=${dep.slice(0,4)}&doDay=${ret.slice(8)}&doMonth=${ret.slice(5,7)}&doYear=${ret.slice(0,4)}`;
+  if (AFFILIATE.rentalcars) u += `&affiliateCode=${AFFILIATE.rentalcars}`;
+  return u;
+}
+function carUrlAutoEurope(city, dep, ret) {
+  let u = `https://www.autoeurope.eu/en/car-rental/${encodeURIComponent(city.toLowerCase().replace(/\s+/g,'-'))}/`;
+  if (AFFILIATE.autoeurope) u += `?aid=${AFFILIATE.autoeurope}`;
+  return u;
+}
+// Back-compat: existing calls to carUrl() default to DiscoverCars
+function carUrl(city, dep, ret){ return carUrlDiscover(city, dep, ret); }
+
+// Airport transfer (taxi rows link here — a real bookable transfer service).
+function transferUrl(city) {
+  let u = `https://www.welcomepickups.com/${encodeURIComponent(city.toLowerCase().replace(/\s+/g,'-'))}/`;
+  if (AFFILIATE.welcomepickups) u += `?ref=${AFFILIATE.welcomepickups}`;
+  return u;
 }
 
 // ── Tab switching ────────────────────────────────────────────────────────────
@@ -1567,6 +1609,28 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers){
       </div>
       <p style="font-size:12px;color:var(--muted);margin-top:14px">Nightly prices are typical estimates for a family room/place. Live prices and photos are on Booking.com and Airbnb.</p>
     </div>
+
+    <div class="dt-section">
+      <h2>🚗 Hire a car</h2>
+      <div class="dt-sub">Compare prices across these trusted car-hire sites — pre-filled with ${d.city} and your dates</div>
+      <div class="dt-car-cards">
+        <a class="dt-car" href="${carUrlDiscover(d.city, dep, ret)}" target="_blank" rel="noopener">
+          <div class="dt-car-name">DiscoverCars</div>
+          <div class="dt-car-sub">Compare 650+ suppliers · free cancellation</div>
+          <div class="dt-car-go">Search cars →</div>
+        </a>
+        <a class="dt-car" href="${carUrlRentalcars(d.city, dep, ret)}" target="_blank" rel="noopener">
+          <div class="dt-car-name">Rentalcars.com</div>
+          <div class="dt-car-sub">Part of Booking.com · Avis, Hertz, Enterprise &amp; more</div>
+          <div class="dt-car-go">Search cars →</div>
+        </a>
+        <a class="dt-car" href="${carUrlAutoEurope(d.city, dep, ret)}" target="_blank" rel="noopener">
+          <div class="dt-car-name">Auto Europe</div>
+          <div class="dt-car-sub">Europe specialist · 180+ countries</div>
+          <div class="dt-car-go">Search cars →</div>
+        </a>
+      </div>
+    </div>
   `;
 
   // Hero photo
@@ -1593,19 +1657,31 @@ function closeDetail(){
 }
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeDetail(); });
 
+function cityTransportName(code){
+  // Resolve a human city name for transfer links (reuse the events city map)
+  return (typeof TM_CITY !== "undefined" && TM_CITY[code]) || code;
+}
 function loadTransport(code){
   const el = document.getElementById("dtTransport");
   if (!el) return;
   const t = cityTransport(code);
   if (!t){ el.innerHTML = "<p style='color:var(--muted)'>Transport details coming soon for this city.</p>"; return; }
 
-  const opts = (t.options||[]).map(o => `
-    <div class="dt-tr-opt${o.best?' best':''}">
+  const officialUrl = t.official ? t.official.url : null;
+  const tCity = (cityTransportName(code) || code);
+  const opts = (t.options||[]).map(o => {
+    const isTaxi = /taxi|transfer|shuttle/i.test(o.mode);
+    const href = isTaxi ? transferUrl(tCity) : (officialUrl || "#");
+    const cta = isTaxi ? "Book a transfer →" : "Tickets & times →";
+    return `
+    <a class="dt-tr-opt${o.best?' best':''}" href="${href}" target="_blank" rel="noopener">
       ${o.best?'<span class="dt-tr-badge">Best pick</span>':''}
       <div class="dt-tr-mode">${o.mode}</div>
       <div class="dt-tr-detail">${o.detail}</div>
       <div class="dt-tr-stats"><span>🕒 ${o.time}</span><span>💶 ${o.price}</span></div>
-    </div>`).join("");
+      <div class="dt-tr-cta">${cta}</div>
+    </a>`;
+  }).join("");
 
   // OpenStreetMap embed centred on the city
   const coords = CITY_COORDS[code];
