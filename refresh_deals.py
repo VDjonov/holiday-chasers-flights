@@ -109,6 +109,12 @@ def _is_quota_error(msg):
                                   "plan", "quota", "401", "429", "unauthorized"])
 
 
+# Keys discovered to be exhausted/invalid during this run. Once a key fails with
+# a quota error, we stop trying it for every remaining search — this avoids
+# wasting 2+ failed calls per search on already-dead keys.
+EXHAUSTED_KEYS = set()
+
+
 def load_keys():
     keys = []
     for name in ["SERPAPI_KEY", "SERPAPI_KEY2", "SERPAPI_KEY3",
@@ -127,7 +133,11 @@ def cheapest_return(keys, dest_code, out_date, ret_date):
         "currency": "EUR", "hl": "en", "gl": "ie",
     }
     data = None
-    for idx, key in enumerate(keys):
+    live_keys = [(idx, k) for idx, k in enumerate(keys) if k not in EXHAUSTED_KEYS]
+    if not live_keys:
+        print("    all keys exhausted — skipping")
+        return None
+    for idx, key in live_keys:
         params = dict(base); params["api_key"] = key
         try:
             r = requests.get("https://serpapi.com/search.json", params=params, timeout=40)
@@ -141,8 +151,10 @@ def cheapest_return(keys, dest_code, out_date, ret_date):
             err = r.json().get("error", f"HTTP {r.status_code}")
         except Exception:
             err = f"HTTP {r.status_code}"
-        if _is_quota_error(err) and idx < len(keys) - 1:
-            print(f"    key {idx+1} exhausted, trying next…")
+        if _is_quota_error(err):
+            # Mark this key dead for the rest of the run, then try the next live key
+            EXHAUSTED_KEYS.add(key)
+            print(f"    key {idx+1} exhausted — will skip it for the rest of this run")
             continue
         else:
             print(f"    API error: {err}")
@@ -232,6 +244,13 @@ def main():
     for b in weekend_boards + week_boards:
         if b["deals"]:
             print(f"  {b['label']}: cheapest €{b['deals'][0]['price']} to {b['deals'][0]['city']}")
+
+    live = len(keys) - len(EXHAUSTED_KEYS)
+    print(f"\nKey health: {live} of {len(keys)} key(s) still had quota at the end of this run.")
+    if EXHAUSTED_KEYS:
+        print(f"  {len(EXHAUSTED_KEYS)} key(s) ran out during the run.")
+        if live == 0:
+            print("  ⚠ ALL keys are exhausted — some boards may be incomplete. Add more keys or reduce boards.")
 
 
 if __name__ == "__main__":
