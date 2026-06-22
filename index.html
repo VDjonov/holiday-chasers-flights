@@ -1637,7 +1637,12 @@ async function loadEvents(code, dep, ret){
   }
   if (!city){ el.innerHTML = "<p style='color:var(--muted)'>No event listings for this city.</p>"; return; }
   try{
-    const start = dep + "T00:00:00Z";
+    // Start from the second day of the trip — arrival day (often a Friday) is
+    // usually travel/settling-in, so events default to the first full day.
+    const secondDay = addDaysISO(dep, 1);
+    // Don't go past the return day; if the trip is only 1 night, fall back to dep.
+    const eventStart = (new Date(secondDay) <= new Date(ret)) ? secondDay : dep;
+    const start = eventStart + "T00:00:00Z";
     const end = ret + "T23:59:59Z";
     const url = `https://app.ticketmaster.com/discovery/v2/events.json?apikey=${TICKETMASTER_KEY}`
       + `&city=${encodeURIComponent(city)}&startDateTime=${start}&endDateTime=${end}&size=8&sort=date,asc`;
