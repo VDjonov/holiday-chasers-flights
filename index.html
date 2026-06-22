@@ -89,8 +89,14 @@ img{max-width:100%}
 .trip-toggle button.active{background:var(--ink);color:var(--ivory)}
 
 #weekendPickerRow label,.filter-bar label{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
-#weekendPicker{padding:11px 16px;border:1px solid var(--line);border-radius:12px;font-size:14px;font-family:var(--font-body);font-weight:500;color:var(--ink);background:var(--paper);min-width:280px;cursor:pointer;box-shadow:var(--shadow-sm)}
-#weekendPicker:focus{outline:none;border-color:var(--gold)}
+.weekend-buttons{display:flex;gap:10px;flex-wrap:wrap}
+.weekend-btn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:11px 18px;border:1px solid var(--line);border-radius:12px;background:var(--paper);cursor:pointer;transition:.18s;box-shadow:var(--shadow-sm);text-align:left}
+.weekend-btn:hover{border-color:var(--gold)}
+.weekend-btn.active{border-color:var(--ink);background:var(--ink)}
+.weekend-btn .wb-label{font-family:var(--font-body);font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap}
+.weekend-btn .wb-price{font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.02em}
+.weekend-btn.active .wb-label{color:var(--ivory)}
+.weekend-btn.active .wb-price{color:var(--gold-soft)}
 
 .filter-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:28px}
 .traveller-bar{display:flex;align-items:center;gap:18px;flex-wrap:wrap;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 18px;margin-bottom:20px;box-shadow:var(--shadow-sm)}
@@ -226,7 +232,8 @@ img{max-width:100%}
   .form-row{flex-direction:column;align-items:stretch}
   .form-group{min-width:0}
   .search-btn{width:100%}
-  #weekendPicker{width:100%;min-width:0}
+  .weekend-buttons{width:100%}
+  .weekend-btn{flex:1;min-width:calc(50% - 5px)}
   .results-table{display:block;overflow-x:auto;white-space:nowrap}
 }
 @media(prefers-reduced-motion:reduce){
@@ -411,8 +418,8 @@ img{max-width:100%}
   </div>
 
   <div id="weekendPickerRow" style="margin-bottom:16px">
-    <label style="font-size:13px;font-weight:600;color:var(--gray);display:block;margin-bottom:6px">Choose your weekend:</label>
-    <select id="weekendPicker" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;color:var(--navy);background:var(--card);min-width:240px;cursor:pointer"></select>
+    <label style="font-size:13px;font-weight:600;color:var(--gray);display:block;margin-bottom:8px">Choose your weekend:</label>
+    <div id="weekendPicker" class="weekend-buttons"></div>
   </div>
 
   <div class="filter-bar">
@@ -842,22 +849,29 @@ document.querySelectorAll("#boardToggle button").forEach(btn => {
 
 // ── Weekend picker ───────────────────────────────────────────────────────────
 let selectedWeekendIdx = 0;
-document.getElementById("weekendPicker").addEventListener("change", function() {
-  selectedWeekendIdx = parseInt(this.value) || 0;
+
+function selectWeekend(idx) {
+  selectedWeekendIdx = idx;
+  document.querySelectorAll("#weekendPicker .weekend-btn").forEach((b, i) => {
+    b.classList.toggle("active", i === idx);
+  });
   renderDeals();
-});
+}
 
 function populateWeekendPicker() {
   const picker = document.getElementById("weekendPicker");
   if (!cachedDeals || !cachedDeals.weekend_boards) return;
   picker.innerHTML = "";
+  const trav = cachedDeals.travellers || 4;
   cachedDeals.weekend_boards.forEach((b, i) => {
-    const o = document.createElement("option");
-    o.value = i;
-    const trav = cachedDeals.travellers || 4;
-    const cheapest = b.deals && b.deals.length ? ` — from €${Math.round([...b.deals].sort((a,c)=>a.price-c.price)[0].price / trav)}pp` : "";
-    o.textContent = (b.label || `Weekend ${i+1}`) + cheapest;
-    picker.appendChild(o);
+    const btn = document.createElement("button");
+    btn.className = "weekend-btn" + (i === selectedWeekendIdx ? " active" : "");
+    btn.onclick = () => selectWeekend(i);
+    const cheapest = b.deals && b.deals.length
+      ? Math.round([...b.deals].sort((a,c)=>a.price-c.price)[0].price / trav) : null;
+    btn.innerHTML = `<span class="wb-label">${b.label || `Weekend ${i+1}`}</span>` +
+      (cheapest != null ? `<span class="wb-price">from €${cheapest}pp</span>` : "");
+    picker.appendChild(btn);
   });
 }
 
