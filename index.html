@@ -301,6 +301,23 @@ img{max-width:100%}
 .dt-stay a:hover{background:var(--gold);color:var(--ink)}
 .dt-loading{color:var(--muted);font-style:italic;font-size:14px}
 
+/* events */
+.dt-events{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.dt-event{display:flex;flex-direction:column;background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.dt-event:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.dt-event-img{height:120px;background:var(--cream) center/cover;display:block}
+.dt-event-body{padding:14px;display:flex;flex-direction:column;gap:3px}
+.dt-event-date{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.04em}
+.dt-event-name{font-weight:600;font-size:14px;line-height:1.3;color:var(--ink)}
+.dt-event-venue{font-size:12px;color:var(--muted)}
+
+/* transport */
+.dt-transport{display:flex;flex-direction:column;gap:16px}
+.dt-tr-item{display:flex;gap:14px;align-items:flex-start;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px}
+.dt-tr-ic{font-size:22px;flex-shrink:0;line-height:1.2}
+.dt-tr-h{font-weight:600;font-size:14px;margin-bottom:4px}
+.dt-tr-b{font-size:13px;color:var(--ink-70);line-height:1.6}
+
 @media(max-width:600px){
   .dt-hero{height:240px}
   .dt-section{padding:28px 18px}
@@ -713,8 +730,14 @@ let backendOnline = false;
 
 // ── Booking deep-links (Path 1: no affiliate yet — add IDs here later) ───────
 function hotelUrl(city, dep, ret) {
-  // Booking.com: 2 adults, 2 children aged 5 & 13
-  return `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(city)}&checkin=${dep}&checkout=${ret}&group_adults=2&group_children=2&age=5&age=13`;
+  // Booking.com public search: 2 adults + 2 children aged 5 & 13, 1 room.
+  // Booking needs group_children count AND a repeated age param per child,
+  // plus the req_* mirrors, or it silently drops the children.
+  return `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(city)}`
+    + `&checkin=${dep}&checkout=${ret}`
+    + `&group_adults=2&no_rooms=1`
+    + `&group_children=2&age=5&age=13`
+    + `&req_adults=2&req_children=2&req_age=5&req_age=13`;
 }
 function airbnbUrl(city, dep, ret) {
   // Airbnb: 2 adults + 2 children
@@ -1262,6 +1285,71 @@ const CITY_TIER = {
 };
 function cityCosts(code){ return COST_TIERS[CITY_TIER[code] || "mid"]; }
 
+// ── Ticketmaster Events API ──────────────────────────────────────────────────
+// Get a free key at developer.ticketmaster.com → paste it here.
+const TICKETMASTER_KEY = "";  // <-- paste your Ticketmaster Consumer Key here
+// Map airport codes to Ticketmaster city names for the events search
+const TM_CITY = {
+  MAN:"Manchester", LHR:"London", LGW:"London", STN:"London", LTN:"London",
+  EDI:"Edinburgh", BRS:"Bristol", FAO:"Faro", LIS:"Lisbon", OPO:"Porto",
+  BCN:"Barcelona", MAD:"Madrid", AGP:"Malaga", ALC:"Alicante", PMI:"Palma",
+  TFS:"Tenerife", ACE:"Arrecife", VLC:"Valencia", SVQ:"Seville", BIO:"Bilbao",
+  BGY:"Milan", MXP:"Milan", PSA:"Pisa", FCO:"Rome", CDG:"Paris", BVA:"Paris",
+  NCE:"Nice", LYS:"Lyon", BOD:"Bordeaux", AMS:"Amsterdam", FRA:"Frankfurt",
+  PRG:"Prague", ZRH:"Zurich", MLA:"Valletta", ZAD:"Zadar", RHO:"Rhodes",
+  ADB:"Izmir", GVA:"Geneva", MUC:"Munich", BER:"Berlin", BUD:"Budapest",
+  KRK:"Krakow", WAW:"Warsaw",
+};
+
+// ── Curated transport guide per city ─────────────────────────────────────────
+// Airport→centre transfer + main public transport. Stable info, no API needed.
+const CITY_TRANSPORT = {
+  MAN:{airport:"Manchester Airport is ~16km south of the centre. The train to Manchester Piccadilly takes ~20 min (~£5). The 43 bus runs frequently; taxis ~£25.",transit:"Trams (Metrolink) and buses cover the city. A single tram is ~£1.40–£3; day tickets ~£5."},
+  FAO:{airport:"Faro Airport is just 7km from the centre. Bus 14/16 runs to the bus station (~€2.40, 20 min). Taxis ~€15.",transit:"Faro centre is walkable. Buses (Próximo) reach the beach and train station; trains link to other Algarve towns cheaply."},
+  BCN:{airport:"Barcelona–El Prat is ~15km from centre. The Aerobús to Plaça Catalunya takes ~35 min (~€7.25). Metro L9 Sud and R2 train are cheaper (~€5).",transit:"Excellent Metro & bus network. A T-casual 10-trip ticket (~€12.55) is the best value; single ~€2.65."},
+  MAD:{airport:"Madrid–Barajas is ~13km out. The Metro (Line 8) reaches the centre in ~30 min (~€4.50–€5 incl. airport supplement). The Exprés Aeropuerto bus runs 24h (~€5).",transit:"Metro is fast and cheap; 10-trip ticket ~€12.20. Buses and Cercanías trains fill gaps."},
+  LIS:{airport:"Lisbon Airport is only 7km from centre. The Metro (red line) is quickest (~€1.80 + card). The Aerobus and bus 744/783 also run.",transit:"Metro, trams (incl. the famous 28), buses and funiculars. A Viva Viagem card with zapping credit is best value."},
+  OPO:{airport:"Porto Airport is ~11km out. Metro Line E (violet) runs to the centre in ~30 min (~€2.60). Taxis ~€25.",transit:"Metro and buses (Andante card). The historic tram 1 runs along the river."},
+  AMS:{airport:"Schiphol is ~15km from centre. Trains to Amsterdam Centraal run every few minutes (~17 min, ~€5.90). Bus 397 is an alternative.",transit:"Trams, metro and buses (GVB). An OV-chipkaart or contactless works; a 24h GVB ticket ~€9. Cycling is huge here."},
+  CDG:{airport:"Paris CDG is ~25km NE. The RER B train reaches the centre in ~35 min (~€11.45). The Roissybus to Opéra (~€16.60) is a comfy alternative.",transit:"Metro, RER, bus and tram. A carnet of 10 t+ tickets (~€17) or a Navigo Easy card is best for short stays."},
+  BVA:{airport:"Beauvais is ~85km from Paris (a Ryanair base). The official shuttle bus to Porte Maillot takes ~1h15 (~€16.90). Plan extra time.",transit:"Once in Paris: Metro, RER, bus and tram. A carnet of 10 tickets (~€17) is good value."},
+  NCE:{airport:"Nice Côte d'Azur is ~7km from centre. Tram Line 2 runs to the centre/port in ~25 min (~€1.70). Very easy.",transit:"Trams and buses (Lignes d'Azur); a single ticket ~€1.70 covers transfers. The centre is walkable."},
+  FCO:{airport:"Rome Fiumicino is ~30km out. The Leonardo Express train to Termini takes ~32 min (~€14). Cheaper buses (SIT, Terravision) ~€6–7.",transit:"Metro (3 lines), buses and trams (ATAC). A single BIT ticket ~€1.50 (100 min); 24h ~€7."},
+  PRG:{airport:"Prague Airport is ~17km from centre. Bus 119 connects to Metro Line A (~30 min total, ~40 CZK). The Airport Express bus runs to the main train station.",transit:"Metro, trams and buses (PID). A 30-min ticket ~30 CZK; 24h ~120 CZK. Trams are great for sightseeing."},
+  EDI:{airport:"Edinburgh Airport is ~13km west. The tram to the centre takes ~35 min (~£7). Airlink 100 bus is similar.",transit:"Buses (Lothian) and trams; single ~£2, day ticket ~£5.50. The Old Town is very walkable."},
+  AGP:{airport:"Málaga Airport is ~8km from centre. The C1 Cercanías train reaches the centre in ~12 min (~€1.80). The A Express bus also runs.",transit:"Walkable centre; buses (EMT) and the Cercanías trains reach the Costa del Sol resorts cheaply."},
+  ALC:{airport:"Alicante Airport is ~10km out. The C-6 bus runs to the centre (~€3.85, 25 min). Taxis ~€20.",transit:"Compact, walkable centre. The TRAM (light rail) runs up the coast to Benidorm."},
+  VLC:{airport:"Valencia Airport is ~8km west. Metro lines 3 & 5 reach the centre in ~20 min (~€4.80 incl. airport supplement).",transit:"Metro, trams and buses. Valencia is famously flat and bike-friendly (Valenbisi)."},
+  FRA:{airport:"Frankfurt Airport has its own train station; S-Bahn S8/S9 to the centre takes ~15 min (~€5.80).",transit:"U-Bahn, S-Bahn, trams and buses (RMV). A single ~€3.65; day ticket ~€6.80."},
+  MUC:{airport:"Munich Airport is ~35km NE. S-Bahn S1/S8 to the centre takes ~40 min (~€13 / day ticket covers it).",transit:"U-Bahn, S-Bahn, trams and buses (MVV). A single ~€3.90; day ticket ~€9.20 (great value)."},
+  BER:{airport:"Berlin Brandenburg (BER) is ~25km out. The FEX airport express & S-Bahn/regional trains reach the centre in ~30–45 min (~€4.40, ABC ticket).",transit:"U-Bahn, S-Bahn, trams and buses (BVG). An AB single ~€3.50; day ticket ~€9.90."},
+  BUD:{airport:"Budapest Airport is ~16km from centre. Bus 100E runs direct to Deák Ferenc tér (~€4.40). Cheaper: bus 200E + Metro M3.",transit:"Metro (4 lines), trams and buses (BKK). A single ~€1; 24h travelcard ~€6.50. Tram 2 is scenic."},
+  KRK:{airport:"Kraków Airport is ~11km west. The train to Kraków Główny takes ~20 min (~12 PLN). Bus 252/208 is cheaper.",transit:"Trams and buses (MPK). A 20-min ticket ~4 PLN; the Old Town is pedestrian-friendly."},
+  WAW:{airport:"Warsaw Chopin is ~10km from centre. Trains (S2/S3) and bus 175 reach the centre in ~25 min (~4.40 PLN).",transit:"Metro (2 lines), trams and buses (ZTM). A 20-min ticket ~3.40 PLN; 24h ~15 PLN."},
+  ZRH:{airport:"Zurich Airport is ~10km out. Trains reach the main station in ~10 min (~€7). Very efficient.",transit:"Trams, buses and S-Bahn (ZVV). Short hops ~€2.70; a 24h pass ~€8.80. The centre is walkable."},
+  GVA:{airport:"Geneva Airport is ~4km from centre. A free transit ticket (from the airport machine) covers the train/bus to the centre (~10 min).",transit:"Trams, buses and trains (TPG). Hotels give a free Geneva Transport Card for your stay."},
+  MLA:{airport:"Malta Airport is ~8km from Valletta. The X4 bus runs to the centre (~€2, 30 min). Taxis are fixed-fare ~€15.",transit:"Buses (Tallinja) cover the islands; a single ~€2 (2h). No rail — buses or ferries between towns."},
+  PSA:{airport:"Pisa Airport is ~2km from centre — the PisaMover tram links it to the train station in 5 min (~€5). Florence is ~1h by train.",transit:"Pisa is small and walkable. Trains link to Florence, Lucca and the coast cheaply."},
+  BGY:{airport:"Bergamo (Milan's Ryanair hub) is ~50km from Milan. The shuttle bus to Milano Centrale takes ~1h (~€10).",transit:"In Milan: Metro (4 lines), trams and buses (ATM). A single ~€2.20; 24h ~€7.60."},
+  MXP:{airport:"Milan Malpensa is ~50km NW. The Malpensa Express train to Cadorna/Centrale takes ~50 min (~€13).",transit:"Metro, trams and buses (ATM). A single ~€2.20; 24h ~€7.60."},
+  SVQ:{airport:"Seville Airport is ~10km from centre. The EA bus runs to the centre (~€4, 35 min). Taxis ~€22 (fixed daytime fare).",transit:"Walkable historic centre; one tram line, buses, and a metro line. Bike hire (Sevici) is popular."},
+  BIO:{airport:"Bilbao Airport is ~12km out. The A3247 Bizkaibus runs to the centre (~€3, 25 min).",transit:"Metro, trams and buses. The centre is compact; the Metro is clean and easy."},
+  BOD:{airport:"Bordeaux Airport is ~12km west. The 30'Direct shuttle bus reaches the centre in ~30 min (~€8). Tram A (via Liane buses) is cheaper.",transit:"Trams (A–D) and buses (TBM); a single ~€1.80. The centre is very walkable."},
+  LYS:{airport:"Lyon–Saint-Exupéry is ~25km east. The Rhônexpress tram to the centre takes ~30 min (~€16.30).",transit:"Metro, trams, buses and funiculars (TCL); a single ~€2. Compact, walkable centre."},
+  TFS:{airport:"Tenerife South (TFS) is ~60km from the north/Santa Cruz, but close to the southern resorts. Buses (TITSA) and taxis serve the resorts; transfers are common.",transit:"Buses (TITSA) cover the island; a tenmás card saves money. A car is handy for exploring."},
+  ACE:{airport:"Lanzarote Airport is ~6km from Arrecife. Bus lines 22/23 run to the centre (~€1.40). Resort transfers are common.",transit:"Buses (InterCity Bus Lanzarote) link the resorts; renting a car is popular for the volcanic landscapes."},
+  PMI:{airport:"Palma Airport is ~8km from the centre. Bus A1 runs to the centre (~€5, 20 min). Taxis ~€20.",transit:"Buses (EMT) and a metro line; the old town is walkable. Buses reach the island's beaches and villages."},
+  RHO:{airport:"Rhodes Airport is ~14km from Rhodes Town. Buses run along the coast (~€2.40); taxis ~€25.",transit:"Buses link the main resorts and Lindos; the medieval old town is pedestrian-only. A car helps for beaches."},
+  ZAD:{airport:"Zadar Airport is ~10km from the centre. The Liburnija shuttle bus meets flights (~€4, 25 min).",transit:"Compact, walkable peninsula old town. Buses (Liburnija) reach the suburbs and beaches."},
+  ADB:{airport:"İzmir Adnan Menderes is ~18km south. The İZBAN commuter train reaches the centre in ~40 min (cheap, with an İzmirimkart).",transit:"Metro, trams, buses and ferries (ESHOT). The ferries across the bay are a lovely way to get around."},
+  LHR:{airport:"Heathrow is ~25km west. The Piccadilly line (Tube) reaches central London in ~50 min (~£5.60); the Elizabeth line is faster (~£12).",transit:"The Tube, buses, Overground and DLR (TfL). Use contactless — fares cap daily (~£8.50 for central zones)."},
+  LGW:{airport:"Gatwick is ~45km south. The Gatwick Express to Victoria takes ~30 min (~£20); Thameslink/Southern trains are cheaper (~£12).",transit:"In London: Tube, buses, Overground (TfL). Contactless with daily fare caps is best."},
+  STN:{airport:"Stansted is ~50km NE. The Stansted Express to Liverpool St takes ~50 min (~£20); National Express coaches are cheaper (~£12).",transit:"In London: Tube, buses, Overground (TfL). Contactless with daily fare caps is best."},
+  LTN:{airport:"Luton is ~55km north. A shuttle bus + Thameslink train reaches central London in ~45 min (~£16); coaches ~£11.",transit:"In London: Tube, buses, Overground (TfL). Contactless with daily fare caps is best."},
+  BRS:{airport:"Bristol Airport is ~13km south. The Bristol Flyer bus (A1) runs to the centre & Temple Meads (~£8, 30 min).",transit:"Buses (First) cover the city; the centre and harbourside are walkable."},
+};
+function cityTransport(code){ return CITY_TRANSPORT[code] || null; }
+
 function addDaysISO(ds, n){ const d=new Date(ds+"T12:00:00"); d.setDate(d.getDate()+n); return d.toISOString().split("T")[0]; }
 
 async function openDetail(d, dep, ret, travellers){
@@ -1345,6 +1433,18 @@ async function openDetail(d, dep, ret, travellers){
     </div>
 
     <div class="dt-section">
+      <h2>🎉 What's on during your trip</h2>
+      <div class="dt-sub">Concerts, sport &amp; major ticketed events around your dates</div>
+      <div id="dtEvents"><span class="dt-loading">Checking for events…</span></div>
+    </div>
+
+    <div class="dt-section">
+      <h2>🚍 Getting around</h2>
+      <div class="dt-sub">Airport transfer &amp; public transport</div>
+      <div id="dtTransport"></div>
+    </div>
+
+    <div class="dt-section">
       <h2>🛏️ Where to stay</h2>
       <div class="dt-sub">Typical nightly prices for ${nights} night${nights>1?'s':''}. Tap to see live options &amp; book.</div>
       <div class="dt-stay-cards">
@@ -1379,6 +1479,8 @@ async function openDetail(d, dep, ret, travellers){
   // City description + attractions
   loadCityAbout(d.code, d.city);
   loadAttractions(d.code);
+  loadTransport(d.code);
+  loadEvents(d.code, dep, ret);
 }
 
 function closeDetail(){
@@ -1386,6 +1488,67 @@ function closeDetail(){
   document.body.style.overflow = "";
 }
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeDetail(); });
+
+function loadTransport(code){
+  const el = document.getElementById("dtTransport");
+  if (!el) return;
+  const t = cityTransport(code);
+  if (!t){ el.innerHTML = "<p style='color:var(--muted)'>Transport details coming soon for this city.</p>"; return; }
+  el.innerHTML = `
+    <div class="dt-transport">
+      <div class="dt-tr-item">
+        <div class="dt-tr-ic">✈️→🏙️</div>
+        <div><div class="dt-tr-h">Airport to centre</div><div class="dt-tr-b">${t.airport}</div></div>
+      </div>
+      <div class="dt-tr-item">
+        <div class="dt-tr-ic">🚇</div>
+        <div><div class="dt-tr-h">Getting around</div><div class="dt-tr-b">${t.transit}</div></div>
+      </div>
+    </div>`;
+}
+
+async function loadEvents(code, dep, ret){
+  const el = document.getElementById("dtEvents");
+  if (!el) return;
+  const city = TM_CITY[code];
+  // No key yet → honest message
+  if (!TICKETMASTER_KEY){
+    el.innerHTML = `<p style="color:var(--muted)">Live events feed isn't switched on yet. Once a Ticketmaster key is added, concerts, sport and major events for your dates will appear here automatically.</p>`;
+    return;
+  }
+  if (!city){ el.innerHTML = "<p style='color:var(--muted)'>No event listings for this city.</p>"; return; }
+  try{
+    const start = dep + "T00:00:00Z";
+    const end = ret + "T23:59:59Z";
+    const url = `https://app.ticketmaster.com/discovery/v2/events.json?apikey=${TICKETMASTER_KEY}`
+      + `&city=${encodeURIComponent(city)}&startDateTime=${start}&endDateTime=${end}&size=8&sort=date,asc`;
+    const r = await fetch(url);
+    const d = await r.json();
+    const events = (d._embedded && d._embedded.events) || [];
+    if (!events.length){
+      el.innerHTML = `<p style="color:var(--muted)">No major ticketed events found for these dates. Local festivals and markets may still be on — worth checking the city's tourism site closer to your trip.</p>`;
+      return;
+    }
+    el.innerHTML = `<div class="dt-events">` + events.map(ev => {
+      const date = ev.dates && ev.dates.start && ev.dates.start.localDate
+        ? new Date(ev.dates.start.localDate+"T12:00:00").toLocaleDateString("en-IE",{weekday:"short",day:"numeric",month:"short"})
+        : "";
+      const venue = (ev._embedded && ev._embedded.venues && ev._embedded.venues[0] && ev._embedded.venues[0].name) || "";
+      const img = (ev.images && (ev.images.find(i=>i.ratio==="16_9"&&i.width>500)||ev.images[0]) || {}).url || "";
+      return `<a class="dt-event" href="${ev.url}" target="_blank" rel="noopener">
+        ${img?`<span class="dt-event-img" style="background-image:url('${img}')"></span>`:""}
+        <span class="dt-event-body">
+          <span class="dt-event-date">${date}</span>
+          <span class="dt-event-name">${ev.name}</span>
+          ${venue?`<span class="dt-event-venue">${venue}</span>`:""}
+        </span>
+      </a>`;
+    }).join("") + `</div>
+    <p style="font-size:12px;color:var(--muted);margin-top:12px">Events from Ticketmaster — concerts, sport &amp; major venues. Local festivals may not appear.</p>`;
+  }catch(e){
+    el.innerHTML = `<p style="color:var(--muted)">Couldn't load events right now. You can check Ticketmaster directly for ${city}.</p>`;
+  }
+}
 
 async function loadDetailWeather(code, dep){
   const grid = document.getElementById("dtWxGrid");
