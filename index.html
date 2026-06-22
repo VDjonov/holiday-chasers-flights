@@ -93,6 +93,19 @@ img{max-width:100%}
 #weekendPicker:focus{outline:none;border-color:var(--gold)}
 
 .filter-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:28px}
+.traveller-bar{display:flex;align-items:center;gap:18px;flex-wrap:wrap;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 18px;margin-bottom:20px;box-shadow:var(--shadow-sm)}
+.tv-label{font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--ink)}
+.tv-group{display:flex;align-items:center;gap:10px}
+.tv-cap{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.tv-stepper{display:flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:100px;overflow:hidden}
+.tv-stepper button{width:32px;height:32px;border:none;background:var(--cream);color:var(--ink);font-size:18px;font-weight:600;line-height:1;cursor:pointer;transition:.15s}
+.tv-stepper button:hover{background:var(--gold-soft)}
+.tv-stepper span{min-width:32px;text-align:center;font-family:var(--font-display);font-weight:600;font-size:16px}
+.tv-total{margin-left:auto;font-family:var(--font-mono);font-size:12px;font-weight:600;letter-spacing:.03em;color:var(--ink);background:var(--cream);border:1px solid var(--line);padding:6px 14px;border-radius:100px}
+@media(max-width:600px){
+  .traveller-bar{gap:12px}
+  .tv-total{margin-left:0;width:100%;text-align:center}
+}
 .filter-btn{padding:8px 16px;border:1px solid var(--line);border-radius:100px;font-size:13px;font-weight:600;color:var(--ink);background:var(--paper);transition:.18s}
 .filter-btn.active{border-color:var(--ink);background:var(--ink);color:var(--ivory)}
 .filter-btn:hover:not(.active){border-color:var(--gold)}
@@ -367,8 +380,29 @@ img{max-width:100%}
 <section id="tab-deals" class="tab-content active">
   <div class="section-hdr">
     <h2>Cheapest escapes from Cork</h2>
-    <p>Return fares for a family of four (2 adults + 2 children, aged 5 &amp; 13) — total and per person. Pick a weekend, or browse a full week away.</p>
+    <p>Return fares from Cork — shown per person, with your group total. Group totals are estimated from the per-person fare. Pick a weekend, or browse a full week away.</p>
     <div class="updated-tag" id="dealsUpdated"></div>
+  </div>
+
+  <div class="traveller-bar">
+    <span class="tv-label">Who's travelling?</span>
+    <div class="tv-group">
+      <span class="tv-cap">Adults</span>
+      <div class="tv-stepper">
+        <button onclick="changeTravellers('adults',-1)" aria-label="Fewer adults">−</button>
+        <span id="tvAdults">1</span>
+        <button onclick="changeTravellers('adults',1)" aria-label="More adults">+</button>
+      </div>
+    </div>
+    <div class="tv-group">
+      <span class="tv-cap">Children</span>
+      <div class="tv-stepper">
+        <button onclick="changeTravellers('children',-1)" aria-label="Fewer children">−</button>
+        <span id="tvChildren">0</span>
+        <button onclick="changeTravellers('children',1)" aria-label="More children">+</button>
+      </div>
+    </div>
+    <span class="tv-total" id="tvSummary">1 traveller</span>
   </div>
 
   <div class="trip-toggle" id="boardToggle">
@@ -739,22 +773,44 @@ const BACKEND_HEADERS = {
 let cachedDeals = null;
 let currentBoard = "weekend";
 let budgetMax = 0;
+// Traveller selection (default: 1 adult, 0 children)
+let selAdults = 1;
+let selChildren = 0;
+
+function travellerLabel(){
+  const a = selAdults, c = selChildren;
+  const parts = [];
+  parts.push(a + " adult" + (a>1?"s":""));
+  if (c>0) parts.push(c + " child" + (c>1?"ren":""));
+  const total = a + c;
+  if (total === 1) return "1 traveller";
+  return parts.join(" + ");
+}
+
+function changeTravellers(kind, delta){
+  if (kind === "adults") selAdults = Math.min(6, Math.max(1, selAdults + delta));
+  else selChildren = Math.min(5, Math.max(0, selChildren + delta));
+  document.getElementById("tvAdults").textContent = selAdults;
+  document.getElementById("tvChildren").textContent = selChildren;
+  document.getElementById("tvSummary").textContent = travellerLabel();
+  renderDeals();
+}
 let backendOnline = false;
 
 // ── Booking deep-links (Path 1: no affiliate yet — add IDs here later) ───────
 function hotelUrl(city, dep, ret) {
-  // Booking.com public search: 2 adults + 2 children aged 5 & 13, 1 room.
-  // Booking needs group_children count AND a repeated age param per child,
-  // plus the req_* mirrors, or it silently drops the children.
-  return `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(city)}`
+  // Booking.com public search using the selected group. Children default to age 8.
+  const a = selAdults, c = selChildren;
+  let url = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(city)}`
     + `&checkin=${dep}&checkout=${ret}`
-    + `&group_adults=2&no_rooms=1`
-    + `&group_children=2&age=5&age=13`
-    + `&req_adults=2&req_children=2&req_age=5&req_age=13`;
+    + `&group_adults=${a}&no_rooms=1&group_children=${c}`
+    + `&req_adults=${a}&req_children=${c}`;
+  for (let i=0;i<c;i++) url += `&age=8&req_age=8`;
+  return url;
 }
 function airbnbUrl(city, dep, ret) {
-  // Airbnb: 2 adults + 2 children
-  return `https://www.airbnb.com/s/${encodeURIComponent(city)}/homes?checkin=${dep}&checkout=${ret}&adults=2&children=2`;
+  const a = selAdults, c = selChildren;
+  return `https://www.airbnb.com/s/${encodeURIComponent(city)}/homes?checkin=${dep}&checkout=${ret}&adults=${a}&children=${c}`;
 }
 function carUrl(city, dep, ret) {
   // DiscoverCars pre-filled with pickup location + dates
@@ -859,9 +915,10 @@ function renderDeals() {
     grid.innerHTML = ""; return;
   }
 
-  const travellersForFilter = cachedDeals.travellers || 4;
+  const cacheTravellers = cachedDeals.travellers || 4;  // what the cache was priced for
+  const groupSize = selAdults + selChildren;            // visitor's selected group
   let deals = [...board.deals].sort((a,b) => a.price - b.price);
-  if (budgetMax > 0) deals = deals.filter(d => (d.price / travellersForFilter) <= budgetMax);
+  if (budgetMax > 0) deals = deals.filter(d => (d.price / cacheTravellers) <= budgetMax);
 
   if (cachedDeals.updated_utc) {
     try {
@@ -871,7 +928,8 @@ function renderDeals() {
   }
 
   const dep = board.depart_date, ret = board.return_date;
-  const travellers = cachedDeals.travellers || 4;
+  const perPerson = d => Math.round(d.price / cacheTravellers);
+  const groupTotal = d => perPerson(d) * groupSize;
 
   // Format dates nicely: "Fri 3 Jul → Sun 5 Jul"
   function fmtD(ds) {
@@ -882,7 +940,7 @@ function renderDeals() {
   // Hero stats
   if (deals.length) {
     document.getElementById("heroStats").innerHTML = `
-      <div class="hero-stat"><div class="val">€${Math.round(deals[0].price / travellers)}</div><div class="lbl">Cheapest · per person</div></div>
+      <div class="hero-stat"><div class="val">€${perPerson(deals[0])}</div><div class="lbl">Cheapest · per person</div></div>
       <div class="hero-stat"><div class="val">${deals.length}</div><div class="lbl">Destinations</div></div>
       <div class="hero-stat"><div class="val">${board.nights}n</div><div class="lbl">${currentBoard==="weekend"?"Weekend":"Week"} trip</div></div>
       <div class="hero-stat"><div class="val" style="font-size:16px">${depFmt} → ${retFmt}</div><div class="lbl">Travel dates</div></div>`;
@@ -901,7 +959,7 @@ function renderDeals() {
          </div>`;
     return `
     <div class="deal-card${i === 0 ? ' cheapest' : ''}">
-      <div class="deal-clickable" onclick='openDetail(${JSON.stringify(d).replace(/'/g,"&#39;")}, "${dep}", "${ret}", ${travellers})'>
+      <div class="deal-clickable" onclick='openDetail(${JSON.stringify(d).replace(/'/g,"&#39;")}, "${dep}", "${ret}", ${groupSize}, ${cacheTravellers})'>
         ${banner}
         <div class="deal-card-top">
           ${i === 0 ? '<div class="deal-badge">Best fare</div>' : ''}
@@ -912,12 +970,12 @@ function renderDeals() {
         <div class="deal-card-bottom">
           <div class="deal-price-block">
             <div class="deal-dates">${depFmt} — ${retFmt}</div>
-            <div class="deal-price"><sup>€</sup>${Math.round(d.price / travellers)}<small>per person</small></div>
+            <div class="deal-price"><sup>€</sup>${perPerson(d)}<small>per person</small></div>
           </div>
-          <div class="deal-perperson">
-            <div class="pp-amount">€${d.price}</div>
-            <div class="pp-label">family of 4</div>
-          </div>
+          ${groupSize > 1 ? `<div class="deal-perperson">
+            <div class="pp-amount">€${groupTotal(d)}</div>
+            <div class="pp-label">${travellerLabel()}</div>
+          </div>` : ''}
         </div>
         <div class="deal-meta">
           <span class="${d.stops === 0 ? 'tag-direct' : ''}">${d.stops === 0 ? '✦ Direct' : d.stops + ' stop' + (d.stops>1?'s':'')}</span>
@@ -928,7 +986,7 @@ function renderDeals() {
         <div class="deal-viewmore">View full details &amp; guide →</div>
       </div>
       <div class="deal-actions">
-        <a class="deal-book primary" href="https://www.google.com/travel/flights?q=Flights+to+${d.code}+from+ORK+on+${dep}+through+${ret}+for+2+adults+2+children" target="_blank" rel="noopener">✈ Flights</a>
+        <a class="deal-book primary" href="https://www.google.com/travel/flights?q=Flights+to+${d.code}+from+ORK+on+${dep}+through+${ret}+for+${selAdults}+adults${selChildren>0?'+'+selChildren+'+children':''}" target="_blank" rel="noopener">✈ Flights</a>
         <a class="deal-book secondary" href="${carUrl(d.city, dep, ret)}" target="_blank" rel="noopener">🚗 Car hire</a>
       </div>
       <div class="deal-stays">
@@ -1366,14 +1424,19 @@ function cityTransport(code){ return CITY_TRANSPORT[code] || null; }
 
 function addDaysISO(ds, n){ const d=new Date(ds+"T12:00:00"); d.setDate(d.getDate()+n); return d.toISOString().split("T")[0]; }
 
-async function openDetail(d, dep, ret, travellers){
+async function openDetail(d, dep, ret, groupSize, cacheTravellers){
   const overlay = document.getElementById("detailOverlay");
   const body = document.getElementById("detailBody");
   window.scrollTo(0,0);
   overlay.classList.add("open");
   document.body.style.overflow = "hidden";
 
-  const perP = Math.round(d.price / travellers);
+  cacheTravellers = cacheTravellers || 4;
+  groupSize = groupSize || 1;
+  const perP = Math.round(d.price / cacheTravellers);
+  const groupTot = perP * groupSize;
+  const groupLbl = travellerLabel();
+  const flightPax = `${selAdults}+adults${selChildren>0?'+'+selChildren+'+children':''}`;
   const nights = Math.round((new Date(ret) - new Date(dep)) / 86400000);
   const costs = cityCosts(d.code);
   const depFmt = new Date(dep+"T12:00:00").toLocaleDateString("en-IE",{weekday:"long",day:"numeric",month:"long"});
@@ -1390,7 +1453,7 @@ async function openDetail(d, dep, ret, travellers){
     </div>
     <div class="dt-pricestrip">
       <div class="dt-priceitem"><div class="lbl">Per person</div><div class="val">€${perP}</div></div>
-      <div class="dt-priceitem"><div class="lbl">Family of 4</div><div class="val">€${d.price}</div></div>
+      <div class="dt-priceitem"><div class="lbl">${groupLbl}</div><div class="val">€${groupTot}</div></div>
       <div class="dt-priceitem"><div class="lbl">Flight</div><div class="val">${d.stops===0?'Direct':d.stops+' stop'+(d.stops>1?'s':'')} <small>${d.total_time||''}</small></div></div>
       <div class="dt-priceitem"><div class="lbl">Airline</div><div class="val" style="font-size:16px">${d.airlines||'—'}</div></div>
     </div>
@@ -1409,11 +1472,11 @@ async function openDetail(d, dep, ret, travellers){
         <div class="dt-leg-dir">RETURN</div>
         <div class="dt-leg-main">
           <div class="dt-leg-route">${d.city} (${d.code}) → Cork (ORK)</div>
-          <div class="dt-leg-info">${retFmt} · same airline · prices for 2 adults + 2 children (5 & 13)</div>
+          <div class="dt-leg-info">${retFmt} · same airline · price shown for ${groupLbl} (estimated from per-person fare)</div>
         </div>
       </div>
       <div style="margin-top:18px">
-        <a class="deal-book primary" style="display:inline-flex;padding:12px 24px;border-radius:10px" href="https://www.google.com/travel/flights?q=Flights+to+${d.code}+from+ORK+on+${dep}+through+${ret}+for+2+adults+2+children" target="_blank" rel="noopener">✈ See live flight details &amp; book →</a>
+        <a class="deal-book primary" style="display:inline-flex;padding:12px 24px;border-radius:10px" href="https://www.google.com/travel/flights?q=Flights+to+${d.code}+from+ORK+on+${dep}+through+${ret}+for+${flightPax}" target="_blank" rel="noopener">✈ See live flight details &amp; book →</a>
       </div>
     </div>
 
