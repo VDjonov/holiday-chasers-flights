@@ -1,0 +1,210 @@
+{
+  "LHR": {
+    "weekend": [
+      188
+    ],
+    "week": [
+      180
+    ]
+  },
+  "MAN": {
+    "weekend": [
+      180
+    ],
+    "week": [
+      177
+    ]
+  },
+  "MXP": {
+    "weekend": [
+      292
+    ],
+    "week": [
+      969
+    ]
+  },
+  "EDI": {
+    "weekend": [
+      416
+    ],
+    "week": [
+      280
+    ]
+  },
+  "FAO": {
+    "weekend": [
+      424
+    ],
+    "week": [
+      512
+    ]
+  },
+  "AGP": {
+    "weekend": [
+      580
+    ],
+    "week": [
+      548
+    ]
+  },
+  "PMI": {
+    "weekend": [
+      712
+    ],
+    "week": [
+      1114
+    ]
+  },
+  "CDG": {
+    "weekend": [
+      756
+    ],
+    "week": [
+      512
+    ]
+  },
+  "ACE": {
+    "weekend": [
+      1000
+    ],
+    "week": [
+      1192
+    ]
+  },
+  "ALC": {
+    "weekend": [
+      1012
+    ],
+    "week": [
+      808
+    ]
+  },
+  "PRG": {
+    "weekend": [
+      990
+    ],
+    "week": [
+      756
+    ]
+  },
+  "AMS": {
+    "weekend": [
+      930
+    ],
+    "week": [
+      815
+    ]
+  },
+  "FCO": {
+    "weekend": [
+      985
+    ],
+    "week": [
+      840
+    ]
+  },
+  "BER": {
+    "weekend": [
+      1005
+    ],
+    "week": [
+      1005
+    ]
+  },
+  "WAW": {
+    "weekend": [
+      1268
+    ],
+    "week": [
+      1054
+    ]
+  },
+  "MAD": {
+    "weekend": [
+      1414
+    ],
+    "week": [
+      971
+    ]
+  },
+  "MUC": {
+    "weekend": [
+      1299
+    ],
+    "week": [
+      978
+    ]
+  },
+  "BCN": {
+    "weekend": [
+      1249
+    ],
+    "week": [
+      837
+    ]
+  },
+  "BUD": {
+    "weekend": [
+      1350
+    ],
+    "week": [
+      1029
+    ]
+  },
+  "NCE": {
+    "weekend": [
+      1271
+    ],
+    "week": [
+      774
+    ]
+  },
+  "GVA": {
+    "weekend": [
+      1092
+    ],
+    "week": [
+      938
+    ]
+  },
+  "LIS": {
+    "weekend": [
+      1543
+    ],
+    "week": [
+      1075
+    ]
+  },
+  "MLA": {
+    "weekend": [
+      1295
+    ],
+    "week": [
+      1852
+    ]
+  },
+  "KRK": {
+    "weekend": [
+      1401
+    ],
+    "week": [
+      961
+    ]
+  },
+  "OPO": {
+    "weekend": [
+      1768
+    ],
+    "week": [
+      1374
+    ]
+  },
+  "TFS": {
+    "weekend": [
+      1498
+    ],
+    "week": [
+      1913
+    ]
+  }
+}
