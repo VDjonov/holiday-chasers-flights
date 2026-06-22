@@ -36,6 +36,7 @@ EARLIEST_DATE = "2026-08-01"  # don't show weekends before this date (skip July)
                               # Set to "" to always just use the next weekends.
 WEEK_DEPART_IN_DAYS = 21
 WEEK_NIGHTS = 7
+NUM_WEEKS = 4              # how many upcoming week-long trips to offer
 
 DESTINATIONS = [
     ("ALC", "Alicante",   "Spain"),
@@ -75,9 +76,10 @@ def fmt_hm(total_min):
     return f"{total_min // 60}h {total_min % 60}m"
 
 
-def upcoming_fridays(count, earliest=""):
-    """Return the next `count` Fridays, not before `earliest` (YYYY-MM-DD) and
-    at least ~7 days out so flights are bookable."""
+def upcoming_weekdays(count, weekday, earliest=""):
+    """Return the next `count` dates falling on `weekday` (0=Mon..6=Sun),
+    not before `earliest` (YYYY-MM-DD) and at least ~7 days out so flights
+    are bookable."""
     start = dt.date.today() + dt.timedelta(days=7)
     if earliest:
         try:
@@ -86,15 +88,19 @@ def upcoming_fridays(count, earliest=""):
                 start = e
         except ValueError:
             pass
-    # advance to the first Friday on/after start
     d = start
-    while d.weekday() != 4:  # 4 = Friday
+    while d.weekday() != weekday:
         d += dt.timedelta(days=1)
-    fridays = []
+    out = []
     for _ in range(count):
-        fridays.append(d)
+        out.append(d)
         d += dt.timedelta(days=7)
-    return fridays
+    return out
+
+
+def upcoming_fridays(count, earliest=""):
+    """Return the next `count` Fridays (kept for compatibility)."""
+    return upcoming_weekdays(count, 4, earliest)  # 4 = Friday
 
 
 def _is_quota_error(msg):
@@ -202,24 +208,28 @@ def main():
         board["label"] = f"{friday.strftime('%a %d %b')} – {sun.strftime('%a %d %b')}"
         weekend_boards.append(board)
 
-    # ── Week board: ~3 weeks out, 7 nights ──
-    wk_out = today + dt.timedelta(days=WEEK_DEPART_IN_DAYS)
-    wk_ret = wk_out + dt.timedelta(days=WEEK_NIGHTS)
-    week_board = build_board(keys, "Week", wk_out.isoformat(), wk_ret.isoformat(), WEEK_NIGHTS)
-    week_board["label"] = f"{wk_out.strftime('%a %d %b')} – {wk_ret.strftime('%a %d %b')}"
+    # ── Week boards: next N week-long trips starting on a Saturday ──
+    week_boards = []
+    for sat in upcoming_weekdays(NUM_WEEKS, 5, EARLIEST_DATE):  # 5 = Saturday
+        wk_ret = sat + dt.timedelta(days=WEEK_NIGHTS)
+        label = f"Week {sat.strftime('%d %b')}"
+        board = build_board(keys, label, sat.isoformat(), wk_ret.isoformat(), WEEK_NIGHTS)
+        board["label"] = f"{sat.strftime('%a %d %b')} – {wk_ret.strftime('%a %d %b')}"
+        week_boards.append(board)
 
     payload = {
         "updated_utc": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "travellers": NUM_TRAVELLERS,
         "passenger_label": "2 adults + 2 children (5 & 13)",
         "weekend_boards": weekend_boards,   # list, visitor picks which
-        "week_board": week_board,           # single week board
+        "week_boards": week_boards,         # list, visitor picks which
+        "week_board": week_boards[0] if week_boards else None,  # legacy single (back-compat)
     }
     with open(OUT_FILE, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, ensure_ascii=False)
 
-    print(f"\nDone. Wrote {len(weekend_boards)} weekend board(s) + 1 week board.")
-    for b in weekend_boards:
+    print(f"\nDone. Wrote {len(weekend_boards)} weekend board(s) + {len(week_boards)} week board(s).")
+    for b in weekend_boards + week_boards:
         if b["deals"]:
             print(f"  {b['label']}: cheapest €{b['deals'][0]['price']} to {b['deals'][0]['city']}")
 

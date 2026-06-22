@@ -418,7 +418,7 @@ img{max-width:100%}
   </div>
 
   <div id="weekendPickerRow" style="margin-bottom:16px">
-    <label style="font-size:13px;font-weight:600;color:var(--gray);display:block;margin-bottom:8px">Choose your weekend:</label>
+    <label id="pickerLabel" style="font-size:13px;font-weight:600;color:var(--gray);display:block;margin-bottom:8px">Choose your weekend:</label>
     <div id="weekendPicker" class="weekend-buttons"></div>
   </div>
 
@@ -840,40 +840,57 @@ document.querySelectorAll("#boardToggle button").forEach(btn => {
     document.querySelectorAll("#boardToggle button").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     currentBoard = btn.dataset.board;
-    // Show/hide the weekend picker depending on trip type
-    document.getElementById("weekendPickerRow").style.display =
-      currentBoard === "weekend" ? "block" : "none";
+    populateBoardPicker();   // rebuild picker for the active board type
     renderDeals();
   });
 });
 
-// ── Weekend picker ───────────────────────────────────────────────────────────
+// ── Board picker (works for both weekend and week boards) ────────────────────
 let selectedWeekendIdx = 0;
+let selectedWeekIdx = 0;
 
-function selectWeekend(idx) {
-  selectedWeekendIdx = idx;
+function currentBoardList() {
+  if (!cachedDeals) return [];
+  if (currentBoard === "weekend") return cachedDeals.weekend_boards || [];
+  // Week boards: prefer the new array; fall back to a single legacy week_board
+  return cachedDeals.week_boards || (cachedDeals.week_board ? [cachedDeals.week_board] : []);
+}
+
+function selectBoard(idx) {
+  if (currentBoard === "weekend") selectedWeekendIdx = idx;
+  else selectedWeekIdx = idx;
   document.querySelectorAll("#weekendPicker .weekend-btn").forEach((b, i) => {
     b.classList.toggle("active", i === idx);
   });
   renderDeals();
 }
 
-function populateWeekendPicker() {
+function populateBoardPicker() {
   const picker = document.getElementById("weekendPicker");
-  if (!cachedDeals || !cachedDeals.weekend_boards) return;
-  picker.innerHTML = "";
+  const row = document.getElementById("weekendPickerRow");
+  const label = document.getElementById("pickerLabel");
+  const list = currentBoardList();
+  // Hide the picker entirely if there's only one (or zero) option
+  if (list.length <= 1) { row.style.display = "none"; return; }
+  row.style.display = "block";
+  if (label) label.textContent = currentBoard === "weekend" ? "Choose your weekend:" : "Choose your week:";
+  const activeIdx = currentBoard === "weekend" ? selectedWeekendIdx : selectedWeekIdx;
   const trav = cachedDeals.travellers || 4;
-  cachedDeals.weekend_boards.forEach((b, i) => {
+  picker.innerHTML = "";
+  list.forEach((b, i) => {
     const btn = document.createElement("button");
-    btn.className = "weekend-btn" + (i === selectedWeekendIdx ? " active" : "");
-    btn.onclick = () => selectWeekend(i);
+    btn.className = "weekend-btn" + (i === activeIdx ? " active" : "");
+    btn.onclick = () => selectBoard(i);
     const cheapest = b.deals && b.deals.length
       ? Math.round([...b.deals].sort((a,c)=>a.price-c.price)[0].price / trav) : null;
-    btn.innerHTML = `<span class="wb-label">${b.label || `Weekend ${i+1}`}</span>` +
+    const fallback = currentBoard === "weekend" ? `Weekend ${i+1}` : `Week ${i+1}`;
+    btn.innerHTML = `<span class="wb-label">${b.label || fallback}</span>` +
       (cheapest != null ? `<span class="wb-price">from €${cheapest}pp</span>` : "");
     picker.appendChild(btn);
   });
 }
+// Back-compat alias (called from loadDeals)
+function populateWeekendPicker(){ populateBoardPicker(); }
 
 // ── Budget filter ────────────────────────────────────────────────────────────
 document.querySelectorAll(".filter-btn").forEach(btn => {
@@ -916,13 +933,9 @@ function renderDeals() {
   }
 
   // Resolve which board to show from the new data structure
-  let board = null;
-  if (currentBoard === "weekend") {
-    const wb = cachedDeals.weekend_boards || [];
-    board = wb[selectedWeekendIdx] || wb[0] || null;
-  } else {
-    board = cachedDeals.week_board || null;
-  }
+  const list = currentBoardList();
+  const idx = currentBoard === "weekend" ? selectedWeekendIdx : selectedWeekIdx;
+  let board = list[idx] || list[0] || null;
 
   if (!board || !board.deals) {
     empty.style.display = "block"; empty.textContent = "No deals available for this trip type.";
