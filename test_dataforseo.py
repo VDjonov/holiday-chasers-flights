@@ -30,6 +30,7 @@ import os
 import sys
 import json
 import base64
+import re
 import datetime as dt
 
 try:
@@ -130,46 +131,35 @@ def find_flights_widget(resp, debug=False):
     return None
 
 
-def parse_cheapest(flights_item):
-    """Pull cheapest price + airline text out of the google_flights widget item.
-    Field names aren't fully confirmed yet, so this tries several common shapes
-    and falls back to scanning any nested dicts/lists for a 'price' field."""
+def parse_cheapest(flights_item, debug=False):
+    """Pull cheapest price + airline out of the google_flights widget.
+    Real format confirmed from a live response:
+      items: [{"type": "google_flights_element",
+                "description": "Ryanair Non-stop from €34"}, ...]
+    The price/airline are embedded in a plain-English sentence, not separate
+    structured fields, so we parse it with a regex."""
     if not flights_item:
         return None
-
-    def extract_price(val):
-        if isinstance(val, (int, float)):
-            return val
-        if isinstance(val, dict):
-            for k in ("value", "current", "amount", "price"):
-                if k in val:
-                    p = extract_price(val[k])
-                    if p:
-                        return p
-        if isinstance(val, str):
-            digits = "".join(c for c in val if c.isdigit())
-            return int(digits) if digits else None
-        return None
-
-    def walk(node, found):
-        """Recursively scan for dicts that look like a flight option."""
-        if isinstance(node, dict):
-            price = extract_price(node.get("price"))
-            title = (node.get("title") or node.get("airline_name") or
-                     node.get("name") or node.get("airline") or node.get("description") or "")
-            if price:
-                found.append({"price": price, "title": str(title)})
-            for v in node.values():
-                walk(v, found)
-        elif isinstance(node, list):
-            for v in node:
-                walk(v, found)
-
-    found = []
-    walk(flights_item, found)
-    if not found:
-        return None
-    return min(found, key=lambda f: f["price"])
+    items = flights_item.get("items") or []
+    # Matches things like "Ryanair Non-stop from €34" or
+    # "Aer Lingus 1 stop from €162" or "KLM, Transavia 1 stop from €420"
+    pattern = re.compile(
+        r"^(?P<airline>.+?)\s+(?:Non-stop|\d+\s*stops?)\s+from\s+€\s*(?P<price>[\d,]+)",
+        re.IGNORECASE
+    )
+    best = None
+    for it in items:
+        desc = it.get("description", "") or ""
+        m = pattern.match(desc.strip())
+        if not m:
+            if debug:
+                print(f"    [debug] couldn't parse description: {desc!r}")
+            continue
+        price = int(m.group("price").replace(",", ""))
+        airline = m.group("airline").strip()
+        if best is None or price < best["price"]:
+            best = {"price": price, "title": airline, "raw": desc}
+    return best
 
 
 def main():
