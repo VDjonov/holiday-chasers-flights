@@ -72,7 +72,7 @@ def auth_header():
             "Content-Type": "application/json"}
 
 
-def search(origin, dest, dep, ret):
+def search(origin, dest, dep, ret, debug=False):
     """Query Google Flights via DataForSEO SERP API (live mode)."""
     url = "https://api.dataforseo.com/v3/serp/google/flights/live/advanced"
     payload = [{
@@ -88,13 +88,26 @@ def search(origin, dest, dep, ret):
         r = requests.post(url, headers=auth_header(), json=payload, timeout=60)
     except Exception as e:
         return {"_error": f"network error: {e}"}
+    if debug:
+        print(f"    [debug] HTTP status: {r.status_code}")
+        print(f"    [debug] raw body (first 1500 chars):\n{r.text[:1500]}")
     if r.status_code == 401:
         return {"_error": "401 Unauthorized — check login/password"}
     if r.status_code == 402:
         return {"_error": "402 — out of credit (top up or use trial credit)"}
     if r.status_code != 200:
         return {"_error": f"HTTP {r.status_code}: {r.text[:160]}"}
-    return r.json()
+    data = r.json()
+    if debug:
+        # Surface any task-level error DataForSEO reports (e.g. bad params,
+        # no data for this endpoint on your plan, etc.)
+        try:
+            task = data["tasks"][0]
+            print(f"    [debug] task status_code: {task.get('status_code')} "
+                  f"status_message: {task.get('status_message')}")
+        except Exception as e:
+            print(f"    [debug] could not read task status: {e}")
+    return data
 
 
 def parse_cheapest(resp):
@@ -138,7 +151,8 @@ def main():
             print(f"\n=== {AIRPORT_NAME[origin]} ({origin}) ===")
             for code, name in dests:
                 horizon_total[hlabel] += 1
-                resp = search(origin, code, dep, ret)
+                is_first_call = (horizon_total[hlabel] == 1 and hlabel == next(iter(HORIZONS)))
+                resp = search(origin, code, dep, ret, debug=is_first_call)
                 if isinstance(resp, dict) and resp.get("_error"):
                     print(f"  {name:<12} ⚠ {resp['_error']}")
                     continue
