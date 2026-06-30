@@ -1,26 +1,29 @@
 """
-DataForSEO Google Flights — coverage test for Cork (ORK) AND Dublin (DUB).
+DataForSEO — coverage test for Cork (ORK) AND Dublin (DUB) flights.
+
+IMPORTANT CORRECTION
+---------------------
+DataForSEO does NOT have a dedicated "flights" endpoint. Flight prices appear
+as a "flights" FEATURE embedded inside a normal Google Organic search result
+(the same flight widget you see if you type "flights from Cork to Barcelona"
+into google.com). So we call the regular organic SERP endpoint with a
+flight-search keyword, then look for the embedded flights widget in the
+response and read the price/airline text out of it.
 
 PURPOSE
 -------
 Before depositing any money, this checks the one thing that matters:
-does DataForSEO return flight prices — and Ryanair — for BOTH Cork and Dublin?
+does DataForSEO surface flight prices — and Ryanair — for BOTH Cork and Dublin?
 
 It runs on the small FREE trial credit DataForSEO gives new accounts, so you
 risk nothing. A handful of searches costs a fraction of a cent.
-
-HOW IT WORKS
-------------
-DataForSEO's SERP API returns the "Google Flights" feature for a route as
-structured JSON. We send a few routes from ORK and DUB and read back the
-cheapest fare + airline shown.
 
 CREDENTIALS
 -----------
 DataForSEO uses a login + password (your account email + API password),
 sent as HTTP Basic Auth. Set them as GitHub Secrets:
   DATAFORSEO_LOGIN    = your account email
-  DATAFORSEO_PASSWORD = your API password (from the dashboard)
+  DATAFORSEO_PASSWORD = your API password (from app.dataforseo.com/api-access)
 """
 
 import os
@@ -44,26 +47,26 @@ except ImportError:
 LOGIN = os.environ.get("DATAFORSEO_LOGIN", "PASTE_LOGIN_HERE")
 PASSWORD = os.environ.get("DATAFORSEO_PASSWORD", "PASTE_PASSWORD_HERE")
 
-# Routes to test from BOTH airports — cheap Ryanair direct + a couple of others
+# Full city/airport names for the search keyword (Google needs a real query,
+# not just airport codes) — e.g. "flights from Cork to London Stansted"
 ROUTES = {
     "ORK": [("STN", "London"), ("AGP", "Malaga"), ("FAO", "Faro"), ("BCN", "Barcelona")],
     "DUB": [("STN", "London"), ("AGP", "Malaga"), ("FAO", "Faro"), ("BCN", "Barcelona")],
 }
-AIRPORT_NAME = {"ORK": "Cork", "DUB": "Dublin"}
+ORIGIN_NAME = {"ORK": "Cork", "DUB": "Dublin"}
 
-# Probe TWO time horizons to check how far forward the data holds:
-#   - "near"  ~6 weeks out (typical browsing window)
-#   - "far"   ~16 weeks out (the edge of a 16-week board — what you'd pay extra for)
+# Probe TWO time horizons to check how far forward the data holds
 HORIZONS = {
-    "near (~6 wks)":  (42, 45),
-    "far  (~16 wks)": (112, 115),
+    "near (~6 wks)":  42,
+    "far  (~16 wks)": 112,
 }
 
+LOCATION_CODE = 2372   # Ireland (DataForSEO location_code for Google search)
+LANGUAGE_CODE = "en"
 
-def trip_dates(dep_days, ret_days):
-    dep = (dt.date.today() + dt.timedelta(days=dep_days)).isoformat()
-    ret = (dt.date.today() + dt.timedelta(days=ret_days)).isoformat()
-    return dep, ret
+
+def trip_date(days_ahead):
+    return (dt.date.today() + dt.timedelta(days=days_ahead)).isoformat()
 
 
 def auth_header():
@@ -72,17 +75,15 @@ def auth_header():
             "Content-Type": "application/json"}
 
 
-def search(origin, dest, dep, ret, debug=False):
-    """Query Google Flights via DataForSEO SERP API (live mode)."""
-    url = "https://api.dataforseo.com/v3/serp/google/flights/live/advanced"
+def search(keyword, debug=False):
+    """Query Google (organic, advanced) for a flight-search keyword and look
+    for the embedded 'flights' SERP feature in the results."""
+    url = "https://api.dataforseo.com/v3/serp/google/organic/live/advanced"
     payload = [{
-        "departure_airport_code": origin,
-        "arrival_airport_code": dest,
-        "departure_date": dep,
-        "return_date": ret,
-        "adults": 2, "children": 2,
-        "currency": "EUR",
-        "language_code": "en",
+        "keyword": keyword,
+        "location_code": LOCATION_CODE,
+        "language_code": LANGUAGE_CODE,
+        "device": "desktop",
     }]
     try:
         r = requests.post(url, headers=auth_header(), json=payload, timeout=60)
@@ -90,7 +91,7 @@ def search(origin, dest, dep, ret, debug=False):
         return {"_error": f"network error: {e}"}
     if debug:
         print(f"    [debug] HTTP status: {r.status_code}")
-        print(f"    [debug] raw body (first 1500 chars):\n{r.text[:1500]}")
+        print(f"    [debug] raw body (first 2000 chars):\n{r.text[:2000]}")
     if r.status_code == 401:
         return {"_error": "401 Unauthorized — check login/password"}
     if r.status_code == 402:
@@ -99,33 +100,55 @@ def search(origin, dest, dep, ret, debug=False):
         return {"_error": f"HTTP {r.status_code}: {r.text[:160]}"}
     data = r.json()
     if debug:
-        # Surface any task-level error DataForSEO reports (e.g. bad params,
-        # no data for this endpoint on your plan, etc.)
         try:
             task = data["tasks"][0]
             print(f"    [debug] task status_code: {task.get('status_code')} "
                   f"status_message: {task.get('status_message')}")
+            items = task.get("result", [{}])[0].get("items", []) if task.get("result") else []
+            types_seen = sorted(set(it.get("type", "?") for it in items))
+            print(f"    [debug] item types in this SERP: {types_seen}")
         except Exception as e:
-            print(f"    [debug] could not read task status: {e}")
+            print(f"    [debug] could not inspect task: {e}")
     return data
 
 
-def parse_cheapest(resp):
-    """Pull the cheapest fare + airline from a DataForSEO flights response."""
+def find_flights_widget(resp):
+    """Find the 'flights' feature item in the organic SERP results, if present."""
     try:
         items = resp["tasks"][0]["result"][0]["items"]
     except (KeyError, IndexError, TypeError):
         return None
-    best = None
     for it in items or []:
-        # google_flights items carry price + airline info
-        price = it.get("price", {})
-        amt = price.get("value") if isinstance(price, dict) else None
-        airline = it.get("airline") or it.get("title") or ""
-        if amt and (best is None or amt < best["price"]):
-            best = {"price": amt, "airline": airline,
-                    "type": it.get("type", "")}
-    return best
+        if it.get("type") == "flights":
+            return it
+    return None
+
+
+def parse_cheapest(flights_item):
+    """Pull cheapest price + airline text out of the flights widget item."""
+    if not flights_item:
+        return None
+    # The flights widget typically nests results under 'items' or 'flights'
+    candidates = flights_item.get("items") or flights_item.get("flights") or []
+    best = None
+    for f in candidates:
+        # Fields vary; try the common ones DataForSEO uses for this widget
+        price = f.get("price")
+        title = f.get("title") or f.get("airline_name") or f.get("description") or ""
+        if isinstance(price, dict):
+            price = price.get("value") or price.get("current")
+        if isinstance(price, str):
+            digits = "".join(c for c in price if c.isdigit())
+            price = int(digits) if digits else None
+        if price and (best is None or price < best["price"]):
+            best = {"price": price, "title": title}
+    if best:
+        return best
+    # Fallback: sometimes the widget itself just has a single price/title pair
+    price = flights_item.get("price")
+    if price:
+        return {"price": price, "title": flights_item.get("title", "")}
+    return None
 
 
 def main():
@@ -134,43 +157,45 @@ def main():
         print("   DATAFORSEO_PASSWORD (or paste into the file for a local run).")
         sys.exit(1)
 
-    print("DataForSEO Google Flights — coverage test for Cork + Dublin")
+    print("DataForSEO — coverage test for Cork + Dublin flights")
+    print("(via the 'flights' widget embedded in Google Organic results)")
     print("Probing TWO horizons: ~6 weeks out and ~16 weeks out")
-    print("2 adults + 2 children · EUR")
     print("=" * 64)
 
-    # Track results per horizon
     horizon_found = {h: 0 for h in HORIZONS}
     horizon_total = {h: 0 for h in HORIZONS}
     ryanair_seen = {"ORK": False, "DUB": False}
+    debug_done = False
 
-    for hlabel, (dd, rd) in HORIZONS.items():
-        dep, ret = trip_dates(dd, rd)
-        print(f"\n######## HORIZON: {hlabel}  ({dep} -> {ret}) ########")
+    for hlabel, days_ahead in HORIZONS.items():
+        dep = trip_date(days_ahead)
+        print(f"\n######## HORIZON: {hlabel}  (around {dep}) ########")
         for origin, dests in ROUTES.items():
-            print(f"\n=== {AIRPORT_NAME[origin]} ({origin}) ===")
+            print(f"\n=== {ORIGIN_NAME[origin]} ({origin}) ===")
             for code, name in dests:
                 horizon_total[hlabel] += 1
-                is_first_call = (horizon_total[hlabel] == 1 and hlabel == next(iter(HORIZONS)))
-                resp = search(origin, code, dep, ret, debug=is_first_call)
+                keyword = f"flights from {ORIGIN_NAME[origin]} to {name} {dep}"
+                resp = search(keyword, debug=not debug_done)
+                debug_done = True
                 if isinstance(resp, dict) and resp.get("_error"):
                     print(f"  {name:<12} ⚠ {resp['_error']}")
                     continue
-                best = parse_cheapest(resp)
+                widget = find_flights_widget(resp)
+                best = parse_cheapest(widget)
                 if not best:
-                    print(f"  {name:<12} (no flights returned)")
+                    print(f"  {name:<12} (no flights widget found)")
                     continue
                 horizon_found[hlabel] += 1
-                air = best["airline"] or "?"
-                if "ryanair" in air.lower():
+                title = best["title"] or "?"
+                if "ryanair" in title.lower():
                     ryanair_seen[origin] = True
-                print(f"  {name:<12} €{best['price']:<6} {air}")
+                print(f"  {name:<12} €{best['price']:<6} {title}")
 
     # ── Verdict ──
     print("\n" + "=" * 64)
     print("VERDICT")
     for h in HORIZONS:
-        print(f"  {h:<16}: {horizon_found[h]}/{horizon_total[h]} routes returned flights")
+        print(f"  {h:<16}: {horizon_found[h]}/{horizon_total[h]} routes returned a flights widget")
     print(f"  Ryanair from Cork   : {'YES ✓' if ryanair_seen['ORK'] else 'no'}")
     print(f"  Ryanair from Dublin : {'YES ✓' if ryanair_seen['DUB'] else 'no'}")
     print()
@@ -182,17 +207,20 @@ def main():
     ryan_ok = ryanair_seen["ORK"] and ryanair_seen["DUB"]
 
     if horizon_found[near_label] == 0 and horizon_found[far_label] == 0:
-        print("  ✗ No flights at all. Check credentials/credit, or fall back to SerpApi.")
+        print("  ✗ No flights widgets found at all. Either:")
+        print("    - the flights feature isn't appearing in this market/location, or")
+        print("    - the response shape still doesn't match what we're parsing.")
+        print("    Check the [debug] item types list above — if 'flights' isn't in")
+        print("    that list, Google simply isn't showing the widget for this query.")
+        print("    Fall back to SerpApi if so.")
     elif near_ok and far_ok and ryan_ok:
         print("  ✓✓ EXCELLENT — good coverage at BOTH 6 and 16 weeks, Ryanair on both")
         print("     airports. The full 16+16 board is justified. Safe to deposit $50.")
     elif near_ok and not far_ok:
-        print("  ~ Good NEAR-term coverage, but the ~16-week data is thin. Honest")
-        print("    takeaway: a 16-week board would have gaps far out. Consider 8+8")
-        print("    (≈2 months ahead) where coverage is solid — cheaper AND fuller.")
+        print("  ~ Good NEAR-term coverage, but the ~16-week data is thin. Consider")
+        print("    8+8 (≈2 months ahead) where coverage is solid instead.")
     elif near_ok:
-        print("  ✓ Decent coverage. Ryanair flag uncertain — eyeball the prices above")
-        print("    vs Google Flights, then decide.")
+        print("  ✓ Decent coverage. Ryanair flag uncertain — eyeball the prices above.")
     else:
         print("  ~ Coverage thinner than hoped. Compare with SerpApi before committing.")
     print()
@@ -200,4 +228,3 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
