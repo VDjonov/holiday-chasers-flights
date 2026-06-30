@@ -112,43 +112,64 @@ def search(keyword, debug=False):
     return data
 
 
-def find_flights_widget(resp):
-    """Find the 'flights' feature item in the organic SERP results, if present."""
+def find_flights_widget(resp, debug=False):
+    """Find the 'google_flights' feature item in the organic SERP results."""
     try:
         items = resp["tasks"][0]["result"][0]["items"]
     except (KeyError, IndexError, TypeError):
         return None
     for it in items or []:
-        if it.get("type") == "flights":
+        if it.get("type") == "google_flights":
+            if debug:
+                # Show the widget's own structure so we can confirm the field
+                # names we're reading (price/airline) are correct.
+                print(f"    [debug] google_flights widget keys: {list(it.keys())}")
+                print(f"    [debug] google_flights widget (first 2000 chars):\n"
+                      f"{json.dumps(it, indent=2)[:2000]}")
             return it
     return None
 
 
 def parse_cheapest(flights_item):
-    """Pull cheapest price + airline text out of the flights widget item."""
+    """Pull cheapest price + airline text out of the google_flights widget item.
+    Field names aren't fully confirmed yet, so this tries several common shapes
+    and falls back to scanning any nested dicts/lists for a 'price' field."""
     if not flights_item:
         return None
-    # The flights widget typically nests results under 'items' or 'flights'
-    candidates = flights_item.get("items") or flights_item.get("flights") or []
-    best = None
-    for f in candidates:
-        # Fields vary; try the common ones DataForSEO uses for this widget
-        price = f.get("price")
-        title = f.get("title") or f.get("airline_name") or f.get("description") or ""
-        if isinstance(price, dict):
-            price = price.get("value") or price.get("current")
-        if isinstance(price, str):
-            digits = "".join(c for c in price if c.isdigit())
-            price = int(digits) if digits else None
-        if price and (best is None or price < best["price"]):
-            best = {"price": price, "title": title}
-    if best:
-        return best
-    # Fallback: sometimes the widget itself just has a single price/title pair
-    price = flights_item.get("price")
-    if price:
-        return {"price": price, "title": flights_item.get("title", "")}
-    return None
+
+    def extract_price(val):
+        if isinstance(val, (int, float)):
+            return val
+        if isinstance(val, dict):
+            for k in ("value", "current", "amount", "price"):
+                if k in val:
+                    p = extract_price(val[k])
+                    if p:
+                        return p
+        if isinstance(val, str):
+            digits = "".join(c for c in val if c.isdigit())
+            return int(digits) if digits else None
+        return None
+
+    def walk(node, found):
+        """Recursively scan for dicts that look like a flight option."""
+        if isinstance(node, dict):
+            price = extract_price(node.get("price"))
+            title = (node.get("title") or node.get("airline_name") or
+                     node.get("name") or node.get("airline") or node.get("description") or "")
+            if price:
+                found.append({"price": price, "title": str(title)})
+            for v in node.values():
+                walk(v, found)
+        elif isinstance(node, list):
+            for v in node:
+                walk(v, found)
+
+    found = []
+    walk(flights_item, found)
+    if not found:
+        return None
+    return min(found, key=lambda f: f["price"])
 
 
 def main():
@@ -175,12 +196,14 @@ def main():
             for code, name in dests:
                 horizon_total[hlabel] += 1
                 keyword = f"flights from {ORIGIN_NAME[origin]} to {name} {dep}"
-                resp = search(keyword, debug=not debug_done)
-                debug_done = True
+                is_first = not debug_done
+                resp = search(keyword, debug=is_first)
                 if isinstance(resp, dict) and resp.get("_error"):
                     print(f"  {name:<12} ⚠ {resp['_error']}")
+                    debug_done = True
                     continue
-                widget = find_flights_widget(resp)
+                widget = find_flights_widget(resp, debug=is_first)
+                debug_done = True
                 best = parse_cheapest(widget)
                 if not best:
                     print(f"  {name:<12} (no flights widget found)")
