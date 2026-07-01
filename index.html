@@ -1074,8 +1074,9 @@ const AIRLINE_URLS = {
   ryanair: (origin, dest, dep, ret, adults, children) => {
     const p = new URLSearchParams({
       originIata: origin, destinationIata: dest,
-      departureDate: dep, returnDate: ret,
+      dateOut: dep, dateIn: ret,
       adults, teens: 0, children, infants: 0,
+      partnerId: "google",
     });
     return `https://www.ryanair.com/ie/en/trip/flights/select?${p}`;
   },
