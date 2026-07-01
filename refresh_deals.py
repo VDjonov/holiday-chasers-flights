@@ -18,10 +18,22 @@ import json
 import os
 import sys
 import time
+import base64
+import re
 
 import requests
 
+# Show progress live in GitHub Actions instead of buffering output to the end.
+sys.stdout.reconfigure(line_buffering=True)
+
 ORIGIN = "ORK"
+ORIGIN_NAME = "Cork"  # human-readable, used in DataForSEO search keywords
+
+# Both airports to scan — each gets its own full set of boards
+AIRPORTS = [
+    {"code": "ORK", "name": "Cork"},
+    {"code": "DUB", "name": "Dublin"},
+]
 DELAY = 1.0
 
 # ── Passengers: family of four (2 adults + 2 children aged 5 and 13) ──────────
@@ -132,6 +144,70 @@ def load_keys():
     return keys
 
 
+# ── DataForSEO fallback (used automatically once all SerpApi keys are out) ──
+DATAFORSEO_LOGIN = os.environ.get("DATAFORSEO_LOGIN", "").strip()
+DATAFORSEO_PASSWORD = os.environ.get("DATAFORSEO_PASSWORD", "").strip()
+DATAFORSEO_LOCATION_CODE = 2372  # Ireland
+
+# Confirmed live response format: items carry a plain-English "description"
+# string like "Ryanair Non-stop from €34" — parsed with this pattern.
+_DFS_PATTERN = re.compile(
+    r"^(?P<airline>.+?)\s+(?:Non-stop|\d+\s*stops?)\s+from\s+€\s*(?P<price>[\d,]+)",
+    re.IGNORECASE
+)
+
+
+def dataforseo_available():
+    return bool(DATAFORSEO_LOGIN and DATAFORSEO_PASSWORD)
+
+
+def dataforseo_cheapest(origin_name, dest_code, dest_city, out_date):
+    """Fallback search via DataForSEO's embedded Google Flights widget.
+    Returns the same shape as cheapest_return()'s result, or None."""
+    if not dataforseo_available():
+        return None
+    url = "https://api.dataforseo.com/v3/serp/google/organic/live/advanced"
+    keyword = f"flights from {origin_name} to {dest_city} {out_date}"
+    payload = [{
+        "keyword": keyword,
+        "location_code": DATAFORSEO_LOCATION_CODE,
+        "language_code": "en",
+        "device": "desktop",
+    }]
+    auth = base64.b64encode(f"{DATAFORSEO_LOGIN}:{DATAFORSEO_PASSWORD}".encode()).decode()
+    headers = {"Authorization": "Basic " + auth, "Content-Type": "application/json"}
+    try:
+        r = requests.post(url, headers=headers, json=payload, timeout=60)
+    except Exception as e:
+        print(f"    (DataForSEO network error: {e})")
+        return None
+    if r.status_code != 200:
+        print(f"    (DataForSEO HTTP {r.status_code})")
+        return None
+    try:
+        items = r.json()["tasks"][0]["result"][0]["items"]
+    except (KeyError, IndexError, TypeError):
+        return None
+    widget = next((it for it in items if it.get("type") == "google_flights"), None)
+    if not widget:
+        return None
+    best = None
+    for el in widget.get("items", []):
+        desc = (el.get("description") or "").strip()
+        m = _DFS_PATTERN.match(desc)
+        if not m:
+            continue
+        price = int(m.group("price").replace(",", ""))
+        airline = m.group("airline").strip()
+        if best is None or price < best["price"]:
+            best = {
+                "price": price, "stops": 0 if "non-stop" in desc.lower() else 1,
+                "total_time": "—", "airlines": airline, "via": "Direct",
+                "source": "dataforseo",
+            }
+    return best
+
+
 # ── Price history helpers ────────────────────────────────────────────────────
 def load_history():
     """Load past prices. Shape: {code: {"weekend": [p,...], "week": [p,...]}}"""
@@ -185,9 +261,13 @@ def record_history(boards, board_type, hist):
         hist[code][board_type] = hist[code][board_type][-MAX_HISTORY:]
 
 
-def cheapest_return(keys, dest_code, out_date, ret_date):
+def cheapest_return(keys, dest_code, dest_city, out_date, ret_date,
+                    origin=None, origin_name=None):
+    """Search cheapest return. Falls back to DataForSEO when SerpApi exhausted."""
+    if origin is None: origin = ORIGIN
+    if origin_name is None: origin_name = ORIGIN_NAME
     base = {
-        "engine": "google_flights", "departure_id": ORIGIN, "arrival_id": dest_code,
+        "engine": "google_flights", "departure_id": origin, "arrival_id": dest_code,
         "outbound_date": out_date, "return_date": ret_date, "type": "1",
         "adults": str(ADULTS), "children": "2", "children_ages": CHILDREN_AGES,
         "currency": "EUR", "hl": "en", "gl": "ie",
@@ -195,6 +275,11 @@ def cheapest_return(keys, dest_code, out_date, ret_date):
     data = None
     live_keys = [(idx, k) for idx, k in enumerate(keys) if k not in EXHAUSTED_KEYS]
     if not live_keys:
+        # All SerpApi keys are spent — seamlessly continue on DataForSEO
+        # instead of giving up on this destination.
+        if dataforseo_available():
+            print("    SerpApi exhausted — using DataForSEO …")
+            return dataforseo_cheapest(origin_name, dest_code, dest_city, out_date)
         print("    all keys exhausted — skipping")
         return None
     for idx, key in live_keys:
@@ -220,6 +305,11 @@ def cheapest_return(keys, dest_code, out_date, ret_date):
             print(f"    API error: {err}")
             return None
     if data is None:
+        # This particular call failed (e.g. every remaining key just got marked
+        # exhausted on this very attempt) — try DataForSEO before giving up.
+        if dataforseo_available():
+            print("    SerpApi unavailable for this search — using DataForSEO …")
+            return dataforseo_cheapest(origin_name, dest_code, dest_city, out_date)
         return None
 
     itineraries = (data.get("best_flights") or []) + (data.get("other_flights") or [])
@@ -248,15 +338,20 @@ def cheapest_return(keys, dest_code, out_date, ret_date):
     return best
 
 
-def build_board(keys, label, out_date, ret_date, nights):
-    print(f"\n=== {label} · out {out_date} · back {ret_date} ({nights} nights) ===")
+def build_board(keys, label, out_date, ret_date, nights,
+                origin=None, origin_name=None):
+    if origin is None: origin = ORIGIN
+    if origin_name is None: origin_name = ORIGIN_NAME
+    print(f"\n=== [{origin}] {label} · out {out_date} · back {ret_date} ({nights} nights) ===")
     deals = []
     for i, (code, city, country) in enumerate(DESTINATIONS, 1):
         print(f"  [{i:>2}/{len(DESTINATIONS)}] {city}, {country} …")
-        res = cheapest_return(keys, code, out_date, ret_date)
+        res = cheapest_return(keys, code, city, out_date, ret_date,
+                              origin=origin, origin_name=origin_name)
         if res:
             deals.append({"city": city, "country": country, "code": code.split(",")[0], **res})
-            print(f"      €{res['price']} ({res['stops']} stop(s)) {res['airlines']}")
+            src = " [DataForSEO]" if res.get("source") == "dataforseo" else ""
+            print(f"      €{res['price']} ({res['stops']} stop(s)) {res['airlines']}{src}")
         time.sleep(DELAY)
     deals.sort(key=lambda d: d["price"])
     return {"depart_date": out_date, "return_date": ret_date, "nights": nights, "deals": deals}
@@ -269,56 +364,93 @@ def main():
         sys.exit(1)
     print(f"Loaded {len(keys)} key(s) for rotation.")
 
-    today = dt.date.today()
+    airport_data = {}
 
-    # ── Weekend boards: next N Fridays (skipping before EARLIEST_DATE) ──
-    weekend_boards = []
-    for friday in upcoming_fridays(NUM_WEEKENDS, EARLIEST_DATE):
-        sun = friday + dt.timedelta(days=WEEKEND_NIGHTS)
-        label = f"Weekend {friday.strftime('%d %b')}"
-        board = build_board(keys, label, friday.isoformat(), sun.isoformat(), WEEKEND_NIGHTS)
-        board["label"] = f"{friday.strftime('%a %d %b')} – {sun.strftime('%a %d %b')}"
-        weekend_boards.append(board)
+    for ap in AIRPORTS:
+        origin_code = ap["code"]
+        origin_name = ap["name"]
+        print(f"\n{'='*60}")
+        print(f"SCANNING {origin_name} ({origin_code})")
+        print(f"{'='*60}")
 
-    # ── Week boards: next N week-long trips starting on a Saturday ──
-    week_boards = []
-    for sat in upcoming_weekdays(NUM_WEEKS, 5, EARLIEST_DATE):  # 5 = Saturday
-        wk_ret = sat + dt.timedelta(days=WEEK_NIGHTS)
-        label = f"Week {sat.strftime('%d %b')}"
-        board = build_board(keys, label, sat.isoformat(), wk_ret.isoformat(), WEEK_NIGHTS)
-        board["label"] = f"{sat.strftime('%a %d %b')} – {wk_ret.strftime('%a %d %b')}"
-        week_boards.append(board)
+        # ── Weekend boards ──
+        weekend_boards = []
+        for friday in upcoming_fridays(NUM_WEEKENDS, EARLIEST_DATE):
+            sun = friday + dt.timedelta(days=WEEKEND_NIGHTS)
+            label = f"Weekend {friday.strftime('%d %b')}"
+            board = build_board(keys, label, friday.isoformat(), sun.isoformat(),
+                                WEEKEND_NIGHTS, origin=origin_code, origin_name=origin_name)
+            board["label"] = f"{friday.strftime('%a %d %b')} – {sun.strftime('%a %d %b')}"
+            weekend_boards.append(board)
 
-    # ── Price history: compare to past, then record this run ──
-    hist = load_history()
-    annotate_with_history(weekend_boards, "weekend", hist)  # uses PRIOR prices
-    annotate_with_history(week_boards, "week", hist)
-    record_history(weekend_boards, "weekend", hist)          # then add this run
-    record_history(week_boards, "week", hist)
-    save_history(hist)
+        # ── Week boards ──
+        week_boards = []
+        for sat in upcoming_weekdays(NUM_WEEKS, 5, EARLIEST_DATE):
+            wk_ret = sat + dt.timedelta(days=WEEK_NIGHTS)
+            label = f"Week {sat.strftime('%d %b')}"
+            board = build_board(keys, label, sat.isoformat(), wk_ret.isoformat(),
+                                WEEK_NIGHTS, origin=origin_code, origin_name=origin_name)
+            board["label"] = f"{sat.strftime('%a %d %b')} – {wk_ret.strftime('%a %d %b')}"
+            week_boards.append(board)
 
+        # ── Price history per airport ──
+        hist = load_history()
+        hist_key_wknd = f"{origin_code}_weekend"
+        hist_key_week = f"{origin_code}_week"
+        annotate_with_history(weekend_boards, hist_key_wknd, hist)
+        annotate_with_history(week_boards, hist_key_week, hist)
+        record_history(weekend_boards, hist_key_wknd, hist)
+        record_history(week_boards, hist_key_week, hist)
+        save_history(hist)
+
+        airport_data[origin_code] = {
+            "name": origin_name,
+            "weekend_boards": weekend_boards,
+            "week_boards": week_boards,
+        }
+
+    # ── Write the cache file ──
+    # "airports" is the new structured key; ORK boards also kept at top level
+    # for backward compatibility with any code that reads the old structure.
+    ork = airport_data.get("ORK", {})
     payload = {
         "updated_utc": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "travellers": NUM_TRAVELLERS,
         "passenger_label": "2 adults + 2 children (5 & 13)",
-        "weekend_boards": weekend_boards,   # list, visitor picks which
-        "week_boards": week_boards,         # list, visitor picks which
-        "week_board": week_boards[0] if week_boards else None,  # legacy single (back-compat)
+        "airports": airport_data,
+        # Legacy keys — keep so the current site keeps working during transition
+        "weekend_boards": ork.get("weekend_boards", []),
+        "week_boards":    ork.get("week_boards", []),
+        "week_board":     ork.get("week_boards", [None])[0],
     }
     with open(OUT_FILE, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, ensure_ascii=False)
 
-    print(f"\nDone. Wrote {len(weekend_boards)} weekend board(s) + {len(week_boards)} week board(s).")
-    for b in weekend_boards + week_boards:
-        if b["deals"]:
-            print(f"  {b['label']}: cheapest €{b['deals'][0]['price']} to {b['deals'][0]['city']}")
+    print(f"\nDone.")
+    total_boards = sum(
+        len(ap.get("weekend_boards", [])) + len(ap.get("week_boards", []))
+        for ap in airport_data.values()
+    )
+    print(f"  {len(airport_data)} airports × boards each = {total_boards} boards total.")
+    for code, ap in airport_data.items():
+        for b in ap["weekend_boards"] + ap["week_boards"]:
+            if b["deals"]:
+                print(f"  [{code}] {b['label']}: cheapest €{b['deals'][0]['price']} to {b['deals'][0]['city']}")
 
     live = len(keys) - len(EXHAUSTED_KEYS)
     print(f"\nKey health: {live} of {len(keys)} key(s) still had quota at the end of this run.")
     if EXHAUSTED_KEYS:
         print(f"  {len(EXHAUSTED_KEYS)} key(s) ran out during the run.")
-        if live == 0:
-            print("  ⚠ ALL keys are exhausted — some boards may be incomplete. Add more keys or reduce boards.")
+        if live == 0 and not dataforseo_available():
+            print("  ⚠ ALL keys are exhausted — some boards may be incomplete.")
+
+    if dataforseo_available():
+        all_deals = [d for ap in airport_data.values()
+                     for b in ap["weekend_boards"] + ap["week_boards"]
+                     for d in b["deals"]]
+        from_dfs = sum(1 for d in all_deals if d.get("source") == "dataforseo")
+        from_serp = len(all_deals) - from_dfs
+        print(f"\nData source mix: {from_serp} via SerpApi, {from_dfs} via DataForSEO.")
 
 
 if __name__ == "__main__":
