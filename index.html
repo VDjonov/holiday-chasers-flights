@@ -1942,6 +1942,11 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers){
 
   cacheTravellers = cacheTravellers || 4;
   groupSize = groupSize || 1;
+
+  // Resolve which airport this deal flies from
+  const flightOrigin = selectedAirport === "BEST"
+    ? (d.origin_airport || "ORK")
+    : (selectedAirport || "ORK");
   const perP = Math.round(d.price / cacheTravellers);
   const groupTot = perP * groupSize;
   const groupLbl = travellerLabel();
