@@ -293,7 +293,27 @@ img{max-width:100%}
 .signup-privacy{margin-top:12px;font-size:12px;color:rgba(251,248,241,.6);line-height:1.5}
 .foot-disclosure{display:inline-block;max-width:560px;margin:8px auto;font-size:12px;color:var(--muted);line-height:1.5}
 
-/* ── Newsletter signup band ── */
+/* ── Airport selector ── */
+.airport-toggle{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.ap-btn{display:flex;align-items:center;gap:10px;padding:11px 20px;border:1px solid var(--line);border-radius:14px;background:var(--paper);cursor:pointer;transition:.18s;box-shadow:var(--shadow-sm)}
+.ap-btn:hover{border-color:var(--gold)}
+.ap-btn.active{background:var(--ink);border-color:var(--ink)}
+.ap-ic{font-size:18px}
+.ap-txt{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left}
+.ap-name{font-family:var(--font-body);font-size:14px;font-weight:600;color:var(--ink)}
+.ap-code{font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.06em}
+.ap-btn.active .ap-name,.ap-btn.active .ap-code{color:var(--ivory)}
+.ap-btn:nth-child(3).active .ap-ic{filter:none}
+/* Comparison mini-card below each deal */
+.alt-card{background:var(--cream);border:1px solid var(--line);border-top:none;border-radius:0 0 14px 14px;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.alt-badge{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.08em;background:var(--ink-soft);color:var(--ivory);padding:3px 7px;border-radius:6px}
+.alt-info{font-size:12px;color:var(--muted);flex:1}
+.alt-price{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--ink)}
+.alt-cheaper{font-size:11px;font-weight:700;color:var(--green);background:rgba(27,122,83,.1);padding:2px 7px;border-radius:100px}
+.alt-pricier{font-size:11px;color:var(--muted)}
+/* Source badge on "Best of both" */
+.origin-badge{position:absolute;top:14px;left:52px;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.08em;background:rgba(10,27,46,.7);color:var(--ivory);padding:3px 7px;border-radius:6px;z-index:3}
+@media(max-width:600px){.airport-toggle{gap:8px}.ap-btn{padding:9px 14px;gap:8px}.ap-name{font-size:13px}}
 .signup-band{margin-top:48px;background:radial-gradient(120% 140% at 0% 0%, #14304F 0%, var(--ink) 60%, #06121F 100%);border-radius:20px;padding:40px;position:relative;overflow:hidden}
 .signup-band::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(90deg,transparent 0 39px,rgba(201,162,75,.05) 39px 40px);pointer-events:none}
 .signup-inner{display:flex;gap:36px;align-items:center;flex-wrap:wrap;position:relative;z-index:1}
@@ -509,11 +529,27 @@ img{max-width:100%}
 <!-- ═══ TAB: DEAL BOARD ═══ -->
 <section id="tab-deals" class="tab-content active">
   <div class="section-hdr">
-    <h2>Cheapest escapes from Cork</h2>
-    <p>Return fares from Cork — shown per person, with your group total. Group totals are estimated from the per-person fare. Pick a weekend, or browse a full week away.</p>
-    <div class="trust-line">✦ How it works: every week we automatically scan real fares from Cork Airport (ORK) via Google Flights and show you the cheapest. Prices are indicative and confirmed when you book — we don't sell flights, we just help you find them.</div>
+    <h2 id="boardHeading">Cheapest escapes from Cork</h2>
+    <p id="boardSubtitle">Return fares from Cork — shown per person, with your group total. Group totals are estimated from the per-person fare. Pick a weekend, or browse a full week away.</p>
+    <div class="trust-line">✦ How it works: every week we automatically scan real fares from Cork (ORK) and Dublin (DUB) airports via Google Flights and show you the cheapest. Prices are indicative and confirmed when you book — we don't sell flights, we just help you find them.</div>
     <div class="updated-tag" id="dealsUpdated"></div>
     <a href="#signup" class="fav-chip" id="favChip" style="display:none">♥ <span class="fav-count">0</span> saved — <span class="fav-cta">get alerts by email</span></a>
+  </div>
+
+  <!-- Airport selector -->
+  <div class="airport-toggle">
+    <button class="ap-btn active" data-ap="ORK" onclick="switchAirport('ORK')">
+      <span class="ap-ic">🛫</span>
+      <span class="ap-txt"><span class="ap-name">Cork</span><span class="ap-code">ORK</span></span>
+    </button>
+    <button class="ap-btn" data-ap="DUB" onclick="switchAirport('DUB')">
+      <span class="ap-ic">🛫</span>
+      <span class="ap-txt"><span class="ap-name">Dublin</span><span class="ap-code">DUB</span></span>
+    </button>
+    <button class="ap-btn" data-ap="BEST" onclick="switchAirport('BEST')">
+      <span class="ap-ic">⭐</span>
+      <span class="ap-txt"><span class="ap-name">Best deal</span><span class="ap-code">Both</span></span>
+    </button>
   </div>
 
   <div class="traveller-bar">
@@ -581,7 +617,7 @@ img{max-width:100%}
 <section id="tab-direct" class="tab-content">
   <div class="section-hdr">
     <h2>Direct flights from Cork</h2>
-    <p>Pick a destination and a centre date — we scan ±7 days and show the cheapest price for each day.</p>
+    <p>Pick a destination and a centre date — we scan ±5 days and show the cheapest price for each day.</p>
   </div>
   <div id="directOffline" class="offline-banner" style="display:none">
     ⚠️ Live search is offline — start backend.py and ngrok on your PC to enable this.
@@ -606,7 +642,7 @@ img{max-width:100%}
           <option value="14">14 nights (2 weeks)</option>
         </select>
       </div>
-      <button class="search-btn" id="directSearch" onclick="searchDirectWindow()">Search ±7 days</button>
+      <button class="search-btn" id="directSearch" onclick="searchDirectWindow()">Search ±5 days</button>
     </div>
   </div>
   <div id="directProgress" style="display:none;margin-bottom:16px">
@@ -920,6 +956,25 @@ const BACKEND_HEADERS = {
 };
 let cachedDeals = null;
 let currentBoard = "weekend";
+let selectedAirport = "ORK";  // ORK, DUB, or BEST (best of both)
+
+// ── Airport selector ─────────────────────────────────────────────────────────
+function switchAirport(code) {
+  selectedAirport = code;
+  document.querySelectorAll(".ap-btn").forEach(b => {
+    b.classList.toggle("active", b.dataset.ap === code);
+  });
+  const labels = {ORK:"Cork Airport (ORK)", DUB:"Dublin Airport (DUB)", BEST:"Best deal — both airports"};
+  const sub = {
+    ORK: "Return fares from Cork — shown per person. Group totals are estimated from the per-person fare.",
+    DUB: "Return fares from Dublin — shown per person. Group totals are estimated from the per-person fare.",
+    BEST: "The cheapest fare for each destination across Cork and Dublin — we pick the best one for you."
+  };
+  document.getElementById("boardHeading").textContent = "Cheapest escapes · " + labels[code];
+  document.getElementById("boardSubtitle").textContent = sub[code];
+  populateBoardPicker();
+  renderDeals();
+}
 let budgetMax = 0;
 // Traveller selection (default: 1 adult, 0 children)
 let selAdults = 1;
@@ -1011,7 +1066,73 @@ const BRAND = {
   autoeurope: `<span class="brand brand-ae">Auto<span class="b">Europe</span></span>`
 };
 
-// ── Tab switching ────────────────────────────────────────────────────────────
+// ── Airline deeplinks — routes users directly to the airline's own site ────────
+// Ryanair pay nothing for affiliate clicks so we link them directly — this
+// also gives the most trusted experience for Irish travellers.
+const AIRLINE_URLS = {
+  // Ryanair — well-known URL format, pre-fills origin/dest/dates
+  ryanair: (origin, dest, dep, ret, adults, children) => {
+    const p = new URLSearchParams({
+      originIata: origin, destinationIata: dest,
+      departureDate: dep, returnDate: ret,
+      adults, teens: 0, children, infants: 0,
+    });
+    return `https://www.ryanair.com/ie/en/trip/flights/select?${p}`;
+  },
+  // Aer Lingus — return flight search
+  "aer lingus": (origin, dest, dep, ret, adults, children) => {
+    const p = new URLSearchParams({
+      fareType: "RETURN", fareCategory: "ECONOMY",
+      numAdults: adults, numYoungAdults: 0, numChildren: children, numInfants: 0,
+      groupBooking: false,
+      sourceAirportCode_0: origin, destinationAirportCode_0: dest, departureDate_0: dep,
+      sourceAirportCode_1: dest,   destinationAirportCode_1: origin, departureDate_1: ret,
+    });
+    return `https://www.aerlingus.com/app/make/flight-search-result?${p}`;
+  },
+  // KLM
+  klm: (origin, dest, dep, ret, adults, children) => {
+    const p = new URLSearchParams({
+      culture: "en-IE", originCity: origin, destinationCity: dest,
+      outboundDate: dep, returnDate: ret, cabinClass: "Economy",
+      adults, children,
+    });
+    return `https://www.klm.com/search/offers?${p}`;
+  },
+  // Transavia
+  transavia: (origin, dest, dep, ret, adults, children) =>
+    `https://www.transavia.com/en-EU/book-a-flight/flights/search/?routeSelection.origin=${origin}&routeSelection.destination=${dest}&passengers.numberOfAdults=${adults}&passengers.numberOfChildren=${children}`,
+  // easyJet
+  easyjet: (origin, dest, dep, ret, adults, children) =>
+    `https://www.easyjet.com/en/cheap-flights?departure=${origin}&arrival=${dest}&departureDate=${dep}&returnDate=${ret}&adult=${adults}&child=${children}`,
+  // Wizz Air
+  "wizz air": (origin, dest, dep, ret, adults, children) =>
+    `https://wizzair.com/en-gb/flights/search/${origin}/${dest}/${dep}/${ret}/${adults}/0/${children}/0`,
+  // Vueling
+  vueling: (origin, dest, dep, ret, adults, children) =>
+    `https://www.vueling.com/en/vueling-flights/search-flights?idsorg=${origin}&idsdst=${dest}&departDate=${dep}&returnDate=${ret}&adult=${adults}&child=${children}&infant=0&sc=RT`,
+  // Iberia
+  iberia: (origin, dest, dep, ret, adults, children) =>
+    `https://www.iberia.com/us/flights/?ib-origin=${origin}&ib-destination=${dest}&ib-date=${dep}&ib-return-date=${ret}&ib-adults=${adults}&ib-children=${children}`,
+};
+
+// Returns the deeplink for the cheapest/primary airline on a deal.
+// Falls back to a Skyscanner search if we don't have a deeplink for that airline.
+function flightUrl(airlinesStr, origin, dest, dep, ret, adults, children) {
+  const primary = (airlinesStr || "").split(/[,/]/)[0].trim().toLowerCase();
+  const builder = AIRLINE_URLS[primary];
+  if (builder) return builder(origin, dest, dep, ret, adults, children);
+  // Skyscanner fallback — trusted in Ireland, covers all airlines
+  return `https://www.skyscanner.ie/transport/flights/${origin.toLowerCase()}/${dest.toLowerCase()}/${dep.replace(/-/g,"")}/${ret.replace(/-/g,"")}/?adults=${adults}&children=${children}`;
+}
+
+// Returns the button label for a given airlines string — "Book on Ryanair" etc.
+function flightBtnLabel(airlinesStr, fallback="Search flights") {
+  const primary = (airlinesStr || "").split(/[,/]/)[0].trim();
+  if (!primary) return fallback;
+  return `✈ Book on ${primary}`;
+}
+
 document.querySelectorAll(".tab-btn").forEach(btn => {
   btn.addEventListener("click", () => {
     document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
@@ -1038,9 +1159,50 @@ let selectedWeekIdx = 0;
 
 function currentBoardList() {
   if (!cachedDeals) return [];
+  // Resolve which airport's boards to use
+  let apCode = selectedAirport === "BEST" ? "ORK" : selectedAirport;
+  const apData = cachedDeals.airports?.[apCode];
+  if (apData) {
+    return currentBoard === "weekend"
+      ? (apData.weekend_boards || [])
+      : (apData.week_boards || []);
+  }
+  // Legacy fallback for old cache format (ORK only, no airports key)
   if (currentBoard === "weekend") return cachedDeals.weekend_boards || [];
-  // Week boards: prefer the new array; fall back to a single legacy week_board
   return cachedDeals.week_boards || (cachedDeals.week_board ? [cachedDeals.week_board] : []);
+}
+
+function getAltAirportData() {
+  // Returns the other airport's data for the comparison mini-card.
+  if (!cachedDeals?.airports || selectedAirport === "BEST") return null;
+  const altCode = selectedAirport === "ORK" ? "DUB" : "ORK";
+  return {code: altCode, data: cachedDeals.airports[altCode]};
+}
+
+function getBestOfBothBoard(boardIdx) {
+  // For "Best of both": merge deals from both airports, pick cheapest per destination.
+  if (!cachedDeals?.airports) return null;
+  const combined = {};
+  for (const [code, ap] of Object.entries(cachedDeals.airports)) {
+    const list = currentBoard === "weekend"
+      ? (ap.weekend_boards || []) : (ap.week_boards || []);
+    const board = list[boardIdx] || list[0];
+    if (!board) continue;
+    for (const deal of board.deals || []) {
+      if (!combined[deal.code] || deal.price < combined[deal.code].price) {
+        combined[deal.code] = {...deal, origin_airport: code, origin_name: ap.name};
+      }
+    }
+  }
+  // Use ORK board for dates/label
+  const orkBoards = currentBoard === "weekend"
+    ? (cachedDeals.airports.ORK?.weekend_boards || [])
+    : (cachedDeals.airports.ORK?.week_boards || []);
+  const refBoard = orkBoards[boardIdx] || orkBoards[0] || {};
+  return {
+    ...refBoard,
+    deals: Object.values(combined).sort((a, b) => a.price - b.price)
+  };
 }
 
 function selectBoard(idx) {
@@ -1154,18 +1316,38 @@ function renderDeals() {
     grid.innerHTML = ""; return;
   }
 
-  // Resolve which board to show from the new data structure
+  // Resolve which board to show
   const list = currentBoardList();
   const idx = currentBoard === "weekend" ? selectedWeekendIdx : selectedWeekIdx;
-  let board = list[idx] || list[0] || null;
+  let board = selectedAirport === "BEST"
+    ? getBestOfBothBoard(idx)
+    : (list[idx] || list[0] || null);
 
   if (!board || !board.deals) {
     empty.style.display = "block"; empty.textContent = "No deals available for this trip type.";
     grid.innerHTML = ""; return;
   }
 
-  const cacheTravellers = cachedDeals.travellers || 4;  // what the cache was priced for
-  const groupSize = selAdults + selChildren;            // visitor's selected group
+  // Build a lookup of the alt airport's prices for the same board dates
+  // (used for the comparison mini-card below each deal)
+  const altAp = getAltAirportData();
+  const altLookup = {};  // dest_code -> {price, airportCode, airportName}
+  if (altAp?.data) {
+    const altList = currentBoard === "weekend"
+      ? (altAp.data.weekend_boards || [])
+      : (altAp.data.week_boards || []);
+    const altBoard = altList[idx] || altList[0];
+    for (const d of altBoard?.deals || []) {
+      altLookup[d.code] = {
+        price: d.price,
+        airportCode: altAp.code,
+        airportName: altAp.data.name
+      };
+    }
+  }
+
+  const cacheTravellers = cachedDeals.travellers || 4;
+  const groupSize = selAdults + selChildren;
   let deals = [...board.deals].sort((a,b) => a.price - b.price);
   if (budgetMax > 0) deals = deals.filter(d => (d.price / cacheTravellers) <= budgetMax);
 
@@ -1221,9 +1403,33 @@ function renderDeals() {
   empty.style.display = "none";
 
   grid.innerHTML = deals.map((d, i) => {
+    const originCode = d.origin_airport || selectedAirport;
+    const showOrigin = selectedAirport === "BEST";
+    const flightOrigin = (showOrigin && d.origin_airport) ? d.origin_airport : (selectedAirport === "BEST" ? "ORK" : selectedAirport);
     const banner = `<div class="deal-photo noimg" id="photo-${d.code}-${i}">
-           <span class="deal-route-on-photo">ORK → ${d.code}</span>
+           <span class="deal-route-on-photo">${flightOrigin} → ${d.code}</span>
+           ${showOrigin && d.origin_airport ? `<span class="origin-badge">${d.origin_airport}</span>` : ''}
          </div>`;
+
+    // Comparison mini-card: the other airport's price for this same destination
+    const alt = altLookup[d.code];
+    let altCard = '';
+    if (alt && selectedAirport !== "BEST") {
+      const altPP = Math.round(alt.price / cacheTravellers);
+      const thisPP = perPerson(d);
+      const diff = altPP - thisPP;
+      const diffLabel = diff < 0
+        ? `<span class="alt-cheaper">€${Math.abs(diff)} cheaper</span>`
+        : `<span class="alt-pricier">€${diff} more</span>`;
+      altCard = `
+      <div class="alt-card">
+        <span class="alt-badge">${alt.airportCode}</span>
+        <span class="alt-info">Same trip from ${alt.airportName}</span>
+        <span class="alt-price">€${altPP}/pp</span>
+        ${diffLabel}
+      </div>`;
+    }
+
     return `
     <div class="deal-card${i === 0 ? ' cheapest' : ''}">
       <button class="deal-fav" onclick='event.stopPropagation();toggleFav("${d.code}","${d.city.replace(/"/g,'')}")' aria-label="Save ${d.city}" data-fav="${d.code}">♡</button>
@@ -1254,7 +1460,7 @@ function renderDeals() {
         <div class="deal-viewmore">View full details &amp; guide →</div>
       </div>
       <div class="deal-actions">
-        <a class="deal-book primary" href="https://www.google.com/travel/flights?q=Flights+to+${d.code}+from+ORK+on+${dep}+through+${ret}+for+${selAdults}+adults${selChildren>0?'+'+selChildren+'+children':''}" target="_blank" rel="noopener">✈ Flights</a>
+        <a class="deal-book primary" href="${flightUrl(d.airlines, flightOrigin, d.code, dep, ret, selAdults, selChildren)}" target="_blank" rel="noopener noreferrer">${flightBtnLabel(d.airlines)}</a>
         <a class="deal-book secondary" href="${carUrl(d.city, dep, ret)}" target="_blank" rel="noopener">🚗 ${BRAND.discovercars}</a>
       </div>
       <div class="deal-stays">
@@ -1262,6 +1468,7 @@ function renderDeals() {
         <a class="stay-btn" href="${hotelUrl(d.city, dep, ret)}" target="_blank" rel="noopener">${BRAND.booking}</a>
         <a class="stay-btn" href="${airbnbUrl(d.city, dep, ret)}" target="_blank" rel="noopener">${BRAND.airbnb}</a>
       </div>
+      ${altCard}
     </div>`;
   }).join("");
 
@@ -1364,7 +1571,7 @@ function updateCities() {
   });
 }
 
-// ── Live search: Direct ±7 days — separate out/return grids ─────────────────
+// ── Live search: Direct ±5 days — separate out/return grids ─────────────────
 function addDays(dateStr, n) {
   const d = new Date(dateStr + "T12:00:00");
   d.setDate(d.getDate() + n);
@@ -1471,7 +1678,7 @@ async function searchDirectWindow() {
 
   const today = new Date().toISOString().split("T")[0];
   const outDates = [], retDates = [];
-  for (let i = -7; i <= 7; i++) {
+  for (let i = -5; i <= 5; i++) {
     const d = addDays(centre, i);
     if (d >= today) outDates.push(d);
     const r = addDays(addDays(centre, nights), i);
@@ -1489,12 +1696,12 @@ async function searchDirectWindow() {
         👆 Select an outbound and return date to see the combined total</div>
     </div>
     <div style="font-weight:700;font-size:15px;margin-bottom:8px">✈️ Outbound: Cork → ${destName}</div>
-    <div style="font-size:12px;color:var(--gray);margin-bottom:10px">Pick your departure date (±7 days around ${fmtDateShort(centre)})</div>
+    <div style="font-size:12px;color:var(--gray);margin-bottom:10px">Pick your departure date (±5 days around ${fmtDateShort(centre)})</div>
     <div id="outGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-bottom:24px">
       <div style="color:var(--gray);font-size:13px">Searching outbound dates...</div>
     </div>
     <div style="font-weight:700;font-size:15px;margin-bottom:8px">🔄 Return: ${destName} → Cork</div>
-    <div style="font-size:12px;color:var(--gray);margin-bottom:10px">Pick your return date (±7 days around ${fmtDateShort(addDays(centre,nights))})</div>
+    <div style="font-size:12px;color:var(--gray);margin-bottom:10px">Pick your return date (±5 days around ${fmtDateShort(addDays(centre,nights))})</div>
     <div id="retGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px">
       <div style="color:var(--gray);font-size:13px">Searching return dates...</div>
     </div>`;
@@ -1597,7 +1804,7 @@ async function searchEurope() {
             <td style="font-size:11px;color:var(--gray)">${d.via}</td>
             <td>${d.departure}</td>
             <td>${d.arrival}</td>
-            <td><a class="deal-book" style="padding:6px 12px;font-size:12px" href="https://www.google.com/travel/flights?q=Flights+to+${d.arrival_airport||dest}+from+ORK+on+${out}${ret?'+through+'+ret:'+oneway'}" target="_blank">Book</a></td>
+            <td><a class="deal-book" style="padding:6px 12px;font-size:12px" href="${flightUrl(data.airlines||'', d.arrival_airport||dest, 'ORK', out, ret||'', 1, 0)}" target="_blank" rel="noopener noreferrer">Book</a></td>
           </tr>`).join("")}</tbody>
       </table>
       <p style="margin-top:12px;font-size:12px;color:var(--gray)">Prices are ${ret?'full return':'one-way'}. Confirmed at booking.</p>`;
@@ -1779,7 +1986,7 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers){
         </div>
       </div>
       <div style="margin-top:18px">
-        <a class="deal-book primary" style="display:inline-flex;padding:12px 24px;border-radius:10px" href="https://www.google.com/travel/flights?q=Flights+to+${d.code}+from+ORK+on+${dep}+through+${ret}+for+${flightPax}" target="_blank" rel="noopener">✈ See live flight details &amp; book →</a>
+        <a class="deal-book primary" style="display:inline-flex;padding:12px 24px;border-radius:10px" href="${flightUrl(d.airlines, flightOrigin||'ORK', d.code, dep, ret, selAdults, selChildren)}" target="_blank" rel="noopener noreferrer">${flightBtnLabel(d.airlines, 'Search flights')} →</a>
       </div>
     </div>
 
