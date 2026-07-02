@@ -9,7 +9,17 @@
       164
     ],
     "ORK_weekend": [
-      156
+      156,
+      35
+    ],
+    "ORK_week": [
+      38
+    ],
+    "DUB_weekend": [
+      34
+    ],
+    "DUB_week": [
+      34
     ]
   },
   "MAN": {
@@ -22,7 +32,17 @@
       159
     ],
     "ORK_weekend": [
-      158
+      158,
+      37
+    ],
+    "ORK_week": [
+      37
+    ],
+    "DUB_weekend": [
+      37
+    ],
+    "DUB_week": [
+      37
     ]
   },
   "MXP": {
@@ -35,7 +55,14 @@
       953
     ],
     "ORK_weekend": [
-      364
+      364,
+      69
+    ],
+    "DUB_weekend": [
+      70
+    ],
+    "DUB_week": [
+      68
     ]
   },
   "EDI": {
@@ -48,7 +75,17 @@
       288
     ],
     "ORK_weekend": [
-      416
+      416,
+      34
+    ],
+    "ORK_week": [
+      48
+    ],
+    "DUB_weekend": [
+      33
+    ],
+    "DUB_week": [
+      32
     ]
   },
   "FAO": {
@@ -61,7 +98,17 @@
       420
     ],
     "ORK_weekend": [
-      416
+      416,
+      58
+    ],
+    "ORK_week": [
+      106
+    ],
+    "DUB_weekend": [
+      73
+    ],
+    "DUB_week": [
+      60
     ]
   },
   "AGP": {
@@ -74,7 +121,17 @@
       532
     ],
     "ORK_weekend": [
-      462
+      462,
+      116
+    ],
+    "ORK_week": [
+      84
+    ],
+    "DUB_weekend": [
+      105
+    ],
+    "DUB_week": [
+      140
     ]
   },
   "PMI": {
@@ -87,7 +144,17 @@
       758
     ],
     "ORK_weekend": [
-      700
+      700,
+      141
+    ],
+    "ORK_week": [
+      128
+    ],
+    "DUB_weekend": [
+      74
+    ],
+    "DUB_week": [
+      74
     ]
   },
   "CDG": {
@@ -100,7 +167,17 @@
       514
     ],
     "ORK_weekend": [
-      712
+      712,
+      186
+    ],
+    "ORK_week": [
+      120
+    ],
+    "DUB_weekend": [
+      47
+    ],
+    "DUB_week": [
+      40
     ]
   },
   "ACE": {
@@ -113,7 +190,14 @@
       1272
     ],
     "ORK_weekend": [
-      1212
+      1212,
+      168
+    ],
+    "DUB_weekend": [
+      193
+    ],
+    "DUB_week": [
+      184
     ]
   },
   "ALC": {
@@ -127,6 +211,15 @@
     ],
     "ORK_weekend": [
       976
+    ],
+    "ORK_week": [
+      128
+    ],
+    "DUB_weekend": [
+      104
+    ],
+    "DUB_week": [
+      81
     ]
   },
   "PRG": {
@@ -140,6 +233,12 @@
     ],
     "ORK_weekend": [
       1030
+    ],
+    "DUB_weekend": [
+      110
+    ],
+    "DUB_week": [
+      97
     ]
   },
   "AMS": {
@@ -152,7 +251,17 @@
       767
     ],
     "ORK_weekend": [
-      829
+      829,
+      182
+    ],
+    "ORK_week": [
+      182
+    ],
+    "DUB_weekend": [
+      60
+    ],
+    "DUB_week": [
+      60
     ]
   },
   "FCO": {
@@ -166,6 +275,12 @@
     ],
     "ORK_weekend": [
       1072
+    ],
+    "DUB_weekend": [
+      121
+    ],
+    "DUB_week": [
+      142
     ]
   },
   "BER": {
@@ -179,6 +294,12 @@
     ],
     "ORK_weekend": [
       1037
+    ],
+    "DUB_weekend": [
+      46
+    ],
+    "DUB_week": [
+      46
     ]
   },
   "WAW": {
@@ -192,6 +313,12 @@
     ],
     "ORK_weekend": [
       1275
+    ],
+    "DUB_weekend": [
+      138
+    ],
+    "DUB_week": [
+      128
     ]
   },
   "MAD": {
@@ -205,6 +332,12 @@
     ],
     "ORK_weekend": [
       1026
+    ],
+    "DUB_weekend": [
+      81
+    ],
+    "DUB_week": [
+      68
     ]
   },
   "MUC": {
@@ -218,6 +351,12 @@
     ],
     "ORK_weekend": [
       1246
+    ],
+    "DUB_weekend": [
+      141
+    ],
+    "DUB_week": [
+      149
     ]
   },
   "BCN": {
@@ -231,6 +370,12 @@
     ],
     "ORK_weekend": [
       1267
+    ],
+    "DUB_weekend": [
+      69
+    ],
+    "DUB_week": [
+      58
     ]
   },
   "BUD": {
@@ -244,6 +389,12 @@
     ],
     "ORK_weekend": [
       1341
+    ],
+    "DUB_weekend": [
+      250
+    ],
+    "DUB_week": [
+      111
     ]
   },
   "NCE": {
@@ -257,6 +408,15 @@
     ],
     "ORK_weekend": [
       1231
+    ],
+    "ORK_week": [
+      184
+    ],
+    "DUB_weekend": [
+      112
+    ],
+    "DUB_week": [
+      68
     ]
   },
   "GVA": {
@@ -270,6 +430,12 @@
     ],
     "ORK_weekend": [
       1225
+    ],
+    "DUB_weekend": [
+      106
+    ],
+    "DUB_week": [
+      106
     ]
   },
   "LIS": {
@@ -283,6 +449,12 @@
     ],
     "ORK_weekend": [
       1457
+    ],
+    "DUB_weekend": [
+      90
+    ],
+    "DUB_week": [
+      84
     ]
   },
   "MLA": {
@@ -296,6 +468,12 @@
     ],
     "ORK_weekend": [
       1410
+    ],
+    "DUB_weekend": [
+      168
+    ],
+    "DUB_week": [
+      124
     ]
   },
   "KRK": {
@@ -309,6 +487,12 @@
     ],
     "ORK_weekend": [
       1460
+    ],
+    "DUB_weekend": [
+      171
+    ],
+    "DUB_week": [
+      122
     ]
   },
   "OPO": {
@@ -322,6 +506,12 @@
     ],
     "ORK_weekend": [
       1721
+    ],
+    "DUB_weekend": [
+      128
+    ],
+    "DUB_week": [
+      115
     ]
   },
   "TFS": {
@@ -334,7 +524,14 @@
       1750
     ],
     "ORK_weekend": [
-      1756
+      1756,
+      153
+    ],
+    "DUB_weekend": [
+      212
+    ],
+    "DUB_week": [
+      193
     ]
   }
 }
