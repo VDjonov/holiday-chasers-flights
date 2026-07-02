@@ -362,7 +362,22 @@ def main():
     if not keys:
         print("ERROR: no SERPAPI_KEY env vars set.")
         sys.exit(1)
-    print(f"Loaded {len(keys)} key(s) for rotation.")
+    print(f"Loaded {len(keys)} SerpApi key(s) for rotation.")
+
+    # Diagnostic: is DataForSEO configured and reachable?
+    if dataforseo_available():
+        print(f"DataForSEO: credentials FOUND (login={DATAFORSEO_LOGIN[:3]}***). "
+              f"Will use as fallback when SerpApi is exhausted.")
+        # Do one live probe so we know immediately if it works
+        probe = dataforseo_cheapest("Cork", "STN", "London", 
+                                     (dt.date.today() + dt.timedelta(days=42)).isoformat())
+        if probe:
+            print(f"DataForSEO PROBE OK: Cork->London €{probe['price']} {probe['airlines']}")
+        else:
+            print("DataForSEO PROBE returned nothing — check credit balance & response format.")
+    else:
+        print("DataForSEO: NO credentials found in env. "
+              "Set DATAFORSEO_LOGIN and DATAFORSEO_PASSWORD as GitHub Secrets.")
 
     airport_data = {}
 
