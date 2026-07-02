@@ -1,15 +1,15 @@
 name: Refresh flight deals
 
-# Runs the deal scan on a schedule and commits deals_cache.json back to the repo.
-# Streamlit Cloud then auto-redeploys with the fresh deals — visitors pay zero quota.
+# Runs the deal scan daily and commits deals_cache.json back to the repo.
+# GitHub Pages then serves the fresh deals — visitors pay zero quota.
 
 on:
   schedule:
-    # Weekly: every Monday at 07:00 UTC.
-    # 5 weekend boards + 1 week board × ~26 destinations ≈ 156 searches/run
-    # × ~4.3 weeks ≈ 670/month. Needs your 3-key rotation (750/month free).
-    # To use less quota: lower NUM_WEEKENDS in refresh_deals.py.
-    - cron: "0 7 * * 1"
+    # Daily at 05:00 UTC (early morning Irish time, deals fresh for the day).
+    # Cork + Dublin × 26 destinations × 8 boards ≈ 416 searches/run.
+    # SerpApi keys are tried first; DataForSEO fills in when they run out
+    # (~€7/month on DataForSEO standard rates at this volume).
+    - cron: "0 5 * * *"
   # Also allow manual runs from the GitHub "Actions" tab
   workflow_dispatch:
 
@@ -35,6 +35,8 @@ jobs:
           SERPAPI_KEY3: ${{ secrets.SERPAPI_KEY3 }}
           SERPAPI_KEY4: ${{ secrets.SERPAPI_KEY4 }}
           SERPAPI_KEY5: ${{ secrets.SERPAPI_KEY5 }}
+          DATAFORSEO_LOGIN: ${{ secrets.DATAFORSEO_LOGIN }}
+          DATAFORSEO_PASSWORD: ${{ secrets.DATAFORSEO_PASSWORD }}
         run: python refresh_deals.py
 
       - name: Commit the updated cache
