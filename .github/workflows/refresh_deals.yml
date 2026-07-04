@@ -1,16 +1,14 @@
 name: Refresh flight deals
 
-# Runs the deal scan daily and commits deals_cache.json back to the repo.
-# GitHub Pages then serves the fresh deals — visitors pay zero quota.
+# Scans real return fares (per person) via FlightAPI.io and commits
+# deals_cache.json back to the repo. GitHub Pages serves the result.
 
 on:
   schedule:
-    # Daily at 05:00 UTC (early morning Irish time, deals fresh for the day).
-    # Cork + Dublin × 26 destinations × 8 boards ≈ 416 searches/run.
-    # SerpApi keys are tried first; DataForSEO fills in when they run out
-    # (~€7/month on DataForSEO standard rates at this volume).
-    - cron: "0 5 * * *"
-  # Also allow manual runs from the GitHub "Actions" tab
+    # Every 5 days (calendar days 1,6,11,16,21,26) at 05:00 UTC.
+    # 8+8 boards × 26 destinations × 2 airports × 2 credits × 6 runs
+    # = 9,984 credits/month — fits the FlightAPI Basic plan (10,000).
+    - cron: "0 5 1,6,11,16,21,26 * *"
   workflow_dispatch:
 
 jobs:
@@ -30,13 +28,12 @@ jobs:
 
       - name: Run the deal scan
         env:
+          FLIGHTAPI_KEY: ${{ secrets.FLIGHTAPI_KEY }}
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
           SERPAPI_KEY2: ${{ secrets.SERPAPI_KEY2 }}
           SERPAPI_KEY3: ${{ secrets.SERPAPI_KEY3 }}
           SERPAPI_KEY4: ${{ secrets.SERPAPI_KEY4 }}
           SERPAPI_KEY5: ${{ secrets.SERPAPI_KEY5 }}
-          DATAFORSEO_LOGIN: ${{ secrets.DATAFORSEO_LOGIN }}
-          DATAFORSEO_PASSWORD: ${{ secrets.DATAFORSEO_PASSWORD }}
         run: python refresh_deals.py
 
       - name: Commit the updated cache
@@ -44,5 +41,5 @@ jobs:
           git config user.name "deal-bot"
           git config user.email "deal-bot@users.noreply.github.com"
           git add deals_cache.json price_history.json
-          git commit -m "Refresh flight deals" || echo "No changes to commit"
+          git commit -m "Refresh flight deals (FlightAPI, per-person)" || echo "No changes to commit"
           git push
