@@ -1,0 +1,27 @@
+name: Test FlightAPI coverage
+
+# Manual test — checks FlightAPI.io coverage & accuracy for Cork + Dublin
+# before paying for a plan. Uses ~16 of the free plan's 100 requests.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run FlightAPI coverage test
+        env:
+          FLIGHTAPI_KEY: ${{ secrets.FLIGHTAPI_KEY }}
+        run: python test_flightapi.py
