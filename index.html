@@ -1915,7 +1915,7 @@ function renderDirectTimeline(){
     rows[0]?.b.return_date  || new Date(Date.now()+28*864e5).toISOString().slice(0,10));
   const aviaCta = `
     <div style="margin-top:18px;text-align:center">
-      <a class="deal-book" href="${avia}" target="_blank" rel="noopener noreferrer sponsored"
+      <a class="deal-book primary" href="${avia}" target="_blank" rel="noopener noreferrer sponsored"
          onclick="track('flight_click',{source:'timeline_aviasales',dest:'${code}'})"
          style="display:inline-flex;padding:12px 22px">🔎 Need different dates? Search live on Aviasales →</a>
       <div style="font-size:11px;color:var(--muted);margin-top:8px">Opens our partner Aviasales — comparing all airlines and dates.</div>
@@ -1943,7 +1943,7 @@ function renderDirectTimeline(){
           <td>${fmtD(r.b.depart_date)} → ${fmtD(r.b.return_date)}</td>
           <td class="price-cell">€${r.pp}${r.pp === minPP ? " ⭐" : ""}</td>
           <td>${r.d.airlines || "—"}</td>
-          <td><a class="deal-book" style="padding:6px 12px;font-size:12px"
+          <td><a class="deal-book secondary" style="padding:6px 12px;font-size:12px"
                  href="${flightUrl(r.d.airlines || "", apCode, r.d.code, r.b.depart_date, r.b.return_date, 1, 0)}"
                  target="_blank" rel="noopener noreferrer"
                  onclick="event.stopPropagation();track('flight_click',{source:'timeline',dest:'${code}'})">Book</a></td>
@@ -1975,7 +1975,7 @@ function searchEuropeFromCache(){
     <div style="margin-top:14px">
       <div style="font-weight:700;font-size:14px;margin-bottom:8px">🧳 Plan the full trip for your dates (${new Date(out+"T12:00:00").toLocaleDateString("en-IE",{day:"numeric",month:"short"})} → ${new Date(ret+"T12:00:00").toLocaleDateString("en-IE",{day:"numeric",month:"short"})})</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <a class="deal-book" style="cursor:pointer"
+        <a class="deal-book primary" style="cursor:pointer"
            onclick='openDetail(${synth("DUB")}, "${out}", "${ret}", selAdults + selChildren, 1)'>from Dublin — hotels, cars &amp; guide →</a>
         <a class="deal-book secondary" style="cursor:pointer"
            onclick='openDetail(${synth("ORK")}, "${out}", "${ret}", selAdults + selChildren, 1)'>from Cork →</a>
@@ -1995,7 +1995,7 @@ function searchEuropeFromCache(){
   const aviaOrk = aviasalesUrl("ORK", code, out, ret || null);
   const cta = `
     <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
-      <a class="deal-book" href="${avia}" target="_blank" rel="noopener noreferrer sponsored"
+      <a class="deal-book primary" href="${avia}" target="_blank" rel="noopener noreferrer sponsored"
          onclick="track('flight_click',{source:'europe_aviasales',dest:'${code}',origin:'DUB'})">🔎 Search your dates from Dublin →</a>
       <a class="deal-book secondary" href="${aviaOrk}" target="_blank" rel="noopener noreferrer sponsored"
          onclick="track('flight_click',{source:'europe_aviasales',dest:'${code}',origin:'ORK'})">from Cork →</a>
@@ -2025,7 +2025,7 @@ function searchEuropeFromCache(){
           <td>${fmtD(r.b.depart_date)} → ${fmtD(r.b.return_date)}</td>
           <td class="price-cell">€${r.pp}</td>
           <td>${r.d.airlines || "—"}</td>
-          <td><a class="deal-book" style="padding:6px 12px;font-size:12px"
+          <td><a class="deal-book secondary" style="padding:6px 12px;font-size:12px"
                  href="${flightUrl(r.d.airlines || "", r.apCode, r.d.code, r.b.depart_date, r.b.return_date, 1, 0)}"
                  target="_blank" rel="noopener noreferrer"
                  onclick="event.stopPropagation();track('flight_click',{source:'europe_cache',dest:'${code}'})">Book</a></td>
@@ -2340,7 +2340,7 @@ async function searchEurope() {
             <td style="font-size:11px;color:var(--gray)">${d.via}</td>
             <td>${d.departure}</td>
             <td>${d.arrival}</td>
-            <td><a class="deal-book" style="padding:6px 12px;font-size:12px" href="${flightUrl(data.airlines||'', d.arrival_airport||dest, 'ORK', out, ret||'', 1, 0)}" target="_blank" rel="noopener noreferrer">Book</a></td>
+            <td><a class="deal-book secondary" style="padding:6px 12px;font-size:12px" href="${flightUrl(data.airlines||'', d.arrival_airport||dest, 'ORK', out, ret||'', 1, 0)}" target="_blank" rel="noopener noreferrer">Book</a></td>
           </tr>`).join("")}</tbody>
       </table>
       <p style="margin-top:12px;font-size:12px;color:var(--gray)">Prices are ${ret?'full return':'one-way'}. Confirmed at booking.</p>`;
