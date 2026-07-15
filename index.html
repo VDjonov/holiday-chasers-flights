@@ -384,6 +384,15 @@ img{max-width:100%}
 .signup-privacy{margin-top:12px;font-size:12px;color:rgba(251,248,241,.6);line-height:1.5}
 .foot-disclosure{display:inline-block;max-width:560px;margin:8px auto;font-size:12px;color:var(--muted);line-height:1.5}
 
+/* v3.3 — analytics consent bar */
+.consent-bar{position:fixed;left:0;right:0;bottom:0;z-index:900;background:var(--ink);color:var(--ivory);padding:14px 20px;display:none;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:0 -8px 30px rgba(10,27,46,.35)}
+.consent-bar.show{display:flex}
+.consent-txt{flex:1;font-size:13px;line-height:1.5;min-width:220px}
+.consent-txt b{color:var(--gold-soft)}
+.consent-btns{display:flex;gap:10px}
+.consent-btn{padding:9px 18px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:var(--font-body)}
+.consent-accept{background:var(--gold);color:var(--ink)}
+.consent-decline{background:transparent;color:var(--ivory);border:1px solid rgba(251,248,241,.35)}
 /* v3.2 — Where to eat (Google Places) */
 .dt-rest{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--paper)}
 .rest-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink);transition:.15s}
@@ -1491,6 +1500,65 @@ document.querySelectorAll(".filter-btn").forEach(btn => {
 });
 
 // ── Load deals ───────────────────────────────────────────────────────────────
+
+// ── Analytics (GA4, consent-gated — GDPR) ───────────────────────────────────
+const GA_ID = "G-ZL57HH33JG";
+
+function loadGA(){
+  if (window.gtag) return;
+  const s = document.createElement("script");
+  s.async = true;
+  s.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID;
+  document.head.appendChild(s);
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function(){ dataLayer.push(arguments); };
+  gtag("js", new Date());
+  gtag("config", GA_ID, { anonymize_ip: true });
+}
+
+function hcConsent(accepted){
+  try{ localStorage.setItem("hc_consent", accepted ? "yes" : "no"); }catch(e){}
+  document.getElementById("consentBar").classList.remove("show");
+  if (accepted) loadGA();
+}
+
+(function initConsent(){
+  let c = null;
+  try{ c = localStorage.getItem("hc_consent"); }catch(e){}
+  if (c === "yes") loadGA();
+  else if (c === null){
+    window.addEventListener("load", () =>
+      document.getElementById("consentBar").classList.add("show"));
+  }
+})();
+
+function track(name, params){
+  if (window.gtag) gtag("event", name, params || {});
+}
+
+// Affiliate & booking click events — delegated, covers every board and page
+document.addEventListener("click", (e) => {
+  const a = e.target.closest("a");
+  if (!a) return;
+  let kind = null;
+  if (a.classList.contains("deal-book")) kind = "flight_click";
+  else if (a.classList.contains("stay-btn")) kind = "stay_click";
+  else if (a.classList.contains("tc-row")) kind = "trip_calc_click";
+  else if (a.classList.contains("rest-row")) kind = "restaurant_click";
+  if (!kind) return;
+  // Work out which destination the click belongs to
+  let dest = "";
+  const card = a.closest(".deal-card");
+  if (card){
+    const n = card.querySelector(".pc-name");
+    dest = n ? n.textContent.trim() : "";
+  } else {
+    const t = document.querySelector(".dt-city-title");
+    dest = t ? t.textContent.trim() : "";
+  }
+  track(kind, { destination: dest, label: (a.textContent || "").trim().slice(0, 40) });
+}, { passive: true });
+
 async function loadDeals() {
   // Load the static GitHub file first — always works, instant, no backend needed
   try {
@@ -2492,6 +2560,7 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers){
   loadCityAbout(d.code, d.city);
   loadAttractions(d.code);
   loadRestaurants(d.code);
+  track("view_destination", { destination: d.city, origin: flightOrigin });
   loadTransport(d.code);
   loadEvents(d.code, dep, ret);
 }
@@ -2743,5 +2812,13 @@ checkBackend();
 // Re-check backend every 30s
 setInterval(checkBackend, 30000);
 </script>
+
+<div class="consent-bar" id="consentBar">
+  <div class="consent-txt"><b>Quick one:</b> we use anonymous analytics to see which deals people love, so we can find better ones. No ads, no selling data.</div>
+  <div class="consent-btns">
+    <button class="consent-btn consent-decline" onclick="hcConsent(false)">No thanks</button>
+    <button class="consent-btn consent-accept" onclick="hcConsent(true)">That's fine</button>
+  </div>
+</div>
 </body>
 </html>
