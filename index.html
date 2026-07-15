@@ -1933,8 +1933,12 @@ function renderDirectTimeline(){
     <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Real return fares per person, refreshed automatically every few days.</div>
     <table class="results-table">
       <thead><tr><th>Trip</th><th>Dates</th><th>Per person</th><th>Airline</th><th></th></tr></thead>
-      <tbody>${rows.map(r => `
-        <tr class="${r.pp === minPP ? 'cheapest-row' : ''}">
+      <tbody>${rows.map(r => {
+        const dd = {...r.d, origin_airport: apCode};
+        const ddJson = JSON.stringify(dd).replace(/'/g, "&#39;");
+        return `
+        <tr class="${r.pp === minPP ? 'cheapest-row' : ''}" style="cursor:pointer" title="Open full trip guide"
+            onclick='openDetail(${ddJson}, "${r.b.depart_date}", "${r.b.return_date}", ${selAdults + selChildren}, ${_cacheTrav()})'>
           <td>${r.b._type === "weekend" ? "🏖️ Weekend" : "✈️ Week"}</td>
           <td>${fmtD(r.b.depart_date)} → ${fmtD(r.b.return_date)}</td>
           <td class="price-cell">€${r.pp}${r.pp === minPP ? " ⭐" : ""}</td>
@@ -1942,9 +1946,10 @@ function renderDirectTimeline(){
           <td><a class="deal-book" style="padding:6px 12px;font-size:12px"
                  href="${flightUrl(r.d.airlines || "", apCode, r.d.code, r.b.depart_date, r.b.return_date, 1, 0)}"
                  target="_blank" rel="noopener noreferrer"
-                 onclick="track('flight_click',{source:'timeline',dest:'${code}'})">Book</a></td>
-        </tr>`).join("")}</tbody>
-    </table>` + aviaCta;
+                 onclick="event.stopPropagation();track('flight_click',{source:'timeline',dest:'${code}'})">Book</a></td>
+        </tr>`;}).join("")}</tbody>
+    </table>
+    <div style="font-size:12px;color:var(--muted);margin-top:8px">💡 Tap any row for the full trip guide — hotels, car hire, food and sights for those dates.</div>` + aviaCta;
 }
 
 // "Anywhere in Europe" without a backend: show any cached fares for the city,
@@ -1953,10 +1958,29 @@ function searchEuropeFromCache(){
   const citySel = document.getElementById("europeCity");
   const code = citySel.value;
   const city = citySel.selectedOptions[0]?.textContent || code;
+  const cityName = city.replace(/\s*\([^)]*\)\s*$/, "");
+  const country = document.getElementById("europeCountry").value;
   const out = document.getElementById("europeDate").value;
   const ret = document.getElementById("europeReturn").value;
   const box = document.getElementById("europeResults");
   const trav = _cacheTrav();
+
+  // "Build this trip" — full destination guide for the EXACT dates picked.
+  // No cached fare for those dates, so the flight line links to live prices.
+  const synth = origin => JSON.stringify({
+    city: cityName, country, code: (code||"").split(",")[0].trim(),
+    price: null, stops: null, total_time: "", airlines: "", origin_airport: origin
+  }).replace(/'/g, "&#39;");
+  const buildBtns = (out && ret) ? `
+    <div style="margin-top:14px">
+      <div style="font-weight:700;font-size:14px;margin-bottom:8px">🧳 Plan the full trip for your dates (${new Date(out+"T12:00:00").toLocaleDateString("en-IE",{day:"numeric",month:"short"})} → ${new Date(ret+"T12:00:00").toLocaleDateString("en-IE",{day:"numeric",month:"short"})})</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a class="deal-book" style="cursor:pointer"
+           onclick='openDetail(${synth("DUB")}, "${out}", "${ret}", selAdults + selChildren, 1)'>from Dublin — hotels, cars &amp; guide →</a>
+        <a class="deal-book secondary" style="cursor:pointer"
+           onclick='openDetail(${synth("ORK")}, "${out}", "${ret}", selAdults + selChildren, 1)'>from Cork →</a>
+      </div>
+    </div>` : "";
 
   const found = [];
   for (const apCode of ["ORK", "DUB"]) {
@@ -1980,7 +2004,7 @@ function searchEuropeFromCache(){
 
   if (!found.length) {
     box.innerHTML = `
-      <p style="font-size:14px;color:var(--muted)">We don't scan ${city} regularly (it's beyond our direct-route boards), but you can check live prices for your dates in one click:</p>` + cta;
+      <p style="font-size:14px;color:var(--muted)">We don't scan ${city} regularly (it's beyond our direct-route boards), but you can plan the whole trip and check live prices in one click:</p>` + buildBtns + cta;
     return;
   }
 
@@ -1991,8 +2015,12 @@ function searchEuropeFromCache(){
     <div style="font-size:12px;color:var(--muted);margin-bottom:12px">From our automatic scans — your exact dates may differ, check live below.</div>
     <table class="results-table">
       <thead><tr><th>From</th><th>Dates</th><th>Per person</th><th>Airline</th><th></th></tr></thead>
-      <tbody>${top.map(r => `
-        <tr>
+      <tbody>${top.map(r => {
+        const dd = {...r.d, origin_airport: r.apCode};
+        const ddJson = JSON.stringify(dd).replace(/'/g, "&#39;");
+        return `
+        <tr style="cursor:pointer" title="Open full trip guide"
+            onclick='openDetail(${ddJson}, "${r.b.depart_date}", "${r.b.return_date}", selAdults + selChildren, _cacheTrav())'>
           <td>${r.apCode === "ORK" ? "Cork" : "Dublin"}</td>
           <td>${fmtD(r.b.depart_date)} → ${fmtD(r.b.return_date)}</td>
           <td class="price-cell">€${r.pp}</td>
@@ -2000,9 +2028,10 @@ function searchEuropeFromCache(){
           <td><a class="deal-book" style="padding:6px 12px;font-size:12px"
                  href="${flightUrl(r.d.airlines || "", r.apCode, r.d.code, r.b.depart_date, r.b.return_date, 1, 0)}"
                  target="_blank" rel="noopener noreferrer"
-                 onclick="track('flight_click',{source:'europe_cache',dest:'${code}'})">Book</a></td>
-        </tr>`).join("")}</tbody>
-    </table>` + cta;
+                 onclick="event.stopPropagation();track('flight_click',{source:'europe_cache',dest:'${code}'})">Book</a></td>
+        </tr>`;}).join("")}</tbody>
+    </table>
+    <div style="font-size:12px;color:var(--muted);margin-top:8px">💡 Tap any row for the full trip guide for those dates.</div>` + buildBtns + cta;
 }
 
 // ── Backend health check ─────────────────────────────────────────────────────
@@ -2560,11 +2589,12 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers){
   groupSize = groupSize || 1;
 
   // Resolve which airport this deal flies from
-  const flightOrigin = selectedAirport === "BEST"
-    ? (d.origin_airport || "ORK")
-    : (selectedAirport || "ORK");
-  const perP = Math.round(d.price / cacheTravellers);
-  const groupTot = perP * groupSize;
+  const flightOrigin = d.origin_airport
+    || (selectedAirport === "BEST" ? "ORK" : (selectedAirport || "ORK"));
+  const hasPrice = d.price != null;
+  const perP = hasPrice ? Math.round(d.price / cacheTravellers) : null;
+  const groupTot = hasPrice ? perP * groupSize : null;
+  const liveFlightUrl = aviasalesUrl(flightOrigin, d.code, dep, ret, Math.max(1, selAdults));
   const groupLbl = travellerLabel();
   const flightPax = `${selAdults}+adults${selChildren>0?'+'+selChildren+'+children':''}`;
   const nights = Math.round((new Date(ret) - new Date(dep)) / 86400000);
@@ -2582,9 +2612,9 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers){
       </div>
     </div>
     <div class="dt-pricestrip">
-      <div class="dt-priceitem"><div class="lbl">Per person</div><div class="val">€${perP}</div></div>
-      <div class="dt-priceitem"><div class="lbl">${groupLbl}</div><div class="val">€${groupTot}</div></div>
-      <div class="dt-priceitem"><div class="lbl">Flight</div><div class="val">${d.stops===0?'Direct':d.stops+' stop'+(d.stops>1?'s':'')} <small>${d.total_time||''}</small></div></div>
+      <div class="dt-priceitem"><div class="lbl">Per person</div><div class="val">${hasPrice ? '€'+perP : '<a href="'+liveFlightUrl+'" target="_blank" rel="noopener noreferrer sponsored" style="font-size:15px">Check live →</a>'}</div></div>
+      <div class="dt-priceitem"><div class="lbl">${groupLbl}</div><div class="val">${hasPrice ? '€'+groupTot : '—'}</div></div>
+      <div class="dt-priceitem"><div class="lbl">Flight</div><div class="val">${d.stops==null ? '<small>your dates</small>' : (d.stops===0?'Direct':d.stops+' stop'+(d.stops>1?'s':'')) + ' <small>'+(d.total_time||'')+'</small>'}</div></div>
       <div class="dt-priceitem"><div class="lbl">Airline</div><div class="val" style="font-size:16px">${d.airlines||'—'}</div></div>
     </div>
 
@@ -2594,9 +2624,9 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers){
       <h2>🧳 Complete the trip</h2>
       <div class="dt-sub">Everything for ${nights} night${nights>1?'s':''} in ${d.city} — tap any line to compare live prices.</div>
       <div class="trip-calc">
-        <a class="tc-row tc-flight" href="${flightUrl(d.airlines, flightOrigin, d.code, dep, ret, selAdults, selChildren)}" target="_blank" rel="noopener noreferrer">
-          <span class="tc-ic">✈️</span><span class="tc-lbl">Flights · ${groupLbl}</span>
-          <span class="tc-val">€${groupTot}</span>
+        <a class="tc-row tc-flight" href="${hasPrice ? flightUrl(d.airlines, flightOrigin, d.code, dep, ret, selAdults, selChildren) : liveFlightUrl}" target="_blank" rel="noopener noreferrer${hasPrice ? '' : ' sponsored'}">
+          <span class="tc-ic">✈️</span><span class="tc-lbl">Flights · ${groupLbl}${hasPrice ? '' : ' · live on Aviasales'}</span>
+          <span class="tc-val">${hasPrice ? '€'+groupTot : 'Check →'}</span>
         </a>
         <a class="tc-row" href="${hotelUrl(d.city, dep, ret)}" target="_blank" rel="noopener noreferrer">
           <span class="tc-ic">🏨</span><span class="tc-lbl">${nights} night${nights>1?'s':''} hotel <span class="tc-brand">${BRAND.booking}</span></span>
@@ -2612,7 +2642,7 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers){
         </a>
         <div class="tc-total">
           <span class="tc-lbl">Estimated trip total <small>(flights + hotel + car)</small></span>
-          <span class="tc-val">~ €${groupTot + costs.hotel*nights + (nights+1)*32}</span>
+          <span class="tc-val">~ €${(hasPrice ? groupTot : 0) + costs.hotel*nights + (nights+1)*32}${hasPrice ? '' : ' + flights'}</span>
         </div>
       </div>
       <div class="tc-note">Estimates from typical ${d.city} prices — live prices shown when you tap through. Book each part with the provider directly.</div>
