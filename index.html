@@ -749,8 +749,8 @@ img{max-width:100%}
   </div>
 
   <div class="trip-toggle" id="boardToggle">
-    <button class="active" data-board="weekend">🏖️ Weekend</button>
-    <button data-board="week">✈️ One week</button>
+    <button data-board="weekend">🏖️ Weekend</button>
+    <button class="active" data-board="week">✈️ One week</button>
   </div>
 
   <div id="weekendPickerRow" style="margin-bottom:16px">
@@ -1148,7 +1148,7 @@ const BACKEND_HEADERS = {
   "ngrok-skip-browser-warning": "true"
 };
 let cachedDeals = null;
-let currentBoard = "weekend";
+let currentBoard = "week";  // default landing view: one-week deals
 let selectedAirport = "ORK";  // ORK, DUB, or BEST (best of both)
 
 // ── Airport selector ─────────────────────────────────────────────────────────
@@ -1441,16 +1441,28 @@ function selectBoard(idx) {
   renderDeals();
 }
 
-// Index of the board with the cheapest top deal (default 0 if empty)
+// Index of the "best" board: cheapest top deal among boards that have
+// enough offers to be worth landing on. Sparse boards (e.g. a glitchy scan
+// that returned 1 offer) can never become the default view. If no board
+// meets the threshold, fall back to the fullest board available.
+const MIN_BOARD_DEALS = 5;
 function bestBoardIdx(list){
-  let bi = 0, bp = Infinity;
-  (list || []).forEach((b, i) => {
+  list = list || [];
+  let bi = -1, bp = Infinity;
+  list.forEach((b, i) => {
     const deals = b.deals || [];
-    if (!deals.length) return;
+    if (deals.length < MIN_BOARD_DEALS) return;   // sparse — not eligible
     const p = Math.min(...deals.map(d => d.price));
     if (p < bp){ bp = p; bi = i; }
   });
-  return bi;
+  if (bi !== -1) return bi;
+  // No board qualifies (bad scan day) — land on the board with the MOST deals
+  let mi = 0, mc = -1;
+  list.forEach((b, i) => {
+    const c = (b.deals || []).length;
+    if (c > mc){ mc = c; mi = i; }
+  });
+  return mi;
 }
 
 function applyBestBoardDefaults(){
