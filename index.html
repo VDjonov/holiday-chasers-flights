@@ -794,10 +794,26 @@ img{max-width:100%}
     <h2>Direct flights from Cork & Dublin</h2>
     <p>Pick a destination and a centre date — we scan ±5 days and show the cheapest price for each day.</p>
   </div>
-  <div id="directOffline" class="offline-banner" style="display:none">
-    ⚠️ Live search is offline — start backend.py and ngrok on your PC to enable this.
+  <!-- Cache-powered price timeline: every scanned weekend & week for one destination -->
+  <div id="directTimelineBlock">
+    <div class="search-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>From</label>
+          <select id="tlAirport" onchange="renderDirectTimeline()">
+            <option value="ORK">Cork (ORK)</option>
+            <option value="DUB">Dublin (DUB)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Destination</label>
+          <select id="tlDest" onchange="renderDirectTimeline()"></select>
+        </div>
+      </div>
+    </div>
+    <div id="tlResults"></div>
   </div>
-  <div class="search-form">
+  <div class="search-form" id="directLiveForm" style="display:none">
     <div class="form-row">
       <div class="form-group">
         <label>Destination</label>
@@ -837,9 +853,6 @@ img{max-width:100%}
   <div class="section-hdr">
     <h2>Anywhere in Europe</h2>
     <p>Reach any European city — including connections. Great for places with no direct Cork route.</p>
-  </div>
-  <div id="europeOffline" class="offline-banner" style="display:none">
-    ⚠️ Live search is offline — start backend.py and ngrok on your PC to enable this.
   </div>
   <div class="search-form" id="europeForm">
     <div class="form-row">
@@ -903,10 +916,20 @@ img{max-width:100%}
 // ══════════════════════════════════════════════════════════════════════════════
 // CONFIG — set your backend URL here after starting Cloudflare Tunnel
 // ══════════════════════════════════════════════════════════════════════════════
-// Backend for live search. Currently the old ngrok URL (dead without your PC).
-// When Render.com is set up, replace with: "https://your-app.onrender.com"
-// Live search fails gracefully when unreachable — Deal Board is unaffected.
-const BACKEND_URL = "https://fantasize-circus-spray.ngrok-free.dev";
+// Backend for live search (Phase 2: Cloudflare Worker URL goes here).
+// Empty = cache + affiliate mode: tabs are powered by deals_cache.json and
+// Aviasales affiliate links. Deal Board is always unaffected.
+const BACKEND_URL = "";
+
+// ── Travelpayouts affiliate (Aviasales flight search) ────────────────────────
+const TP_MARKER = "543929";
+function aviasalesUrl(origin, destCode, dep, ret, adults = 1) {
+  const d1 = (destCode || "").split(",")[0].trim();
+  const ddmm = (iso) => iso ? iso.slice(8,10) + iso.slice(5,7) : "";
+  const seg = ret ? `${origin}${ddmm(dep)}${d1}${ddmm(ret)}${adults}`
+                  : `${origin}${ddmm(dep)}${d1}${adults}`;
+  return `https://www.aviasales.com/search/${seg}?marker=${TP_MARKER}`;
+}
 const NGROK_BYPASS = "?ngrok-skip-browser-warning=true";
 const DEALS_JSON = "./deals_cache.json"; // static file, always available
 
@@ -1272,7 +1295,6 @@ const AIRLINE_URLS = {
       originIata: origin, destinationIata: dest,
       dateOut: dep, dateIn: ret,
       adults, teens: 0, children, infants: 0,
-      partnerId: "google",
     });
     return `https://www.ryanair.com/ie/en/trip/flights/select?${p}`;
   },
@@ -1580,6 +1602,7 @@ async function loadDeals() {
       applyBestBoardDefaults();     // default to the best-priced week/weekend
       populateWeekendPicker();
       renderDeals();
+      renderDirectTimeline();       // cache-powered Direct Flights timeline
       return;
     } else {
       document.getElementById("dealsLoading").innerHTML = "No deals found yet. Check back soon.";
@@ -1840,33 +1863,172 @@ function renderDeals() {
   });
 }
 
+// ── Cache-powered tabs (Phase 1: no backend needed) ──────────────────────────
+// Everything below reads deals_cache.json (already loaded as cachedDeals) and
+// links out via airline deeplinks + Aviasales affiliate search.
+
+function _cacheTrav(){ return (cachedDeals && cachedDeals.travellers) || 1; }
+
+// All scanned boards for one airport, tagged with their trip type.
+function _allBoards(apCode){
+  const ap = cachedDeals?.airports?.[apCode];
+  if (!ap) return [];
+  const tag = (list, type) => (list || []).map(b => ({...b, _type: type}));
+  return [...tag(ap.weekend_boards, "weekend"), ...tag(ap.week_boards, "week")];
+}
+
+// Find a deal for a destination code (handles multi-codes like "CDG,ORY").
+function _findDeal(board, codeStr){
+  const codes = (codeStr || "").split(",").map(s => s.trim());
+  return (board.deals || []).find(d => codes.includes(d.code)) || null;
+}
+
+function populateTimelineDest(){
+  const sel = document.getElementById("tlDest");
+  if (!sel || sel.options.length) return;
+  DIRECT.forEach(d => {
+    const o = document.createElement("option");
+    o.value = d.code; o.textContent = `${d.city}, ${d.country}`;
+    sel.appendChild(o);
+  });
+}
+
+function renderDirectTimeline(){
+  const box = document.getElementById("tlResults");
+  if (!box || !cachedDeals) return;
+  populateTimelineDest();
+  const apCode = document.getElementById("tlAirport").value;
+  const destSel = document.getElementById("tlDest");
+  const code = destSel.value;
+  const cityName = destSel.selectedOptions[0]?.textContent?.split(",")[0] || code;
+  const trav = _cacheTrav();
+
+  const rows = [];
+  for (const b of _allBoards(apCode)) {
+    const d = _findDeal(b, code);
+    if (d) rows.push({ b, d, pp: Math.round(d.price / trav) });
+  }
+  rows.sort((a, c) => (a.b.depart_date || "").localeCompare(c.b.depart_date || ""));
+
+  const avia = aviasalesUrl(apCode, code,
+    rows[0]?.b.depart_date || new Date(Date.now()+21*864e5).toISOString().slice(0,10),
+    rows[0]?.b.return_date  || new Date(Date.now()+28*864e5).toISOString().slice(0,10));
+  const aviaCta = `
+    <div style="margin-top:18px;text-align:center">
+      <a class="deal-book" href="${avia}" target="_blank" rel="noopener noreferrer sponsored"
+         onclick="track('flight_click',{source:'timeline_aviasales',dest:'${code}'})"
+         style="display:inline-flex;padding:12px 22px">🔎 Need different dates? Search live on Aviasales →</a>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px">Opens our partner Aviasales — comparing all airlines and dates.</div>
+    </div>`;
+
+  if (!rows.length) {
+    box.innerHTML = `<p style="color:var(--muted);font-size:14px">No scanned fares for ${cityName} from ${apCode === "ORK" ? "Cork" : "Dublin"} right now — it may not be a direct route from this airport.</p>` + aviaCta;
+    return;
+  }
+
+  const minPP = Math.min(...rows.map(r => r.pp));
+  const fmtD = iso => new Date(iso + "T00:00:00").toLocaleDateString("en-IE", {day:"numeric", month:"short"});
+  box.innerHTML = `
+    <div style="font-weight:700;font-size:15px;margin:6px 0 4px">Every scanned date for ${cityName} — cheapest first-glance planner</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Real return fares per person, refreshed automatically every few days.</div>
+    <table class="results-table">
+      <thead><tr><th>Trip</th><th>Dates</th><th>Per person</th><th>Airline</th><th></th></tr></thead>
+      <tbody>${rows.map(r => `
+        <tr class="${r.pp === minPP ? 'cheapest-row' : ''}">
+          <td>${r.b._type === "weekend" ? "🏖️ Weekend" : "✈️ Week"}</td>
+          <td>${fmtD(r.b.depart_date)} → ${fmtD(r.b.return_date)}</td>
+          <td class="price-cell">€${r.pp}${r.pp === minPP ? " ⭐" : ""}</td>
+          <td>${r.d.airlines || "—"}</td>
+          <td><a class="deal-book" style="padding:6px 12px;font-size:12px"
+                 href="${flightUrl(r.d.airlines || "", apCode, r.d.code, r.b.depart_date, r.b.return_date, 1, 0)}"
+                 target="_blank" rel="noopener noreferrer"
+                 onclick="track('flight_click',{source:'timeline',dest:'${code}'})">Book</a></td>
+        </tr>`).join("")}</tbody>
+    </table>` + aviaCta;
+}
+
+// "Anywhere in Europe" without a backend: show any cached fares for the city,
+// then hand off to Aviasales (affiliate) for the exact dates chosen.
+function searchEuropeFromCache(){
+  const citySel = document.getElementById("europeCity");
+  const code = citySel.value;
+  const city = citySel.selectedOptions[0]?.textContent || code;
+  const out = document.getElementById("europeDate").value;
+  const ret = document.getElementById("europeReturn").value;
+  const box = document.getElementById("europeResults");
+  const trav = _cacheTrav();
+
+  const found = [];
+  for (const apCode of ["ORK", "DUB"]) {
+    for (const b of _allBoards(apCode)) {
+      const d = _findDeal(b, code);
+      if (d) found.push({ apCode, b, d, pp: Math.round(d.price / trav) });
+    }
+  }
+  found.sort((a, c) => a.pp - c.pp);
+
+  const avia = aviasalesUrl("DUB", code, out, ret || null);
+  const aviaOrk = aviasalesUrl("ORK", code, out, ret || null);
+  const cta = `
+    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+      <a class="deal-book" href="${avia}" target="_blank" rel="noopener noreferrer sponsored"
+         onclick="track('flight_click',{source:'europe_aviasales',dest:'${code}',origin:'DUB'})">🔎 Search your dates from Dublin →</a>
+      <a class="deal-book secondary" href="${aviaOrk}" target="_blank" rel="noopener noreferrer sponsored"
+         onclick="track('flight_click',{source:'europe_aviasales',dest:'${code}',origin:'ORK'})">from Cork →</a>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px">Live prices for your exact dates on our partner Aviasales — all airlines, including connections.</div>`;
+
+  if (!found.length) {
+    box.innerHTML = `
+      <p style="font-size:14px;color:var(--muted)">We don't scan ${city} regularly (it's beyond our direct-route boards), but you can check live prices for your dates in one click:</p>` + cta;
+    return;
+  }
+
+  const fmtD = iso => new Date(iso + "T00:00:00").toLocaleDateString("en-IE", {day:"numeric", month:"short"});
+  const top = found.slice(0, 6);
+  box.innerHTML = `
+    <div style="font-weight:700;font-size:15px;margin-bottom:4px">Recently scanned fares to ${city}</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px">From our automatic scans — your exact dates may differ, check live below.</div>
+    <table class="results-table">
+      <thead><tr><th>From</th><th>Dates</th><th>Per person</th><th>Airline</th><th></th></tr></thead>
+      <tbody>${top.map(r => `
+        <tr>
+          <td>${r.apCode === "ORK" ? "Cork" : "Dublin"}</td>
+          <td>${fmtD(r.b.depart_date)} → ${fmtD(r.b.return_date)}</td>
+          <td class="price-cell">€${r.pp}</td>
+          <td>${r.d.airlines || "—"}</td>
+          <td><a class="deal-book" style="padding:6px 12px;font-size:12px"
+                 href="${flightUrl(r.d.airlines || "", r.apCode, r.d.code, r.b.depart_date, r.b.return_date, 1, 0)}"
+                 target="_blank" rel="noopener noreferrer"
+                 onclick="track('flight_click',{source:'europe_cache',dest:'${code}'})">Book</a></td>
+        </tr>`).join("")}</tbody>
+    </table>` + cta;
+}
+
 // ── Backend health check ─────────────────────────────────────────────────────
 async function checkBackend() {
   const el = document.getElementById("backendStatus");
-  if (!BACKEND_URL) {
-    el.className = "nav-status status-off"; el.textContent = "● Deal board only";
-    showOfflineBanners(true); return;
+  if (BACKEND_URL) {
+    try {
+      const r = await fetch(BACKEND_URL + "/api/health", { signal: AbortSignal.timeout(4000) });
+      if (r.ok) {
+        backendOnline = true;
+        el.className = "nav-status status-on"; el.textContent = "● Live search on";
+        setLiveUi(true); return;
+      }
+    } catch(e) {}
   }
-  try {
-    const r = await fetch(BACKEND_URL + "/api/health" + NGROK_BYPASS, {
-      signal: AbortSignal.timeout(4000),
-      headers: {"ngrok-skip-browser-warning": "true"}
-    });
-    if (r.ok) {
-      backendOnline = true;
-      el.className = "nav-status status-on"; el.textContent = "● Live search on";
-      showOfflineBanners(false); return;
-    }
-  } catch(e) {}
-  el.className = "nav-status status-off"; el.textContent = "● Live search off";
-  showOfflineBanners(true);
+  // Cache + affiliate mode: no scary badge, tabs stay fully functional
+  el.textContent = ""; el.className = "nav-status";
+  setLiveUi(false);
 }
 
-function showOfflineBanners(show) {
-  document.getElementById("directOffline").style.display = show ? "flex" : "none";
-  document.getElementById("europeOffline").style.display = show ? "flex" : "none";
-  document.getElementById("directSearch").disabled = show;
-  document.getElementById("europeSearch").disabled = show;
+function setLiveUi(online) {
+  const live = document.getElementById("directLiveForm");
+  if (live) live.style.display = online ? "" : "none";
+  const btn = document.getElementById("directSearch");
+  if (btn) btn.disabled = !online;
+  // europeSearch stays enabled — offline it falls through to cache + Aviasales
 }
 
 // ── Populate dropdowns ───────────────────────────────────────────────────────
@@ -2111,7 +2273,7 @@ async function searchDirectWindow() {
 
 // ── Live search: Europe (all options) ────────────────────────────────────────
 async function searchEurope() {
-  if (!backendOnline) return;
+  if (!backendOnline) { searchEuropeFromCache(); return; }
   const dest = document.getElementById("europeCity").value;
   const out = document.getElementById("europeDate").value;
   const ret = document.getElementById("europeReturn").value;
