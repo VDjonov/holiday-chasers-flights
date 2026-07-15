@@ -852,7 +852,7 @@ img{max-width:100%}
 <section id="tab-europe" class="tab-content">
   <div class="section-hdr">
     <h2>Anywhere in Europe</h2>
-    <p>Reach any European city — including connections. Great for places with no direct Cork route.</p>
+    <p>Reach any European city — including connections. Great for places with no direct route from Cork or Dublin.</p>
   </div>
   <div class="search-form" id="europeForm">
     <div class="form-row">
@@ -862,15 +862,15 @@ img{max-width:100%}
       </div>
       <div class="form-group">
         <label>City</label>
-        <select id="europeCity"></select>
+        <select id="europeCity" onchange="refreshEuropeResults()"></select>
       </div>
       <div class="form-group">
         <label>Outbound date</label>
-        <input type="date" id="europeDate">
+        <input type="date" id="europeDate" onchange="refreshEuropeResults()">
       </div>
       <div class="form-group">
         <label>Return date</label>
-        <input type="date" id="europeReturn">
+        <input type="date" id="europeReturn" onchange="refreshEuropeResults()">
       </div>
       <button class="search-btn" id="europeSearch" onclick="searchEurope()">Search</button>
     </div>
@@ -2066,6 +2066,16 @@ function updateCities() {
     const o = document.createElement("option"); o.value = d.code;
     o.textContent = `${d.city} (${d.code})`; sel.appendChild(o);
   });
+  refreshEuropeResults();
+}
+
+// Keep the results (and their affiliate links) in sync with the inputs —
+// stale results with old destinations must never linger on screen.
+function refreshEuropeResults() {
+  const box = document.getElementById("europeResults");
+  if (!box || !box.innerHTML.trim()) return;   // nothing rendered yet
+  if (!backendOnline) searchEuropeFromCache(); // instant, cache-only
+  else box.innerHTML = "";                     // live mode: clear, ask to re-search
 }
 
 // ── Live search: Direct ±5 days — separate out/return grids ─────────────────
