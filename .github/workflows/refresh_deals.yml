@@ -5,10 +5,11 @@ name: Refresh flight deals
 
 on:
   schedule:
-    # Every 5 days (calendar days 1,6,11,16,21,26) at 05:00 UTC.
-    # 8+8 boards × 26 destinations × 2 airports × 2 credits × 6 runs
-    # = 9,984 credits/month — fits the FlightAPI Basic plan (10,000).
-    - cron: "0 5 1,6,11,16,21,26 * *"
+    # Every 3 days (calendar days 1,4,...,28) at 05:00 UTC.
+    # (8+10 boards) × 30 destinations × 2 airports × 2 credits × 10 runs
+    # = 21,600 credits/month — comfortably inside the FlightAPI Lite plan
+    # (30,000), leaving ~5,400 buffer + ~3,000 reserved for live search.
+    - cron: "0 5 1,4,7,10,13,16,19,22,25,28 * *"
   workflow_dispatch:
 
 jobs:
