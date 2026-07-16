@@ -1054,8 +1054,8 @@ const CITY_WIKI = {
 };
 
 const photoUrlCache = {};
-async function fetchCityPhoto(code) {
-  const title = CITY_WIKI[code];
+async function fetchCityPhoto(code, cityName) {
+  const title = CITY_WIKI[code] || cityName;
   if (!title) return "";
   if (photoUrlCache[code] !== undefined) return photoUrlCache[code];
   try {
@@ -1991,16 +1991,8 @@ function searchEuropeFromCache(){
   }
   found.sort((a, c) => a.pp - c.pp);
 
-  const avia = aviasalesUrl("DUB", code, out, ret || null);
-  const aviaOrk = aviasalesUrl("ORK", code, out, ret || null);
-  const cta = `
-    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
-      <a class="deal-book primary" href="${avia}" target="_blank" rel="noopener noreferrer sponsored"
-         onclick="track('flight_click',{source:'europe_aviasales',dest:'${code}',origin:'DUB'})">🔎 Search your dates from Dublin →</a>
-      <a class="deal-book secondary" href="${aviaOrk}" target="_blank" rel="noopener noreferrer sponsored"
-         onclick="track('flight_click',{source:'europe_aviasales',dest:'${code}',origin:'ORK'})">from Cork →</a>
-    </div>
-    <div style="font-size:11px;color:var(--muted);margin-top:8px">Live prices for your exact dates on our partner Aviasales — all airlines, including connections.</div>`;
+  const cta = (out && ret) ? "" : `
+    <div style="font-size:13px;color:var(--muted);margin-top:12px">Pick an outbound and return date above to plan the full trip.</div>`;
 
   if (!found.length) {
     box.innerHTML = `
@@ -2759,8 +2751,19 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers){
     </div>
   `;
 
+  // Unknown city (beyond the 26 curated destinations)? Geocode it once so
+  // weather, restaurants and the map light up for ANY city.
+  if (!CITY_COORDS[d.code]) {
+    try {
+      const g = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(d.city)}&count=1&language=en`);
+      const gj = await g.json();
+      const hit = gj.results && gj.results[0];
+      if (hit) CITY_COORDS[d.code] = [hit.latitude, hit.longitude];
+    } catch(e) {}
+  }
+
   // Hero photo
-  fetchCityPhoto(d.code).then(url => {
+  fetchCityPhoto(d.code, d.city).then(url => {
     if (!url) return;
     const hero = document.getElementById("dtHero");
     const img = new Image(); img.alt = d.city;
@@ -2776,7 +2779,7 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers){
   loadRestaurants(d.code);
   track("view_destination", { destination: d.city, origin: flightOrigin });
   loadTransport(d.code);
-  loadEvents(d.code, dep, ret);
+  loadEvents(d.code, dep, ret, d.city);
 }
 
 function closeDetail(){
@@ -2839,10 +2842,10 @@ function loadTransport(code){
   `;
 }
 
-async function loadEvents(code, dep, ret){
+async function loadEvents(code, dep, ret, cityName){
   const el = document.getElementById("dtEvents");
   if (!el) return;
-  const city = TM_CITY[code];
+  const city = TM_CITY[code] || cityName;
   // No key yet → honest message
   if (!TICKETMASTER_KEY){
     el.innerHTML = `<p style="color:var(--muted)">Live events feed isn't switched on yet. Once a Ticketmaster key is added, concerts, sport and major events for your dates will appear here automatically.</p>`;
@@ -2987,11 +2990,77 @@ async function loadRestaurants(code){
       : "");
 }
 
+// Fallback sights for cities beyond the curated 26: top-rated attractions
+// from Google Places (same referrer-locked key as restaurants), cached 7 days.
+async function loadAttractionsFromPlaces(code, box){
+  const coords = CITY_COORDS[code];
+  if (!coords || !GOOGLE_PLACES_KEY){
+    box.innerHTML = "<span class='dt-loading'>City guide coming soon.</span>"; return;
+  }
+  const ck = "hc_attr_" + code;
+  let spots = null;
+  try{
+    const cached = JSON.parse(localStorage.getItem(ck) || "null");
+    if (cached && Date.now() - cached.ts < 7*24*3600*1000) spots = cached.data;
+  }catch(e){}
+
+  if (!spots){
+    try{
+      const r = await fetch("https://places.googleapis.com/v1/places:searchNearby", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": GOOGLE_PLACES_KEY,
+          "X-Goog-FieldMask": "places.displayName,places.rating,places.userRatingCount,places.googleMapsUri,places.photos"
+        },
+        body: JSON.stringify({
+          includedTypes: ["tourist_attraction"],
+          maxResultCount: 8,
+          rankPreference: "POPULARITY",
+          locationRestriction: { circle: {
+            center: { latitude: coords[0], longitude: coords[1] },
+            radius: 8000
+          }}
+        })
+      });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const d = await r.json();
+      spots = (d.places || []).map(p => ({
+        name: p.displayName?.text || "",
+        rating: p.rating || null,
+        count: p.userRatingCount || 0,
+        url: p.googleMapsUri || "#",
+        photo: (p.photos && p.photos[0] && p.photos[0].name) || null
+      })).filter(p => p.name);
+      try{ localStorage.setItem(ck, JSON.stringify({ts: Date.now(), data: spots})); }catch(e){}
+    }catch(e){
+      box.innerHTML = "<span class='dt-loading'>City guide coming soon.</span>"; return;
+    }
+  }
+
+  if (!spots || !spots.length){
+    box.innerHTML = "<span class='dt-loading'>City guide coming soon.</span>"; return;
+  }
+
+  box.innerHTML = spots.slice(0, 6).map((s, i) => {
+    const img = (s.photo && i < 4)
+      ? `background-image:url('https://places.googleapis.com/v1/${s.photo}/media?maxWidthPx=400&key=${GOOGLE_PLACES_KEY}');color:transparent`
+      : "";
+    return `
+    <div class="dt-attraction">
+      <span class="dt-attraction-img" style="display:flex;align-items:center;justify-content:center;color:var(--gold);${img}">✦</span>
+      <div class="dt-attraction-body">
+        <div class="a-name"><a href="${s.url}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">${s.name}</a></div>
+        <div class="a-desc">${s.rating ? '★ ' + s.rating + ' · ' + s.count.toLocaleString() + ' reviews' : 'Popular spot'}</div>
+      </div>
+    </div>`;}).join("");
+}
+
 async function loadAttractions(code){
   const box = document.getElementById("dtAttractions");
   const sights = CITY_SIGHTS[code];
   if (!sights || !sights.length){
-    box.innerHTML = "<span class='dt-loading'>City guide coming soon.</span>"; return;
+    loadAttractionsFromPlaces(code, box); return;
   }
   // Render curated sights immediately (text first, photos fill in)
   box.innerHTML = sights.map(([wiki, name, blurb], i) => `
