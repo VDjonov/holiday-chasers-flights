@@ -40,7 +40,7 @@ RETRIES = 1          # one retry on transient errors
 
 NUM_WEEKENDS = 8
 WEEKEND_NIGHTS = 2   # Fri → Sun
-NUM_WEEKS = 8
+NUM_WEEKS = 10       # weeks booked further ahead than weekends → longer horizon
 WEEK_NIGHTS = 7      # Sat → Sat
 
 AIRPORTS = [
@@ -77,6 +77,10 @@ DESTINATIONS = [
     ("MAN", "Manchester", "England"),
     ("GVA", "Geneva",     "Switzerland"),
     ("MLA", "Malta",      "Malta"),
+    ("VIE", "Vienna",     "Austria"),
+    ("ATH", "Athens",     "Greece"),
+    ("VLC", "Valencia",   "Spain"),
+    ("CPH", "Copenhagen", "Denmark"),
 ]
 
 HERE = os.path.dirname(os.path.abspath(__file__))
