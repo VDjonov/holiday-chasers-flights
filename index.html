@@ -804,24 +804,28 @@ img{max-width:100%}
     <h2>Direct flights from Cork & Dublin</h2>
     <p>Pick a destination and a centre date — we scan ±5 days and show the cheapest price for each day.</p>
   </div>
-  <!-- Cache-powered price timeline: every scanned weekend & week for one destination -->
+  <!-- Trip planner: pick a city, the full guide opens with date pickers,
+       live flights, scanned-date timeline, hotels, cars and costs. -->
   <div id="directTimelineBlock">
     <div class="search-form">
       <div class="form-row">
         <div class="form-group">
           <label>From</label>
-          <select id="tlAirport" onchange="renderDirectTimeline()">
+          <select id="tlAirport">
             <option value="ORK">Cork (ORK)</option>
             <option value="DUB">Dublin (DUB)</option>
           </select>
         </div>
         <div class="form-group">
           <label>Destination</label>
-          <select id="tlDest" onchange="renderDirectTimeline()"></select>
+          <select id="tlDest"></select>
+        </div>
+        <div class="form-group" style="align-self:end">
+          <button class="hc-signup-btn" style="width:100%" onclick="openPlanner()">Plan this trip →</button>
         </div>
       </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">Opens the full trip guide — pick your own dates, see live flight prices, book each leg, and get hotels, car hire and costs for those dates.</div>
     </div>
-    <div id="tlResults"></div>
   </div>
   <div class="search-form" id="directLiveForm" style="display:none">
     <div class="form-row">
@@ -1304,23 +1308,51 @@ const AIRLINE_URLS = {
   ryanair: (origin, dest, dep, ret, adults, children) => {
     const p = new URLSearchParams({
       originIata: origin, destinationIata: dest,
-      dateOut: dep, dateIn: ret,
+      dateOut: dep,
       adults, teens: 0, children, infants: 0,
     });
+    if (ret) p.set("dateIn", ret);            // omit for one-way
     return `https://www.ryanair.com/ie/en/trip/flights/select?${p}`;
   },
   // Aer Lingus — return flight search with pre-filled route and dates
   "aer lingus": (origin, dest, dep, ret, adults, children) => {
     const p = new URLSearchParams({
-      fareType: "RETURN", fareCategory: "ECONOMY",
+      fareType: ret ? "RETURN" : "ONEWAY", fareCategory: "ECONOMY",
       numAdults: adults, numYoungAdults: 0,
       numChildren: children, numInfants: 0, groupBooking: false,
       sourceAirportCode_0: origin, destinationAirportCode_0: dest, departureDate_0: dep,
-      sourceAirportCode_1: dest, destinationAirportCode_1: origin, departureDate_1: ret,
     });
+    if (ret) {
+      p.set("sourceAirportCode_1", dest);
+      p.set("destinationAirportCode_1", origin);
+      p.set("departureDate_1", ret);
+    }
     return `https://www.aerlingus.com/app/make/flight-search-result?${p}`;
   },
 };
+
+// One-way booking link for a single selected leg. Known airlines get their
+// pre-filled site; everything else goes to our partner Aviasales (one-way).
+function legUrl(airlinesStr, origin, dest, date, adults, children) {
+  const primary = (airlinesStr || "").split(/[,/]/)[0].trim().toLowerCase();
+  if (primary === "ryanair") {
+    const p = new URLSearchParams({
+      originIata: origin, destinationIata: dest, dateOut: date,
+      adults, teens: 0, children, infants: 0, isReturn: false,
+    });
+    return `https://www.ryanair.com/ie/en/trip/flights/select?${p}`;
+  }
+  if (primary === "aer lingus") {
+    const p = new URLSearchParams({
+      fareType: "ONEWAY", fareCategory: "ECONOMY",
+      numAdults: adults, numYoungAdults: 0,
+      numChildren: children, numInfants: 0, groupBooking: false,
+      sourceAirportCode_0: origin, destinationAirportCode_0: dest, departureDate_0: date,
+    });
+    return `https://www.aerlingus.com/app/make/flight-search-result?${p}`;
+  }
+  return aviasalesUrl(origin, dest, date, null, Math.max(1, adults || 1));
+}
 
 // Skyscanner Ireland — reliable pre-filled fallback for all other airlines.
 // Converts date "2026-08-28" → "20260828" for Skyscanner URL format.
@@ -1613,7 +1645,7 @@ async function loadDeals() {
       applyBestBoardDefaults();     // default to the best-priced week/weekend
       populateWeekendPicker();
       renderDeals();
-      renderDirectTimeline();       // cache-powered Direct Flights timeline
+      populateTimelineDest();       // fill the trip-planner destination list
       return;
     } else {
       document.getElementById("dealsLoading").innerHTML = "No deals found yet. Check back soon.";
@@ -1874,6 +1906,194 @@ function renderDeals() {
   });
 }
 
+// ── In-guide trip planner: dates → live flights → leg booking ────────────────
+
+function applyGuideDates(){
+  const g = window._guide;
+  if (!g) return;
+  const dep = document.getElementById("dtDep")?.value;
+  const ret = document.getElementById("dtRet")?.value;
+  if (!dep || !ret || ret <= dep) { alert("Pick an outbound date and a later return date."); return; }
+  const changed = dep !== g.dep || ret !== g.ret;
+  const d = {...g.d};
+  if (changed) { d.price = null; d.stops = null; d.total_time = ""; }  // old fare no longer applies
+  openDetail(d, dep, ret, g.groupSize, changed ? 1 : g.cacheTravellers);
+}
+
+// Timeline of all scanned boards for this destination, inside the guide.
+function guideTimeline(d){
+  const box = document.getElementById("dtTimeline");
+  const section = document.getElementById("dtTimelineSection");
+  if (!box || !section || !cachedDeals) return;
+  const trav = _cacheTrav();
+  const found = [];
+  for (const apCode of ["ORK","DUB"]) {
+    for (const b of _allBoards(apCode)) {
+      const deal = _findDeal(b, d.code);
+      if (deal) found.push({ apCode, b, deal, pp: Math.round(deal.price / trav) });
+    }
+  }
+  if (!found.length) { section.style.display = "none"; return; }
+  found.sort((a,c) => (a.b.depart_date||"").localeCompare(c.b.depart_date||""));
+  const minPP = Math.min(...found.map(r => r.pp));
+  const fmtD = iso => new Date(iso+"T00:00:00").toLocaleDateString("en-IE",{day:"numeric",month:"short"});
+  section.style.display = "";
+  box.innerHTML = `
+    <table class="results-table">
+      <thead><tr><th>From</th><th>Trip</th><th>Dates</th><th>Per person</th><th>Airline</th></tr></thead>
+      <tbody>${found.map((r,i) => `
+        <tr style="cursor:pointer" title="Plan the trip on these dates"
+            onclick="guidePickBoard(${i})">
+          <td>${r.apCode === "ORK" ? "Cork" : "Dublin"}</td>
+          <td>${r.b._type === "weekend" ? "🏖️ Weekend" : "✈️ Week"}</td>
+          <td>${fmtD(r.b.depart_date)} → ${fmtD(r.b.return_date)}</td>
+          <td class="price-cell">€${r.pp}${r.pp === minPP ? " ⭐" : ""}</td>
+          <td>${r.deal.airlines || "—"}</td>
+        </tr>`).join("")}</tbody>
+    </table>`;
+  window._gTimeline = found;
+}
+
+function guidePickBoard(i){
+  const r = (window._gTimeline || [])[i];
+  const g = window._guide;
+  if (!r || !g) return;
+  openDetail({...r.deal, origin_airport: r.apCode}, r.b.depart_date, r.b.return_date,
+             g.groupSize, _cacheTrav());
+}
+
+// Live flights inside the guide.
+function guideLiveInit(d, dep, ret, hasPrice){
+  const box = document.getElementById("dtLive");
+  if (!box) return;
+  const origin = d.origin_airport || "ORK";
+  if (!backendOnline) {
+    const avia = aviasalesUrl(origin, d.code, dep, ret);
+    box.innerHTML = `<a class="deal-book primary" href="${avia}" target="_blank" rel="noopener noreferrer sponsored"
+        onclick="track('flight_click',{source:'guide_aviasales',dest:'${d.code}'})">🔎 Search live prices on Aviasales →</a>`;
+    return;
+  }
+  if (hasPrice) {
+    // Board deal already has a scanned fare — search on demand, not automatically
+    box.innerHTML = `<button class="deal-book primary" style="border:none;cursor:pointer"
+        onclick="guideGrids()">🔎 Check live prices &amp; nearby dates</button>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">Compares ±3 days around your dates, per person.</div>`;
+  } else {
+    guideGrids();  // custom dates — fetch immediately
+  }
+}
+
+async function guideGrids(){
+  const g = window._guide;
+  const box = document.getElementById("dtLive");
+  if (!g || !box) return;
+  const origin = g.d.origin_airport || "ORK";
+  const code = (g.d.code || "").split(",")[0];
+  const dates = (centre) => {
+    const out = [];
+    for (let o = -3; o <= 3; o++) {
+      const dt = new Date(centre + "T12:00:00"); dt.setDate(dt.getDate() + o);
+      const iso = dt.toISOString().slice(0,10);
+      if (iso > new Date().toISOString().slice(0,10)) out.push(iso);
+    }
+    return out;
+  };
+  const outDates = dates(g.dep), retDates = dates(g.ret).filter(x => x > g.dep);
+  box.innerHTML = `<div id="gProg" style="font-size:13px;color:var(--muted);margin-bottom:10px">Searching live fares… <span id="gProgN">0</span>/${outDates.length + retDates.length}</div>
+    <div style="font-weight:700;font-size:14px;margin:6px 0">Departure — ${origin === "ORK" ? "Cork" : "Dublin"} → ${g.d.city}</div>
+    <div id="gOutGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px"></div>
+    <div style="font-weight:700;font-size:14px;margin:14px 0 6px">Return — ${g.d.city} → ${origin === "ORK" ? "Cork" : "Dublin"}</div>
+    <div id="gRetGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px"></div>
+    <div id="gPick" style="margin-top:14px"></div>`;
+  window._gPrices = { out: {}, ret: {} };
+  let done = 0;
+  const bump = () => { const el = document.getElementById("gProgN"); if (el) el.textContent = ++done; };
+  const fetchOne = async (from, to, date, bucket) => {
+    try {
+      const r = await fetch(BACKEND_URL + "/api/search/direct", {
+        method: "POST", headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ dest_code: to, outbound_date: date, return_date: null,
+                               departure_override: from === origin ? null : from }),
+        signal: AbortSignal.timeout(60000)
+      });
+      if (r.ok) {
+        const f = await r.json();
+        if (f && f.price) window._gPrices[bucket][date] = f;
+      }
+    } catch(e) {}
+    bump();
+    guideRenderGrid(bucket);
+  };
+  // outbound: origin → dest; return: dest → origin (departure_override)
+  for (const dt of outDates) await fetchOne(origin, code, dt, "out");
+  for (const dt of retDates) await fetchOne(code, origin, dt, "ret");
+  const prog = document.getElementById("gProg");
+  if (prog) prog.textContent = "Prices are per person · tap a departure and a return to build your booking.";
+  if (!Object.keys(window._gPrices.out).length && !Object.keys(window._gPrices.ret).length) {
+    box.innerHTML = `<p style="font-size:14px;color:var(--muted)">No live fares found around these dates.</p>
+      <a class="deal-book primary" href="${aviasalesUrl(origin, code, g.dep, g.ret)}" target="_blank" rel="noopener noreferrer sponsored">🔎 Try Aviasales for these dates →</a>`;
+  }
+}
+
+function guideRenderGrid(bucket){
+  const grid = document.getElementById(bucket === "out" ? "gOutGrid" : "gRetGrid");
+  if (!grid) return;
+  const prices = window._gPrices[bucket];
+  const entries = Object.entries(prices).sort((a,b) => a[0].localeCompare(b[0]));
+  if (!entries.length) { grid.innerHTML = ""; return; }
+  const minP = Math.min(...entries.map(([,f]) => f.price));
+  const sel = window._gSel[bucket];
+  const fmtD = iso => new Date(iso+"T00:00:00").toLocaleDateString("en-IE",{weekday:"short",day:"numeric",month:"short"});
+  grid.innerHTML = entries.map(([date,f]) => {
+    const isSel = sel && sel.date === date;
+    const isMin = f.price === minP;
+    return `
+    <div onclick="guideSelect('${bucket}','${date}')" style="cursor:pointer;border-radius:10px;padding:10px 6px;text-align:center;transition:.15s;
+        border:${isSel ? '2px solid var(--ink)' : isMin ? '2px solid #1B7A53' : '1px solid var(--line)'};
+        background:${isSel ? 'rgba(10,27,46,.06)' : isMin ? 'rgba(27,122,83,.07)' : 'var(--paper, #fff)'}">
+      <div style="font-size:10px;color:var(--muted)">${fmtD(date)}</div>
+      <div style="font-weight:800;font-size:17px">€${f.price}</div>
+      <div style="font-size:10px;color:var(--muted)">${(f.airlines||"—").split(",")[0]}</div>
+      ${isMin ? '<div style="font-size:9px;color:#1B7A53;font-weight:700">CHEAPEST</div>' : ''}
+    </div>`;}).join("");
+}
+
+function guideSelect(bucket, date){
+  window._gSel[bucket] = { date, ...window._gPrices[bucket][date] };
+  guideRenderGrid("out"); guideRenderGrid("ret");
+  const g = window._guide, s = window._gSel;
+  const pick = document.getElementById("gPick");
+  if (!pick) return;
+  if (!(s.out && s.ret)) {
+    pick.innerHTML = `<div style="font-size:13px;color:var(--muted)">Selected ${s.out ? "departure ✓" : ""}${s.ret ? "return ✓" : ""} — pick the other leg to see your total.</div>`;
+    return;
+  }
+  const origin = g.d.origin_airport || "ORK";
+  const code = (g.d.code || "").split(",")[0];
+  const pp = s.out.price + s.ret.price;
+  const groupTot = pp * g.groupSize;
+  const outUrl = legUrl(s.out.airlines, origin, code, s.out.date, selAdults, selChildren);
+  const retUrl = legUrl(s.ret.airlines, code, origin, s.ret.date, selAdults, selChildren);
+  pick.innerHTML = `
+    <div style="border:1px solid var(--line);border-radius:14px;padding:16px">
+      <div style="font-weight:800;font-size:18px">Your trip: €${pp} <span style="font-weight:400;font-size:13px;color:var(--muted)">per person · €${groupTot} for ${g.groupSize}</span></div>
+      <div style="font-size:13px;color:var(--muted);margin:4px 0 12px">${s.out.date} (${(s.out.airlines||"").split(",")[0]}) → ${s.ret.date} (${(s.ret.airlines||"").split(",")[0]})</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a class="deal-book primary" href="${outUrl}" target="_blank" rel="noopener noreferrer"
+           onclick="track('flight_click',{source:'guide_leg_out',dest:'${code}'})">Book departure · €${s.out.price} →</a>
+        <a class="deal-book secondary" href="${retUrl}" target="_blank" rel="noopener noreferrer"
+           onclick="track('flight_click',{source:'guide_leg_ret',dest:'${code}'})">Book return · €${s.ret.price} →</a>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px">Each leg books separately — that's how these prices are possible.</div>
+    </div>`;
+  // Sync the price strip and the trip calculator with the live selection
+  const pp2 = document.getElementById("dtPP"); if (pp2) pp2.textContent = "€" + pp;
+  const gt = document.getElementById("dtGroupTot"); if (gt) gt.textContent = "€" + groupTot;
+  const val = document.getElementById("tcFlightVal"); if (val) val.textContent = "€" + groupTot;
+  const lbl = document.getElementById("tcFlightLbl"); if (lbl) lbl.textContent = "Flights · live selection";
+  const row = document.getElementById("tcFlightRow"); if (row) row.href = outUrl;
+}
+
 // ── Cache-powered tabs (Phase 1: no backend needed) ──────────────────────────
 // Everything below reads deals_cache.json (already loaded as cachedDeals) and
 // links out via airline deeplinks + Aviasales affiliate search.
@@ -1892,6 +2112,22 @@ function _allBoards(apCode){
 function _findDeal(board, codeStr){
   const codes = (codeStr || "").split(",").map(s => s.trim());
   return (board.deals || []).find(d => codes.includes(d.code)) || null;
+}
+
+function openPlanner(){
+  const apSel = document.getElementById("tlAirport");
+  const destSel = document.getElementById("tlDest");
+  populateTimelineDest();
+  const code = destSel.value;
+  const entry = DIRECT.find(x => x.code === code) || {};
+  const dep = new Date(Date.now() + 21*864e5).toISOString().slice(0,10);
+  const ret = new Date(Date.now() + 28*864e5).toISOString().slice(0,10);
+  openDetail({
+    city: entry.city || code, country: entry.country || "",
+    code, price: null, stops: null, total_time: "", airlines: "",
+    origin_airport: apSel.value
+  }, dep, ret, selAdults + selChildren, 1);
+  track("view_destination", { source: "planner", dest: code });
 }
 
 function populateTimelineDest(){
@@ -2085,11 +2321,8 @@ async function checkBackend() {
 }
 
 function setLiveUi(online) {
-  const live = document.getElementById("directLiveForm");
-  if (live) live.style.display = online ? "" : "none";
-  const btn = document.getElementById("directSearch");
-  if (btn) btn.disabled = !online;
-  // europeSearch stays enabled — offline it falls through to cache + Aviasales
+  // Live search now lives inside the trip guide; the legacy standalone form
+  // stays hidden in all cases. europeSearch stays enabled (cache + Aviasales).
 }
 
 // ── Populate dropdowns ───────────────────────────────────────────────────────
@@ -2344,7 +2577,8 @@ async function searchDirectWindow() {
 
 // ── Live search: Europe (all options) ────────────────────────────────────────
 async function searchEurope() {
-  if (!backendOnline) { searchEuropeFromCache(); return; }
+  // Guide-first design: the planner (with live flights inside) handles all cases.
+  searchEuropeFromCache(); return;
   const dest = document.getElementById("europeCity").value;
   const out = document.getElementById("europeDate").value;
   const ret = document.getElementById("europeReturn").value;
@@ -2611,6 +2845,8 @@ function cityTransport(code){ return CITY_TRANSPORT[code] || null; }
 function addDaysISO(ds, n){ const d=new Date(ds+"T12:00:00"); d.setDate(d.getDate()+n); return d.toISOString().split("T")[0]; }
 
 async function openDetail(d, dep, ret, groupSize, cacheTravellers){
+  window._guide = { d: {...d}, dep, ret, groupSize, cacheTravellers };
+  window._gSel = { out: null, ret: null };   // live-grid leg selections
   const overlay = document.getElementById("detailOverlay");
   const body = document.getElementById("detailBody");
   window.scrollTo(0,0);
@@ -2644,21 +2880,44 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers){
       </div>
     </div>
     <div class="dt-pricestrip">
-      <div class="dt-priceitem"><div class="lbl">Per person</div><div class="val">${hasPrice ? '€'+perP : '<a href="'+liveFlightUrl+'" target="_blank" rel="noopener noreferrer sponsored" style="font-size:15px">Check live →</a>'}</div></div>
-      <div class="dt-priceitem"><div class="lbl">${groupLbl}</div><div class="val">${hasPrice ? '€'+groupTot : '—'}</div></div>
+      <div class="dt-priceitem"><div class="lbl">Per person</div><div class="val" id="dtPP">${hasPrice ? '€'+perP : '<a href="'+liveFlightUrl+'" target="_blank" rel="noopener noreferrer sponsored" style="font-size:15px">Check live →</a>'}</div></div>
+      <div class="dt-priceitem"><div class="lbl">${groupLbl}</div><div class="val" id="dtGroupTot">${hasPrice ? '€'+groupTot : '—'}</div></div>
       <div class="dt-priceitem"><div class="lbl">Flight</div><div class="val">${d.stops==null ? '<small>your dates</small>' : (d.stops===0?'Direct':d.stops+' stop'+(d.stops>1?'s':'')) + ' <small>'+(d.total_time||'')+'</small>'}</div></div>
       <div class="dt-priceitem"><div class="lbl">Airline</div><div class="val" style="font-size:16px">${d.airlines||'—'}</div></div>
     </div>
 
     <div class="rainsun" style="margin:0 -0px"></div>
 
+    <div class="dt-section" style="padding-top:16px">
+      <h2>📅 Your dates</h2>
+      <div class="dt-sub">Change the dates and the whole trip — flights, hotels, costs — updates.</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <input type="date" id="dtDep" value="${dep}" class="hc-signup-input" style="flex:0 1 170px;min-width:150px">
+        <span style="color:var(--muted)">→</span>
+        <input type="date" id="dtRet" value="${ret}" class="hc-signup-input" style="flex:0 1 170px;min-width:150px">
+        <button class="hc-signup-btn" onclick="applyGuideDates()">Update trip</button>
+      </div>
+    </div>
+
+    <div class="dt-section">
+      <h2>✈️ Flights for your dates</h2>
+      <div class="dt-sub">Pick a departure and a return below — real prices per person, book each leg directly.</div>
+      <div id="dtLive"><span class="dt-loading">Preparing flight search…</span></div>
+    </div>
+
+    <div class="dt-section" id="dtTimelineSection" style="display:none">
+      <h2>🗓️ Every scanned date for ${d.city} — cheapest first-glance planner</h2>
+      <div class="dt-sub">From our automatic scans of the next weeks — tap any row to plan the trip on those dates.</div>
+      <div id="dtTimeline"></div>
+    </div>
+
     <div class="dt-section dt-complete">
       <h2>🧳 Complete the trip</h2>
       <div class="dt-sub">Everything for ${nights} night${nights>1?'s':''} in ${d.city} — tap any line to compare live prices.</div>
       <div class="trip-calc">
-        <a class="tc-row tc-flight" href="${hasPrice ? flightUrl(d.airlines, flightOrigin, d.code, dep, ret, selAdults, selChildren) : liveFlightUrl}" target="_blank" rel="noopener noreferrer${hasPrice ? '' : ' sponsored'}">
-          <span class="tc-ic">✈️</span><span class="tc-lbl">Flights · ${groupLbl}${hasPrice ? '' : ' · live on Aviasales'}</span>
-          <span class="tc-val">${hasPrice ? '€'+groupTot : 'Check →'}</span>
+        <a class="tc-row tc-flight" id="tcFlightRow" href="${hasPrice ? flightUrl(d.airlines, flightOrigin, d.code, dep, ret, selAdults, selChildren) : liveFlightUrl}" target="_blank" rel="noopener noreferrer${hasPrice ? '' : ' sponsored'}">
+          <span class="tc-ic">✈️</span><span class="tc-lbl" id="tcFlightLbl">Flights · ${groupLbl}${hasPrice ? '' : ' · live on Aviasales'}</span>
+          <span class="tc-val" id="tcFlightVal">${hasPrice ? '€'+groupTot : 'Check →'}</span>
         </a>
         <a class="tc-row" href="${hotelUrl(d.city, dep, ret)}" target="_blank" rel="noopener noreferrer">
           <span class="tc-ic">🏨</span><span class="tc-lbl">${nights} night${nights>1?'s':''} hotel <span class="tc-brand">${BRAND.booking}</span></span>
@@ -2820,6 +3079,8 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers){
   track("view_destination", { destination: d.city, origin: flightOrigin });
   loadTransport(d.code);
   loadEvents(d.code, dep, ret, d.city);
+  guideTimeline(d);
+  guideLiveInit(d, dep, ret, hasPrice);
 }
 
 function closeDetail(){
