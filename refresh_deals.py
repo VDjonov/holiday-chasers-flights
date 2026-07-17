@@ -129,6 +129,84 @@ def week_starts(count):
     return [first_sat + dt.timedelta(weeks=i) for i in range(count)]
 
 
+# ── Cork schedule-aware anchors (official Cork Airport table, Summer 2026) ───
+# code → list of (operating weekdays Mon=0..Sun=6, valid_from, valid_to).
+# Multiple entries per code = multiple airlines/periods (union applies).
+# Routes NOT listed here (e.g. GVA, MUC — absent from the published table)
+# and ALL Dublin routes use fixed anchors + a rescue probe instead.
+CORK_SCHEDULE = {
+    "ALC": [({0,1,2,3,5,6}, "2026-03-29", "2026-10-24")],
+    "AMS": [({0,1,2,3,4,5,6}, "2026-03-29", "2026-10-24")],
+    "BCN": [({0,3,6}, "2026-03-29", "2026-10-22")],
+    "EDI": [({0,1,2,3,4,5,6}, "2026-03-29", "2026-10-24")],
+    "FAO": [({0,1,2,3,4,5,6}, "2026-03-29", "2026-10-24")],
+    "FUE": [({3,}, "2026-04-02", "2026-10-22")],
+    "LPA": [({4,}, "2026-04-03", "2026-10-23")],
+    "ACE": [({1,3,5,6}, "2026-03-29", "2026-10-24"),   # Aer Lingus
+            ({0,2,3,4}, "2026-03-30", "2026-10-23")],  # Ryanair
+    "STN": [({0,1,2,3,4,5,6}, "2026-03-29", "2026-10-24")],
+    "AGP": [({0,1,2,3,4,5,6}, "2026-03-29", "2026-10-24")],
+    "MAN": [({0,1,2,3,4,5,6}, "2026-03-29", "2026-10-24")],
+    "BGY": [({0,4}, "2026-04-03", "2026-10-23")],
+    "NCE": [({2,5}, "2026-05-01", "2026-09-30")],
+    "PMI": [({0,1,2,3,4,5,6}, "2026-03-29", "2026-10-24"),  # Ryanair daily
+            ({1,4,6}, "2026-05-01", "2026-09-02")],          # Aer Lingus
+    "CDG": [({0,1,2,3,4,5,6}, "2026-03-29", "2026-10-24")],
+    "PSA": [({0,4}, "2026-04-03", "2026-10-23")],
+    "PRG": [({3,6}, "2026-03-29", "2026-04-30"),
+            ({0,3}, "2026-05-01", "2026-09-29")],
+    "RHO": [({0,3}, "2026-06-01", "2026-10-22")],
+    "SVQ": [({2,6}, "2026-04-01", "2026-10-21")],
+    "TFS": [({0,2,4}, "2026-03-29", "2026-10-23")],
+    "VLC": [({0,4,6}, "2026-03-30", "2026-10-23")],
+    "VCE": [({0,3}, "2026-04-02", "2026-10-22")],
+    "ZAD": [({1,5}, "2026-06-02", "2026-09-29")],
+    "ZRH": [({0,4}, "2026-04-03", "2026-09-15")],
+}
+
+def cork_operating(code, date):
+    """True/False if the schedule covers this route; None if route unknown."""
+    entries = CORK_SCHEDULE.get(code)
+    if entries is None:
+        return None
+    iso = date.isoformat()
+    return any(date.weekday() in days and f <= iso <= t for days, f, t in entries)
+
+# Trip-shape rules (agreed): weeks 6–8n prefer 7, any dep day nearest Saturday;
+# weekends 2–3n, departures Thu–Sat only.
+WEEK_DEP_PREF = [5, 4, 6, 3, 0, 2, 1]   # Sat, Fri, Sun, Thu, Mon, Wed, Tue
+WEEK_NIGHTS_PREF = [7, 6, 8]
+WKND_DEP_PREF = [4, 5, 3]               # Fri, Sat, Thu
+WKND_NIGHTS_PREF = [2, 3]
+
+def snap_pair(code, target_dep, kind):
+    """Best operating (dep, ret, nights) near the target for a scheduled Cork
+    route, honouring the trip-shape rules. None = route can't make this shape
+    around these dates (honest absence — costs zero credits)."""
+    if kind == "week":
+        dep_pref, nights_pref, window = WEEK_DEP_PREF, WEEK_NIGHTS_PREF, 3
+    else:
+        dep_pref, nights_pref, window = WKND_DEP_PREF, WKND_NIGHTS_PREF, 2
+    today = dt.date.today()
+    cands = []
+    for off in range(-window, window + 1):
+        day = target_dep + dt.timedelta(days=off)
+        if day <= today:
+            continue
+        if kind == "weekend" and day.weekday() not in WKND_DEP_PREF:
+            continue
+        if cork_operating(code, day):
+            cands.append((dep_pref.index(day.weekday()) if day.weekday() in dep_pref else 9,
+                          abs(off), day))
+    cands.sort()
+    for _, _, dep in cands:
+        for n in nights_pref:
+            ret = dep + dt.timedelta(days=n)
+            if cork_operating(code, ret):
+                return dep, ret, n
+    return None
+
+
 # ── FlightAPI.io — primary source ────────────────────────────────────────────
 def flightapi_cheapest(origin, dest_code, out_date, ret_date):
     """Cheapest REAL return fare, per person (1 adult), EUR.
@@ -317,19 +395,56 @@ def record_history(boards, hkey, hist):
 
 
 # ── Board building ───────────────────────────────────────────────────────────
-def build_board(origin, label, out_date, ret_date, nights):
-    print(f"\n=== [{origin}] {label} · out {out_date} · back {ret_date} ({nights}n) ===")
+RESCUE_MAX_PER_SCAN = 40      # extra probes when fixed anchors find no direct
+_rescues_used = 0
+
+def build_board(origin, label, out_date, ret_date, nights, kind):
+    """kind: "weekend" | "week". Cork routes with a known schedule get their
+    anchors SNAPPED to real flying days (per-deal dates). Everything else uses
+    the fixed anchors, with one shifted rescue probe if nothing direct exists."""
+    global _rescues_used
+    print(f"\n=== [{origin}] {label} · target out {out_date} · back {ret_date} ({nights}n) ===")
+    target_dep = dt.date.fromisoformat(out_date)
     deals = []
     for i, (code, city, country, airports) in enumerate(DESTINATIONS, 1):
         if origin not in airports:
             print(f"  [{i:>2}/{len(DESTINATIONS)}] {city:<12} (no direct route from {origin} — skipped)")
             continue
-        res = cheapest_return(origin, code, out_date, ret_date)
+
+        d_out, d_ret, d_n = out_date, ret_date, nights
+        scheduled = origin == "ORK" and code in CORK_SCHEDULE
+        if scheduled:
+            pair = snap_pair(code, target_dep, kind)
+            if pair is None:
+                print(f"  [{i:>2}/{len(DESTINATIONS)}] {city:<12} (no {kind}-shaped direct these dates — schedule)")
+                continue                       # honest absence, zero credits
+            d_out, d_ret, d_n = pair[0].isoformat(), pair[1].isoformat(), pair[2]
+
+        res = cheapest_return(origin, code, d_out, d_ret)
+
+        # Rescue probe: unscheduled routes only — shift the window once.
+        if not res and not scheduled and _rescues_used < RESCUE_MAX_PER_SCAN:
+            if kind == "week":
+                alt_dep = target_dep + dt.timedelta(days=(7 - target_dep.weekday()) % 7 or 7)  # next Monday
+                alt_n = 7
+            else:
+                alt_dep = target_dep + dt.timedelta(days=1)   # Sat→Mon short break
+                alt_n = 2
+            alt_ret = alt_dep + dt.timedelta(days=alt_n)
+            _rescues_used += 1
+            res = cheapest_return(origin, code, alt_dep.isoformat(), alt_ret.isoformat())
+            if res:
+                d_out, d_ret, d_n = alt_dep.isoformat(), alt_ret.isoformat(), alt_n
+            time.sleep(DELAY)
+
         if res:
-            deals.append({"city": city, "country": country, "code": code, **res})
+            deals.append({"city": city, "country": country, "code": code,
+                          "depart_date": d_out, "return_date": d_ret, "nights": d_n,
+                          **res})
             src = "" if res["source"] == "flightapi" else f" [{res['source']}]"
+            snapped = "" if (d_out == out_date and d_ret == ret_date) else f"  ({d_out}→{d_ret})"
             print(f"  [{i:>2}/{len(DESTINATIONS)}] {city:<12} €{res['price']:<5} "
-                  f"{res['airlines']:<16}{src}")
+                  f"{res['airlines']:<16}{src}{snapped}")
         else:
             print(f"  [{i:>2}/{len(DESTINATIONS)}] {city:<12} —")
         time.sleep(DELAY)
@@ -359,7 +474,7 @@ def main():
         for fri in weekend_starts(NUM_WEEKENDS):
             sun = fri + dt.timedelta(days=WEEKEND_NIGHTS)
             b = build_board(origin, f"Weekend {fri.strftime('%d %b')}",
-                            fri.isoformat(), sun.isoformat(), WEEKEND_NIGHTS)
+                            fri.isoformat(), sun.isoformat(), WEEKEND_NIGHTS, "weekend")
             b["label"] = f"{fri.strftime('%a %d %b')} – {sun.strftime('%a %d %b')}"
             weekend_boards.append(b)
 
@@ -367,7 +482,7 @@ def main():
         for sat in week_starts(NUM_WEEKS):
             ret = sat + dt.timedelta(days=WEEK_NIGHTS)
             b = build_board(origin, f"Week {sat.strftime('%d %b')}",
-                            sat.isoformat(), ret.isoformat(), WEEK_NIGHTS)
+                            sat.isoformat(), ret.isoformat(), WEEK_NIGHTS, "week")
             b["label"] = f"{sat.strftime('%a %d %b')} – {ret.strftime('%a %d %b')}"
             week_boards.append(b)
 

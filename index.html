@@ -1852,7 +1852,7 @@ function renderDeals() {
     return `
     <div class="deal-card${i === 0 ? ' cheapest' : ''}">
       <button class="deal-fav" onclick='event.stopPropagation();toggleFav("${d.code}","${d.city.replace(/"/g,'')}")' aria-label="Save ${d.city}" data-fav="${d.code}">♡</button>
-      <div class="deal-clickable" onclick='openDetail(${JSON.stringify(d).replace(/'/g,"&#39;")}, "${dep}", "${ret}", ${groupSize}, ${cacheTravellers})'>
+      <div class="deal-clickable" onclick='openDetail(${JSON.stringify(d).replace(/'/g,"&#39;")}, "${d.depart_date || dep}", "${d.return_date || ret}", ${groupSize}, ${cacheTravellers})'>
         ${banner}
         <div class="deal-card-top">
           ${i === 0 ? '<div class="deal-badge">Best fare</div>' : valueBadge(d)}
@@ -1863,7 +1863,7 @@ function renderDeals() {
         ${EDITOR_NOTES[d.code] ? `<div class="ed-note">"${EDITOR_NOTES[d.code]}"</div>` : '<div class="ed-note empty"></div>'}
         <div class="deal-card-bottom">
           <div class="deal-price-block">
-            <div class="deal-dates">${depFmt} — ${retFmt}</div>
+            <div class="deal-dates">${fmtD(d.depart_date || dep)} — ${fmtD(d.return_date || ret)}${d.nights && d.nights !== board.nights ? ` · ${d.nights}n` : ""}</div>
             <div class="deal-price"><sup>€</sup>${perPerson(d)}<small>per person</small></div>
           </div>
           ${groupSize > 1 ? `<div class="deal-perperson">
@@ -1880,15 +1880,15 @@ function renderDeals() {
         <div class="deal-viewmore">View full details &amp; guide →</div>
       </div>
       <div class="deal-actions">
-        <a class="deal-book primary" href="${flightUrl(d.airlines, flightOrigin, d.code, dep, ret, selAdults, selChildren)}" target="_blank" rel="noopener noreferrer">${flightBtnLabel(d.airlines)}</a>
-        <a class="deal-book secondary" href="${carUrl(d.city, dep, ret)}" target="_blank" rel="noopener">🚗 ${BRAND.discovercars}</a>
+        <a class="deal-book primary" href="${flightUrl(d.airlines, flightOrigin, d.code, d.depart_date || dep, d.return_date || ret, selAdults, selChildren)}" target="_blank" rel="noopener noreferrer">${flightBtnLabel(d.airlines)}</a>
+        <a class="deal-book secondary" href="${carUrl(d.city, d.depart_date || dep, d.return_date || ret)}" target="_blank" rel="noopener">🚗 ${BRAND.discovercars}</a>
       </div>
       <div class="deal-stays">
         <span class="stay-label">Where to stay</span>
-        <a class="stay-btn" href="${hotelUrl(d.city, dep, ret)}" target="_blank" rel="noopener">${BRAND.booking}</a>
-        <a class="stay-btn" href="${airbnbUrl(d.city, dep, ret)}" target="_blank" rel="noopener">${BRAND.airbnb}</a>
+        <a class="stay-btn" href="${hotelUrl(d.city, d.depart_date || dep, d.return_date || ret)}" target="_blank" rel="noopener">${BRAND.booking}</a>
+        <a class="stay-btn" href="${airbnbUrl(d.city, d.depart_date || dep, d.return_date || ret)}" target="_blank" rel="noopener">${BRAND.airbnb}</a>
       </div>
-      <div class="stay-nudge">🏨 ${board.nights} night${board.nights>1?'s':''} in ${d.city} from <b>~€${cityCosts(d.code).airbnb * board.nights}</b> — tap to compare</div>
+      <div class="stay-nudge">🏨 ${d.nights || board.nights} night${(d.nights || board.nights)>1?'s':''} in ${d.city} from <b>~€${cityCosts(d.code).airbnb * (d.nights || board.nights)}</b> — tap to compare</div>
       ${altCard}
     </div>`;
   }).join("");
@@ -1967,7 +1967,7 @@ function guideTimeline(d){
             onclick="guidePickBoard(${i})">
           <td>${r.apCode === "ORK" ? "Cork" : "Dublin"}</td>
           <td>${r.b._type === "weekend" ? "🏖️ Weekend" : "✈️ Week"}</td>
-          <td>${fmtD(r.b.depart_date)} → ${fmtD(r.b.return_date)}</td>
+          <td>${fmtD(r.deal.depart_date || r.b.depart_date)} → ${fmtD(r.deal.return_date || r.b.return_date)}</td>
           <td class="price-cell">€${r.pp}${r.pp === minPP ? " ⭐" : ""}</td>
           <td>${r.deal.airlines || "—"}</td>
         </tr>`).join("")}</tbody>
@@ -1979,7 +1979,8 @@ function guidePickBoard(i){
   const r = (window._gTimeline || [])[i];
   const g = window._guide;
   if (!r || !g) return;
-  openDetail({...r.deal, origin_airport: r.apCode}, r.b.depart_date, r.b.return_date,
+  openDetail({...r.deal, origin_airport: r.apCode},
+             r.deal.depart_date || r.b.depart_date, r.deal.return_date || r.b.return_date,
              g.groupSize, _cacheTrav(), true);
 }
 
@@ -2220,13 +2221,13 @@ function renderDirectTimeline(){
         const ddJson = JSON.stringify(dd).replace(/'/g, "&#39;");
         return `
         <tr class="${r.pp === minPP ? 'cheapest-row' : ''}" style="cursor:pointer" title="Open full trip guide"
-            onclick='openDetail(${ddJson}, "${r.b.depart_date}", "${r.b.return_date}", ${selAdults + selChildren}, ${_cacheTrav()}, true)'>
+            onclick='openDetail(${ddJson}, "${r.d.depart_date || r.b.depart_date}", "${r.d.return_date || r.b.return_date}", ${selAdults + selChildren}, ${_cacheTrav()}, true)'>
           <td>${r.b._type === "weekend" ? "🏖️ Weekend" : "✈️ Week"}</td>
-          <td>${fmtD(r.b.depart_date)} → ${fmtD(r.b.return_date)}</td>
+          <td>${fmtD(r.d.depart_date || r.b.depart_date)} → ${fmtD(r.d.return_date || r.b.return_date)}${r.d.nights ? ` · ${r.d.nights}n` : ""}</td>
           <td class="price-cell">€${r.pp}${r.pp === minPP ? " ⭐" : ""}</td>
           <td>${r.d.airlines || "—"}</td>
           <td><a class="deal-book secondary" style="padding:6px 12px;font-size:12px"
-                 href="${flightUrl(r.d.airlines || "", apCode, r.d.code, r.b.depart_date, r.b.return_date, 1, 0)}"
+                 href="${flightUrl(r.d.airlines || "", apCode, r.d.code, r.d.depart_date || r.b.depart_date, r.d.return_date || r.b.return_date, 1, 0)}"
                  target="_blank" rel="noopener noreferrer"
                  onclick="event.stopPropagation();track('flight_click',{source:'timeline',dest:'${code}'})">Book</a></td>
         </tr>`;}).join("")}</tbody>
@@ -2294,13 +2295,13 @@ function searchEuropeFromCache(){
         const ddJson = JSON.stringify(dd).replace(/'/g, "&#39;");
         return `
         <tr style="cursor:pointer" title="Open full trip guide"
-            onclick='openDetail(${ddJson}, "${r.b.depart_date}", "${r.b.return_date}", selAdults + selChildren, _cacheTrav(), true)'>
+            onclick='openDetail(${ddJson}, "${r.d.depart_date || r.b.depart_date}", "${r.d.return_date || r.b.return_date}", selAdults + selChildren, _cacheTrav(), true)'>
           <td>${r.apCode === "ORK" ? "Cork" : "Dublin"}</td>
-          <td>${fmtD(r.b.depart_date)} → ${fmtD(r.b.return_date)}</td>
+          <td>${fmtD(r.d.depart_date || r.b.depart_date)} → ${fmtD(r.d.return_date || r.b.return_date)}${r.d.nights ? ` · ${r.d.nights}n` : ""}</td>
           <td class="price-cell">€${r.pp}</td>
           <td>${r.d.airlines || "—"}</td>
           <td><a class="deal-book secondary" style="padding:6px 12px;font-size:12px"
-                 href="${flightUrl(r.d.airlines || "", r.apCode, r.d.code, r.b.depart_date, r.b.return_date, 1, 0)}"
+                 href="${flightUrl(r.d.airlines || "", r.apCode, r.d.code, r.d.depart_date || r.b.depart_date, r.d.return_date || r.b.return_date, 1, 0)}"
                  target="_blank" rel="noopener noreferrer"
                  onclick="event.stopPropagation();track('flight_click',{source:'europe_cache',dest:'${code}'})">Book</a></td>
         </tr>`;}).join("")}</tbody>
