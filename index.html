@@ -1917,6 +1917,7 @@ function applyGuideDates(){
   const changed = dep !== g.dep || ret !== g.ret;
   const d = {...g.d};
   if (changed) { d.price = null; d.stops = null; d.total_time = ""; }  // old fare no longer applies
+  window._gAutoSearch = true;   // the button press IS the search request
   openDetail(d, dep, ret, g.groupSize, changed ? 1 : g.cacheTravellers);
 }
 
@@ -1973,14 +1974,16 @@ function guideLiveInit(d, dep, ret, hasPrice){
         onclick="track('flight_click',{source:'guide_aviasales',dest:'${d.code}'})">🔎 Search live prices on Aviasales →</a>`;
     return;
   }
-  if (hasPrice) {
-    // Board deal already has a scanned fare — search on demand, not automatically
-    box.innerHTML = `<button class="deal-book primary" style="border:none;cursor:pointer"
-        onclick="guideGrids()">🔎 Check live prices &amp; nearby dates</button>
-      <div style="font-size:12px;color:var(--muted);margin-top:8px">Compares ±3 days around your dates, per person.</div>`;
-  } else {
-    guideGrids();  // custom dates — fetch immediately
+  if (window._gAutoSearch) {
+    window._gAutoSearch = false;   // consumed — set by "Update trip"
+    guideGrids();
+    return;
   }
+  // Never search without an explicit action — the visitor picks dates first.
+  box.innerHTML = `<div style="font-size:14px;color:var(--muted);margin-bottom:10px">👆 ${hasPrice ? "Happy with the scanned fare above, or want to compare nearby days?" : "Set your dates above, then search live prices."}</div>
+    <button class="deal-book primary" style="border:none;cursor:pointer"
+        onclick="guideGrids()">🔎 Search flights for these dates</button>
+    <div style="font-size:12px;color:var(--muted);margin-top:8px">Compares ±3 days around your dates, per person.</div>`;
 }
 
 async function guideGrids(){
@@ -2006,6 +2009,8 @@ async function guideGrids(){
     <div id="gRetGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px"></div>
     <div id="gPick" style="margin-top:14px"></div>`;
   window._gPrices = { out: {}, ret: {} };
+  window._gSel = { out: null, ret: null };            // stale picks reference old prices
+  const gen = window._gGen = (window._gGen || 0) + 1;  // newer search invalidates this one
   let done = 0;
   const bump = () => { const el = document.getElementById("gProgN"); if (el) el.textContent = ++done; };
   const fetchOne = async (from, to, date, bucket) => {
@@ -2016,17 +2021,20 @@ async function guideGrids(){
                                departure_override: from === origin ? null : from }),
         signal: AbortSignal.timeout(60000)
       });
+      if (gen !== window._gGen) return;   // a newer search took over — discard
       if (r.ok) {
         const f = await r.json();
         if (f && f.price) window._gPrices[bucket][date] = f;
       }
     } catch(e) {}
+    if (gen !== window._gGen) return;
     bump();
     guideRenderGrid(bucket);
   };
   // outbound: origin → dest; return: dest → origin (departure_override)
-  for (const dt of outDates) await fetchOne(origin, code, dt, "out");
-  for (const dt of retDates) await fetchOne(code, origin, dt, "ret");
+  for (const dt of outDates) { if (gen !== window._gGen) return; await fetchOne(origin, code, dt, "out"); }
+  for (const dt of retDates) { if (gen !== window._gGen) return; await fetchOne(code, origin, dt, "ret"); }
+  if (gen !== window._gGen) return;
   const prog = document.getElementById("gProg");
   if (prog) prog.textContent = "Prices are per person · tap a departure and a return to build your booking.";
   if (!Object.keys(window._gPrices.out).length && !Object.keys(window._gPrices.ret).length) {
