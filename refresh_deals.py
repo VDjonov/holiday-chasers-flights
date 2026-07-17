@@ -189,18 +189,19 @@ def flightapi_cheapest(origin, dest_code, out_date, ret_date):
         amt = float(amt)
         if best is not None and amt >= best["price"]:
             continue
-        airline, stops, dur = "", None, None
+        # DIRECT ONLY — and BOTH legs must be non-stop. A cheap 26h connection
+        # is not a deal; if no direct flies these dates, show nothing instead.
         lids = it.get("leg_ids") or []
-        if lids and lids[0] in legs:
-            leg = legs[lids[0]]
-            mc = leg.get("marketing_carrier_ids") or []
-            if mc:
-                airline = carriers.get(mc[0], "")
-            stops = leg.get("stop_count")
-            dur = leg.get("duration")
+        it_legs = [legs[l] for l in lids if l in legs]
+        if not it_legs or any((lg.get("stop_count") or 0) != 0 for lg in it_legs):
+            continue
+        out_leg = it_legs[0]
+        mc = out_leg.get("marketing_carrier_ids") or []
+        airline = carriers.get(mc[0], "") if mc else ""
+        dur = out_leg.get("duration")
         best = {
             "price": round(amt),             # PER PERSON, return, EUR
-            "stops": stops if stops is not None else 0,
+            "stops": 0,
             "total_time": f"{dur//60}h {dur%60:02d}m" if dur else "—",
             "airlines": airline or "—",
             "source": "flightapi",
@@ -222,6 +223,7 @@ def serpapi_cheapest(origin, dest_code, out_date, ret_date):
         params = {"engine": "google_flights", "departure_id": origin,
                   "arrival_id": dest_code, "outbound_date": out_date,
                   "return_date": ret_date, "type": "1", "adults": "1",
+                  "stops": "1",   # nonstop only — boards never show connections
                   "currency": "EUR", "hl": "en", "gl": "ie", "api_key": key}
         try:
             r = requests.get("https://serpapi.com/search.json",
