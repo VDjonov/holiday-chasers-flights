@@ -50,37 +50,48 @@ AIRPORTS = [
 
 # Single IATA code per destination (FlightAPI takes one airport per query).
 # Multi-airport cities use the code most relevant to the Irish market.
+# 4th field = airports that operate the route NON-STOP (route map: flightsfrom.com,
+# July 2026). Cork-only-via-connection cities are skipped for ORK — keeps the
+# "direct flights" promise honest and saves ~430 credits per scan.
 DESTINATIONS = [
-    ("ALC", "Alicante",   "Spain"),
-    ("BCN", "Barcelona",  "Spain"),
-    ("AGP", "Malaga",     "Spain"),
-    ("PMI", "Palma",      "Spain (Mallorca)"),
-    ("MAD", "Madrid",     "Spain"),
-    ("TFS", "Tenerife",   "Spain"),
-    ("ACE", "Lanzarote",  "Spain"),
-    ("FAO", "Faro",       "Portugal"),
-    ("LIS", "Lisbon",     "Portugal"),
-    ("OPO", "Porto",      "Portugal"),
-    ("FCO", "Rome",       "Italy"),
-    ("BGY", "Milan",      "Italy"),
-    ("CDG", "Paris",      "France"),
-    ("NCE", "Nice",       "France"),
-    ("AMS", "Amsterdam",  "Netherlands"),
-    ("BER", "Berlin",     "Germany"),
-    ("MUC", "Munich",     "Germany"),
-    ("BUD", "Budapest",   "Hungary"),
-    ("KRK", "Krakow",     "Poland"),
-    ("WAW", "Warsaw",     "Poland"),
-    ("PRG", "Prague",     "Czech Republic"),
-    ("EDI", "Edinburgh",  "Scotland"),
-    ("STN", "London",     "England"),
-    ("MAN", "Manchester", "England"),
-    ("GVA", "Geneva",     "Switzerland"),
-    ("MLA", "Malta",      "Malta"),
-    ("VIE", "Vienna",     "Austria"),
-    ("ATH", "Athens",     "Greece"),
-    ("VLC", "Valencia",   "Spain"),
-    ("CPH", "Copenhagen", "Denmark"),
+    ("ALC", "Alicante",   "Spain", ("ORK", "DUB")),
+    ("BCN", "Barcelona",  "Spain", ("ORK", "DUB")),
+    ("AGP", "Malaga",     "Spain", ("ORK", "DUB")),
+    ("PMI", "Palma",      "Spain (Mallorca)", ("ORK", "DUB")),
+    ("MAD", "Madrid",     "Spain", ("DUB",)),
+    ("TFS", "Tenerife",   "Spain", ("ORK", "DUB")),
+    ("ACE", "Lanzarote",  "Spain", ("ORK", "DUB")),
+    ("FAO", "Faro",       "Portugal", ("ORK", "DUB")),
+    ("LIS", "Lisbon",     "Portugal", ("DUB",)),
+    ("OPO", "Porto",      "Portugal", ("DUB",)),
+    ("FCO", "Rome",       "Italy", ("DUB",)),
+    ("BGY", "Milan",      "Italy", ("ORK", "DUB")),
+    ("CDG", "Paris",      "France", ("ORK", "DUB")),
+    ("NCE", "Nice",       "France", ("ORK", "DUB")),
+    ("AMS", "Amsterdam",  "Netherlands", ("ORK", "DUB")),
+    ("BER", "Berlin",     "Germany", ("DUB",)),
+    ("MUC", "Munich",     "Germany", ("ORK", "DUB")),
+    ("BUD", "Budapest",   "Hungary", ("DUB",)),
+    ("KRK", "Krakow",     "Poland", ("DUB",)),
+    ("WAW", "Warsaw",     "Poland", ("DUB",)),
+    ("PRG", "Prague",     "Czech Republic", ("ORK", "DUB")),
+    ("EDI", "Edinburgh",  "Scotland", ("ORK", "DUB")),
+    ("STN", "London",     "England", ("ORK", "DUB")),
+    ("MAN", "Manchester", "England", ("ORK", "DUB")),
+    ("GVA", "Geneva",     "Switzerland", ("ORK", "DUB")),
+    ("MLA", "Malta",      "Malta", ("DUB",)),
+    ("VIE", "Vienna",     "Austria", ("DUB",)),
+    ("ATH", "Athens",     "Greece", ("DUB",)),
+    ("VLC", "Valencia",   "Spain", ("ORK", "DUB")),
+    ("CPH", "Copenhagen", "Denmark", ("DUB",)),
+    ("SVQ", "Seville",    "Spain", ("ORK", "DUB")),
+    ("VCE", "Venice",     "Italy", ("ORK", "DUB")),
+    ("PSA", "Pisa",       "Italy", ("ORK", "DUB")),
+    ("ZAD", "Zadar",      "Croatia", ("ORK", "DUB")),
+    ("RHO", "Rhodes",     "Greece", ("ORK", "DUB")),
+    ("FUE", "Fuerteventura", "Spain", ("ORK", "DUB")),
+    ("LPA", "Las Palmas", "Spain", ("ORK", "DUB")),
+    ("ZRH", "Zurich",     "Switzerland", ("ORK", "DUB")),
 ]
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -307,7 +318,10 @@ def record_history(boards, hkey, hist):
 def build_board(origin, label, out_date, ret_date, nights):
     print(f"\n=== [{origin}] {label} · out {out_date} · back {ret_date} ({nights}n) ===")
     deals = []
-    for i, (code, city, country) in enumerate(DESTINATIONS, 1):
+    for i, (code, city, country, airports) in enumerate(DESTINATIONS, 1):
+        if origin not in airports:
+            print(f"  [{i:>2}/{len(DESTINATIONS)}] {city:<12} (no direct route from {origin} — skipped)")
+            continue
         res = cheapest_return(origin, code, out_date, ret_date)
         if res:
             deals.append({"city": city, "country": country, "code": code, **res})

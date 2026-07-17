@@ -811,7 +811,7 @@ img{max-width:100%}
       <div class="form-row">
         <div class="form-group">
           <label>From</label>
-          <select id="tlAirport">
+          <select id="tlAirport" onchange="populateTimelineDest()">
             <option value="ORK">Cork (ORK)</option>
             <option value="DUB">Dublin (DUB)</option>
           </select>
@@ -963,12 +963,25 @@ const EDITOR_NOTES = {
   EDI: "Castle views and cosy pubs — autumn in Edinburgh is a postcard.",
 };
 
+// Cork Airport's real non-stop network (47 routes, July 2026 — flightsfrom.com).
+// Dublin serves everything on our lists, so only Cork needs filtering.
+const CORK_ROUTES = new Set(["CDG","FRA","AMS","MUC","BCN","LHR","ZRH","LGW","MAN",
+  "STN","DUB","PMI","AGP","EDI","PRG","BGY","ALC","GVA","LPA","LTN","BHX","NCE",
+  "CRL","LYS","TFS","BRS","VLC","RHO","VCE","SVQ","ADB","FAO","BOD","GLA","PSA",
+  "BVA","ACE","LPL","BIO","FUE","ZAD","GRO","AHO","SCQ","REU","LRH","CCF"]);
+function servedFrom(ap, codeStr){
+  if (ap !== "ORK") return true;   // Dublin: full network
+  return (codeStr || "").split(",").some(c => CORK_ROUTES.has(c.trim()));
+}
+
 const DIRECT = [
   // Spain — Ryanair & Aer Lingus
   {code:"ALC",city:"Alicante",country:"Spain",airlines:"Ryanair"},
   {code:"BCN",city:"Barcelona",country:"Spain",airlines:"Ryanair"},
   {code:"BIO",city:"Bilbao",country:"Spain",airlines:"Aer Lingus"},
   {code:"ACE",city:"Lanzarote",country:"Spain",airlines:"Ryanair, Aer Lingus"},
+  {code:"FUE",city:"Fuerteventura",country:"Spain",airlines:"Ryanair"},
+  {code:"LPA",city:"Las Palmas",country:"Spain",airlines:"Ryanair"},
   {code:"AGP",city:"Malaga",country:"Spain",airlines:"Ryanair, Aer Lingus"},
   {code:"MAD",city:"Madrid",country:"Spain",airlines:"Ryanair"},
   {code:"PMI",city:"Palma Mallorca",country:"Spain",airlines:"Ryanair, Aer Lingus"},
@@ -1088,6 +1101,7 @@ async function fetchCityPhoto(code, cityName) {
 // ── City coordinates (for weather) ───────────────────────────────────────────
 const CITY_COORDS = {
   VIE:[48.21,16.37], ATH:[37.98,23.73], CPH:[55.68,12.57],
+  VCE:[45.44,12.34], FUE:[28.50,-13.86], LPA:[28.12,-15.43],
   MAN:[53.48,-2.24], LHR:[51.51,-0.13], LGW:[51.51,-0.13], STN:[51.51,-0.13], LTN:[51.51,-0.13],
   EDI:[55.95,-3.19], BRS:[51.45,-2.59],
   FAO:[37.02,-7.93], LIS:[38.72,-9.14], OPO:[41.16,-8.62],
@@ -1918,7 +1932,7 @@ function applyGuideDates(){
   const d = {...g.d};
   if (changed) { d.price = null; d.stops = null; d.total_time = ""; }  // old fare no longer applies
   window._gAutoSearch = true;   // the button press IS the search request
-  openDetail(d, dep, ret, g.groupSize, changed ? 1 : g.cacheTravellers);
+  openDetail(d, dep, ret, g.groupSize, changed ? 1 : g.cacheTravellers, g.planner !== false);
 }
 
 // Timeline of all scanned boards for this destination, inside the guide.
@@ -1960,7 +1974,7 @@ function guidePickBoard(i){
   const g = window._guide;
   if (!r || !g) return;
   openDetail({...r.deal, origin_airport: r.apCode}, r.b.depart_date, r.b.return_date,
-             g.groupSize, _cacheTrav());
+             g.groupSize, _cacheTrav(), true);
 }
 
 // Live flights inside the guide.
@@ -2024,7 +2038,9 @@ async function guideGrids(){
       if (gen !== window._gGen) return;   // a newer search took over — discard
       if (r.ok) {
         const f = await r.json();
-        if (f && f.price) window._gPrices[bucket][date] = f;
+        // Direct fares ONLY — each leg must be bookable on the shown airline.
+        // Connections belong to "Anywhere in Europe" via Aviasales, not here.
+        if (f && f.price && f.stops === 0) window._gPrices[bucket][date] = f;
       }
     } catch(e) {}
     if (gen !== window._gGen) return;
@@ -2134,18 +2150,23 @@ function openPlanner(){
     city: entry.city || code, country: entry.country || "",
     code, price: null, stops: null, total_time: "", airlines: "",
     origin_airport: apSel.value
-  }, dep, ret, selAdults + selChildren, 1);
+  }, dep, ret, selAdults + selChildren, 1, true);
   track("view_destination", { source: "planner", dest: code });
 }
 
 function populateTimelineDest(){
   const sel = document.getElementById("tlDest");
-  if (!sel || sel.options.length) return;
-  DIRECT.forEach(d => {
+  const ap = document.getElementById("tlAirport")?.value || "ORK";
+  if (!sel) return;
+  const keep = sel.value;
+  sel.innerHTML = "";
+  DIRECT.filter(d => servedFrom(ap, d.code)).forEach(d => {
     const o = document.createElement("option");
     o.value = d.code; o.textContent = `${d.city}, ${d.country}`;
     sel.appendChild(o);
   });
+  // keep the previous pick if the new airport also serves it
+  if (keep && [...sel.options].some(o => o.value === keep)) sel.value = keep;
 }
 
 function renderDirectTimeline(){
@@ -2193,7 +2214,7 @@ function renderDirectTimeline(){
         const ddJson = JSON.stringify(dd).replace(/'/g, "&#39;");
         return `
         <tr class="${r.pp === minPP ? 'cheapest-row' : ''}" style="cursor:pointer" title="Open full trip guide"
-            onclick='openDetail(${ddJson}, "${r.b.depart_date}", "${r.b.return_date}", ${selAdults + selChildren}, ${_cacheTrav()})'>
+            onclick='openDetail(${ddJson}, "${r.b.depart_date}", "${r.b.return_date}", ${selAdults + selChildren}, ${_cacheTrav()}, true)'>
           <td>${r.b._type === "weekend" ? "🏖️ Weekend" : "✈️ Week"}</td>
           <td>${fmtD(r.b.depart_date)} → ${fmtD(r.b.return_date)}</td>
           <td class="price-cell">€${r.pp}${r.pp === minPP ? " ⭐" : ""}</td>
@@ -2231,9 +2252,9 @@ function searchEuropeFromCache(){
       <div style="font-weight:700;font-size:14px;margin-bottom:8px">🧳 Plan the full trip for your dates (${new Date(out+"T12:00:00").toLocaleDateString("en-IE",{day:"numeric",month:"short"})} → ${new Date(ret+"T12:00:00").toLocaleDateString("en-IE",{day:"numeric",month:"short"})})</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <a class="deal-book primary" style="cursor:pointer"
-           onclick='openDetail(${synth("DUB")}, "${out}", "${ret}", selAdults + selChildren, 1)'>from Dublin — hotels, cars &amp; guide →</a>
+           onclick='openDetail(${synth("DUB")}, "${out}", "${ret}", selAdults + selChildren, 1, true)'>from Dublin — hotels, cars &amp; guide →</a>
         <a class="deal-book secondary" style="cursor:pointer"
-           onclick='openDetail(${synth("ORK")}, "${out}", "${ret}", selAdults + selChildren, 1)'>from Cork →</a>
+           onclick='openDetail(${synth("ORK")}, "${out}", "${ret}", selAdults + selChildren, 1, true)'>from Cork →</a>
       </div>
     </div>` : "";
 
@@ -2267,7 +2288,7 @@ function searchEuropeFromCache(){
         const ddJson = JSON.stringify(dd).replace(/'/g, "&#39;");
         return `
         <tr style="cursor:pointer" title="Open full trip guide"
-            onclick='openDetail(${ddJson}, "${r.b.depart_date}", "${r.b.return_date}", selAdults + selChildren, _cacheTrav())'>
+            onclick='openDetail(${ddJson}, "${r.b.depart_date}", "${r.b.return_date}", selAdults + selChildren, _cacheTrav(), true)'>
           <td>${r.apCode === "ORK" ? "Cork" : "Dublin"}</td>
           <td>${fmtD(r.b.depart_date)} → ${fmtD(r.b.return_date)}</td>
           <td class="price-cell">€${r.pp}</td>
@@ -2441,7 +2462,7 @@ function openLiveDetail(dealJson, dep, ret){
   try {
     const d = JSON.parse(dealJson.replace(/&quot;/g,'"').replace(/&#39;/g,"'"));
     // Live search is per person → groupSize 1, cacheTravellers 1 (price already per person)
-    openDetail(d, dep, ret, selAdults + selChildren, 1);
+    openDetail(d, dep, ret, selAdults + selChildren, 1, true);
   } catch(e){ console.error("Could not open detail", e); }
 }
 
@@ -2852,8 +2873,8 @@ function cityTransport(code){ return CITY_TRANSPORT[code] || null; }
 
 function addDaysISO(ds, n){ const d=new Date(ds+"T12:00:00"); d.setDate(d.getDate()+n); return d.toISOString().split("T")[0]; }
 
-async function openDetail(d, dep, ret, groupSize, cacheTravellers){
-  window._guide = { d: {...d}, dep, ret, groupSize, cacheTravellers };
+async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = false){
+  window._guide = { d: {...d}, dep, ret, groupSize, cacheTravellers, planner };
   window._gSel = { out: null, ret: null };   // live-grid leg selections
   const overlay = document.getElementById("detailOverlay");
   const body = document.getElementById("detailBody");
@@ -2896,6 +2917,7 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers){
 
     <div class="rainsun" style="margin:0 -0px"></div>
 
+    ${planner ? `
     <div class="dt-section" style="padding-top:16px">
       <h2>📅 Your dates</h2>
       <div class="dt-sub">Change the dates and the whole trip — flights, hotels, costs — updates.</div>
@@ -2917,7 +2939,7 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers){
       <h2>🗓️ Every scanned date for ${d.city} — cheapest first-glance planner</h2>
       <div class="dt-sub">From our automatic scans of the next weeks — tap any row to plan the trip on those dates.</div>
       <div id="dtTimeline"></div>
-    </div>
+    </div>` : ""}
 
     <div class="dt-section dt-complete">
       <h2>🧳 Complete the trip</h2>
@@ -3087,8 +3109,10 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers){
   track("view_destination", { destination: d.city, origin: flightOrigin });
   loadTransport(d.code);
   loadEvents(d.code, dep, ret, d.city);
-  guideTimeline(d);
-  guideLiveInit(d, dep, ret, hasPrice);
+  if (planner) {
+    guideTimeline(d);
+    guideLiveInit(d, dep, ret, hasPrice);
+  }
 }
 
 function closeDetail(){
