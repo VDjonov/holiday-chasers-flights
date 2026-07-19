@@ -395,7 +395,14 @@ img{max-width:100%}
 .consent-decline{background:transparent;color:var(--ivory);border:1px solid rgba(251,248,241,.35)}
 /* v3.2 — Where to eat (Google Places) */
 .dt-rest{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--paper)}
-.rest-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink);transition:.15s}
+.rest-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink);transition:.15s}
+.rest-photo{width:56px;height:56px;flex:none;border-radius:12px;background-size:cover;background-position:center;background-color:var(--cream)}
+.rest-photo-empty{display:flex;align-items:center;justify-content:center;font-size:22px}
+.rest-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.rest-sub{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rest-meta small{color:var(--muted);font-weight:400;font-size:10px}
+.rest-meta{text-align:right;line-height:1.3}
+.tl-hidden{display:none}
 .rest-row:last-child{border-bottom:none}
 .rest-row:hover{background:var(--cream)}
 .rest-rank{font-family:var(--font-mono);font-size:11px;color:var(--gold);width:18px;flex:none}
@@ -1065,6 +1072,8 @@ const EUROPE = [
 // We map each airport code to a Wikipedia article title, then fetch that page's
 // lead image. This avoids fragile hardcoded filenames and covers every city.
 const CITY_WIKI = {
+  VIE:"Vienna", ATH:"Athens", CPH:"Copenhagen", VCE:"Venice",
+  FUE:"Fuerteventura", LPA:"Las_Palmas_de_Gran_Canaria",
   MAN:"Manchester", LHR:"London", LGW:"London", STN:"London", LTN:"London",
   EDI:"Edinburgh", BRS:"Bristol",
   FAO:"Faro,_Portugal", LIS:"Lisbon", OPO:"Porto",
@@ -1788,6 +1797,11 @@ function renderDeals() {
   const median = pps.length ? pps[Math.floor(pps.length/2)] : 0;
   const valueThreshold = median * 0.7;  // 30%+ below median = great value
   function valueBadge(d){
+    // Priority 0: midweek saver — the scanner found Tue→Tue beating the weekend
+    if (d.midweek_saver && d.weekend_price) {
+      const save = Math.round((d.weekend_price - d.price) / (cachedDeals?.travellers || 1));
+      return `<div class="deal-badge cheaper">💡 Midweek saver · €${save} less</div>`;
+    }
     // Priority 1: real price-history flags from the scanner (genuinely true)
     if (d.is_cheaper) return '<div class="deal-badge cheaper">↓ Cheaper than usual</div>';
     if (d.is_new) return '<div class="deal-badge newbadge">✦ New route</div>';
@@ -1898,7 +1912,7 @@ function renderDeals() {
   // Load photo + weather for each card asynchronously (doesn't block render)
   deals.forEach((d, i) => {
     // City photo from Wikipedia
-    fetchCityPhoto(d.code).then(url => {
+    fetchCityPhoto(d.code, d.city).then(url => {
       if (!url) return;
       const ph = document.getElementById(`photo-${d.code}-${i}`);
       if (!ph) return;
@@ -1928,6 +1942,18 @@ function renderDeals() {
 
 // ── In-guide trip planner: dates → live flights → leg booking ────────────────
 
+// Return can only be after departure: keep the min in sync and bump if needed.
+function syncRetMin(){
+  const depEl = document.getElementById("dtDep");
+  const retEl = document.getElementById("dtRet");
+  if (!depEl || !retEl || !depEl.value) return;
+  const minRet = new Date(depEl.value + "T12:00:00");
+  minRet.setDate(minRet.getDate() + 1);
+  const minIso = minRet.toISOString().slice(0, 10);
+  retEl.min = minIso;
+  if (retEl.value && retEl.value < minIso) retEl.value = minIso;
+}
+
 function applyGuideDates(){
   const g = window._guide;
   if (!g) return;
@@ -1938,7 +1964,8 @@ function applyGuideDates(){
   const d = {...g.d};
   if (changed) { d.price = null; d.stops = null; d.total_time = ""; }  // old fare no longer applies
   window._gAutoSearch = true;   // the button press IS the search request
-  openDetail(d, dep, ret, g.groupSize, changed ? 1 : g.cacheTravellers, g.planner !== false);
+  const freshGroup = (typeof selAdults === "number" ? selAdults : 1) + (typeof selChildren === "number" ? selChildren : 0);
+  openDetail(d, dep, ret, freshGroup || g.groupSize, changed ? 1 : g.cacheTravellers, g.planner !== false);
 }
 
 // Timeline of all scanned boards for this destination, inside the guide.
@@ -1958,20 +1985,34 @@ function guideTimeline(d){
   found.sort((a,c) => (a.b.depart_date||"").localeCompare(c.b.depart_date||""));
   const minPP = Math.min(...found.map(r => r.pp));
   const fmtD = iso => new Date(iso+"T00:00:00").toLocaleDateString("en-IE",{day:"numeric",month:"short"});
+  // Collapsed view: the 6 cheapest fares (kept in date order) + the row being
+  // viewed. One tap expands to every scanned date.
+  const SHOW = 6;
+  const cheapIdx = new Set(
+    found.map((r,i) => [r.pp, i]).sort((a,b) => a[0]-b[0]).slice(0, SHOW).map(([,i]) => i)
+  );
   section.style.display = "";
   box.innerHTML = `
     <table class="results-table">
       <thead><tr><th>From</th><th>Trip</th><th>Dates</th><th>Per person</th><th>Airline</th></tr></thead>
-      <tbody>${found.map((r,i) => `
-        <tr style="cursor:pointer" title="Plan the trip on these dates"
+      <tbody>${found.map((r,i) => {
+        const g = window._guide || {};
+        const viewing = (r.deal.depart_date || r.b.depart_date) === g.dep
+                     && r.apCode === (g.d && g.d.origin_airport);
+        const hidden = !cheapIdx.has(i) && !viewing && found.length > SHOW + 2;
+        return `
+        <tr class="${hidden ? 'tl-hidden' : ''}" style="cursor:pointer${viewing ? ';background:var(--gold-soft)' : ''}" title="See the full trip on these dates"
             onclick="guidePickBoard(${i})">
           <td>${r.apCode === "ORK" ? "Cork" : "Dublin"}</td>
           <td>${r.b._type === "weekend" ? "🏖️ Weekend" : "✈️ Week"}</td>
           <td>${fmtD(r.deal.depart_date || r.b.depart_date)} → ${fmtD(r.deal.return_date || r.b.return_date)}</td>
           <td class="price-cell">€${r.pp}${r.pp === minPP ? " ⭐" : ""}</td>
-          <td>${r.deal.airlines || "—"}</td>
-        </tr>`).join("")}</tbody>
-    </table>`;
+          <td>${r.deal.airlines || "—"}${viewing ? ' <span style="font-size:10px;color:var(--muted)">· viewing</span>' : ''}</td>
+        </tr>`;}).join("")}</tbody>
+    </table>` +
+    (found.length > SHOW + 2
+      ? `<button class="rest-more" onclick="this.parentElement.querySelectorAll('.tl-hidden').forEach(e=>e.classList.remove('tl-hidden'));this.remove()">Show all ${found.length} scanned dates ↓</button>`
+      : "");
   window._gTimeline = found;
 }
 
@@ -1979,9 +2020,11 @@ function guidePickBoard(i){
   const r = (window._gTimeline || [])[i];
   const g = window._guide;
   if (!r || !g) return;
+  // Keep the visitor in the world they came from: board guides stay board-style,
+  // planner guides stay planner-style.
   openDetail({...r.deal, origin_airport: r.apCode},
              r.deal.depart_date || r.b.depart_date, r.deal.return_date || r.b.return_date,
-             g.groupSize, _cacheTrav(), true);
+             g.groupSize, _cacheTrav(), g.planner === true);
 }
 
 // Live flights inside the guide.
@@ -2023,7 +2066,7 @@ async function guideGrids(){
     return out;
   };
   const outDates = dates(g.dep), retDates = dates(g.ret).filter(x => x > g.dep);
-  box.innerHTML = `<div id="gProg" style="font-size:13px;color:var(--muted);margin-bottom:10px">Searching live fares… <span id="gProgN">0</span>/${outDates.length + retDates.length}</div>
+  box.innerHTML = `<div id="gProg" style="font-size:13px;color:var(--muted);margin-bottom:10px">⏳ Checking real prices for every date — takes about 20 seconds… <span id="gProgN">0</span>/${outDates.length + retDates.length} done</div>
     <div style="font-weight:700;font-size:14px;margin:6px 0">Departure — ${origin === "ORK" ? "Cork" : "Dublin"} → ${g.d.city}</div>
     <div id="gOutGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px"></div>
     <div style="font-weight:700;font-size:14px;margin:14px 0 6px">Return — ${g.d.city} → ${origin === "ORK" ? "Cork" : "Dublin"}</div>
@@ -2054,10 +2097,38 @@ async function guideGrids(){
     bump();
     guideRenderGrid(bucket);
   };
-  // outbound: origin → dest; return: dest → origin (departure_override)
-  for (const dt of outDates) { if (gen !== window._gGen) return; await fetchOne(origin, code, dt, "out"); }
-  for (const dt of retDates) { if (gen !== window._gGen) return; await fetchOne(code, origin, dt, "ret"); }
+  // outbound: origin → dest; return: dest → origin (departure_override).
+  // 4 requests in parallel — the Worker + cache handle it easily, and the
+  // full grid lands in ~15-20s instead of a minute.
+  const jobs = [
+    ...outDates.map(dt => ({ from: origin, to: code, dt, bucket: "out" })),
+    ...retDates.map(dt => ({ from: code, to: origin, dt, bucket: "ret" })),
+  ];
+  const workers = Array.from({ length: 4 }, async () => {
+    while (jobs.length) {
+      if (gen !== window._gGen) return;
+      const j = jobs.shift();
+      await fetchOne(j.from, j.to, j.dt, j.bucket);
+    }
+  });
+  await Promise.all(workers);
   if (gen !== window._gGen) return;
+
+  // Pre-pick the cheapest sensible combo so the booking bar is ready to go —
+  // the visitor can tap any other date to change either leg.
+  const outEntries = Object.entries(window._gPrices.out);
+  if (outEntries.length && !window._gSel.out) {
+    const bestOut = outEntries.sort((a,b) => a[1].price - b[1].price)[0][0];
+    const retEntries = Object.entries(window._gPrices.ret).filter(([d]) => d > bestOut);
+    if (retEntries.length) {
+      const bestRet = retEntries.sort((a,b) => a[1].price - b[1].price)[0][0];
+      guideSelect("out", bestOut);
+      guideSelect("ret", bestRet);
+      const pk = document.getElementById("gPick");
+      if (pk) pk.insertAdjacentHTML("afterbegin",
+        `<div style="font-size:12px;color:var(--muted);margin-bottom:8px">✨ We pre-picked the cheapest combination — tap any other date above to change it.</div>`);
+    }
+  }
   const prog = document.getElementById("gProg");
   if (prog) prog.textContent = "Prices are per person · tap a departure and a return to build your booking.";
   if (!Object.keys(window._gPrices.out).length && !Object.keys(window._gPrices.ret).length) {
@@ -2079,13 +2150,15 @@ function guideRenderGrid(bucket){
     const isSel = sel && sel.date === date;
     const isMin = f.price === minP;
     return `
-    <div onclick="guideSelect('${bucket}','${date}')" style="cursor:pointer;border-radius:10px;padding:10px 6px;text-align:center;transition:.15s;
-        border:${isSel ? '2px solid var(--ink)' : isMin ? '2px solid #1B7A53' : '1px solid var(--line)'};
-        background:${isSel ? 'rgba(10,27,46,.06)' : isMin ? 'rgba(27,122,83,.07)' : 'var(--paper, #fff)'}">
+    <div onclick="guideSelect('${bucket}','${date}')" style="cursor:pointer;border-radius:10px;padding:10px 6px;text-align:center;transition:.15s;position:relative;
+        border:${isSel ? '2.5px solid var(--ink)' : '1px solid var(--line)'};
+        background:${isSel ? 'var(--gold-soft)' : 'var(--paper, #fff)'};
+        box-shadow:${isSel ? '0 2px 10px rgba(10,27,46,.18)' : 'none'}">
+      ${isSel ? '<div style="position:absolute;top:-8px;right:-6px;background:var(--ink);color:var(--ivory);border-radius:100px;width:20px;height:20px;font-size:12px;line-height:20px">✓</div>' : ''}
       <div style="font-size:10px;color:var(--muted)">${fmtD(date)}</div>
       <div style="font-weight:800;font-size:17px">€${f.price}</div>
       <div style="font-size:10px;color:var(--muted)">${(f.airlines||"—").split(",")[0]}</div>
-      ${isMin ? '<div style="font-size:9px;color:#1B7A53;font-weight:700">CHEAPEST</div>' : ''}
+      ${isMin ? '<div style="font-size:9px;color:#1B7A53;font-weight:700">💚 CHEAPEST</div>' : ''}
     </div>`;}).join("");
 }
 
@@ -2105,17 +2178,25 @@ function guideSelect(bucket, date){
   const groupTot = pp * g.groupSize;
   const outUrl = legUrl(s.out.airlines, origin, code, s.out.date, selAdults, selChildren);
   const retUrl = legUrl(s.ret.airlines, code, origin, s.ret.date, selAdults, selChildren);
+  const outAir = (s.out.airlines||"").split(",")[0].trim();
+  const retAir = (s.ret.airlines||"").split(",")[0].trim();
+  const sameAir = outAir && outAir.toLowerCase() === retAir.toLowerCase()
+                  && ["ryanair","aer lingus"].includes(outAir.toLowerCase());
+  const buttons = sameAir
+    ? `<a class="deal-book primary" href="${flightUrl(outAir, origin, code, s.out.date, s.ret.date, selAdults, selChildren)}" target="_blank" rel="noopener noreferrer"
+         onclick="track('flight_click',{source:'guide_roundtrip',dest:'${code}'})">✈ Book both flights on ${outAir} · €${pp} →</a>`
+    : `<a class="deal-book primary" href="${outUrl}" target="_blank" rel="noopener noreferrer"
+         onclick="track('flight_click',{source:'guide_leg_out',dest:'${code}'})">Book departure · €${s.out.price} →</a>
+       <a class="deal-book secondary" href="${retUrl}" target="_blank" rel="noopener noreferrer"
+         onclick="track('flight_click',{source:'guide_leg_ret',dest:'${code}'})">Book return · €${s.ret.price} →</a>`;
   pick.innerHTML = `
     <div style="border:1px solid var(--line);border-radius:14px;padding:16px">
       <div style="font-weight:800;font-size:18px">Your trip: €${pp} <span style="font-weight:400;font-size:13px;color:var(--muted)">per person · €${groupTot} for ${g.groupSize}</span></div>
-      <div style="font-size:13px;color:var(--muted);margin:4px 0 12px">${s.out.date} (${(s.out.airlines||"").split(",")[0]}) → ${s.ret.date} (${(s.ret.airlines||"").split(",")[0]})</div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <a class="deal-book primary" href="${outUrl}" target="_blank" rel="noopener noreferrer"
-           onclick="track('flight_click',{source:'guide_leg_out',dest:'${code}'})">Book departure · €${s.out.price} →</a>
-        <a class="deal-book secondary" href="${retUrl}" target="_blank" rel="noopener noreferrer"
-           onclick="track('flight_click',{source:'guide_leg_ret',dest:'${code}'})">Book return · €${s.ret.price} →</a>
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:8px">Each leg books separately — that's how these prices are possible.</div>
+      <div style="font-size:13px;color:var(--muted);margin:4px 0 12px">${s.out.date} (${outAir}) → ${s.ret.date} (${retAir})</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">${buttons}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px">${sameAir
+        ? `One booking, both dates pre-filled on ${outAir}.`
+        : "Each leg books separately — that's how these prices are possible."}</div>
     </div>`;
   // Sync the price strip and the trip calculator with the live selection
   const pp2 = document.getElementById("dtPP"); if (pp2) pp2.textContent = "€" + pp;
@@ -2911,7 +2992,7 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = fal
     <div class="dt-pricestrip">
       <div class="dt-priceitem"><div class="lbl">Per person</div><div class="val" id="dtPP">${hasPrice ? '€'+perP : '<a href="'+liveFlightUrl+'" target="_blank" rel="noopener noreferrer sponsored" style="font-size:15px">Check live →</a>'}</div></div>
       <div class="dt-priceitem"><div class="lbl">${groupLbl}</div><div class="val" id="dtGroupTot">${hasPrice ? '€'+groupTot : '—'}</div></div>
-      <div class="dt-priceitem"><div class="lbl">Flight</div><div class="val">${d.stops==null ? '<small>your dates</small>' : (d.stops===0?'Direct':d.stops+' stop'+(d.stops>1?'s':'')) + ' <small>'+(d.total_time||'')+'</small>'}</div></div>
+      <div class="dt-priceitem"><div class="lbl">Flight</div><div class="val">${d.stops==null ? '<small>' + (dep && ret ? new Date(dep+"T12:00:00").toLocaleDateString("en-IE",{day:"numeric",month:"short"}) + " – " + new Date(ret+"T12:00:00").toLocaleDateString("en-IE",{day:"numeric",month:"short"}) : "your dates") + '</small>' : (d.stops===0?'Direct':d.stops+' stop'+(d.stops>1?'s':'')) + ' <small>'+(d.total_time||'')+'</small>'}</div></div>
       <div class="dt-priceitem"><div class="lbl">Airline</div><div class="val" style="font-size:16px">${d.airlines||'—'}</div></div>
     </div>
 
@@ -2922,9 +3003,9 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = fal
       <h2>📅 Your dates</h2>
       <div class="dt-sub">Change the dates and the whole trip — flights, hotels, costs — updates.</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-        <input type="date" id="dtDep" value="${dep}" class="hc-signup-input" style="flex:0 1 170px;min-width:150px">
+        <input type="date" id="dtDep" value="${dep}" class="hc-signup-input" style="flex:0 1 170px;min-width:150px" onchange="syncRetMin()">
         <span style="color:var(--muted)">→</span>
-        <input type="date" id="dtRet" value="${ret}" class="hc-signup-input" style="flex:0 1 170px;min-width:150px">
+        <input type="date" id="dtRet" value="${ret}" class="hc-signup-input" style="flex:0 1 170px;min-width:150px" ${dep ? `min="${dep}"` : ""}>
         <button class="hc-signup-btn" onclick="applyGuideDates()">Update trip</button>
       </div>
     </div>
@@ -2935,11 +3016,13 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = fal
       <div id="dtLive"><span class="dt-loading">Preparing flight search…</span></div>
     </div>
 
+` : ""}
+
     <div class="dt-section" id="dtTimelineSection" style="display:none">
       <h2>🗓️ Every scanned date for ${d.city} — cheapest first-glance planner</h2>
-      <div class="dt-sub">From our automatic scans of the next weeks — tap any row to plan the trip on those dates.</div>
+      <div class="dt-sub">From our automatic scans of the next weeks — tap any row to see the full trip on those dates.</div>
       <div id="dtTimeline"></div>
-    </div>` : ""}
+    </div>
 
     <div class="dt-section dt-complete">
       <h2>🧳 Complete the trip</h2>
@@ -3109,8 +3192,8 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = fal
   track("view_destination", { destination: d.city, origin: flightOrigin });
   loadTransport(d.code);
   loadEvents(d.code, dep, ret, d.city);
+  guideTimeline(d);
   if (planner) {
-    guideTimeline(d);
     guideLiveInit(d, dep, ret, hasPrice);
   }
 }
@@ -3265,7 +3348,7 @@ async function loadRestaurants(code){
   if (!coords || !GOOGLE_PLACES_KEY){ box.parentElement.style.display = "none"; return; }
 
   // 7-day localStorage cache — one API call per city per visitor per week
-  const ck = "hc_rest_" + code;
+  const ck = "hc_rest2_" + code;   // v2: includes photos + cuisine
   let places = null;
   try{
     const cached = JSON.parse(localStorage.getItem(ck) || "null");
@@ -3279,7 +3362,7 @@ async function loadRestaurants(code){
         headers: {
           "Content-Type": "application/json",
           "X-Goog-Api-Key": GOOGLE_PLACES_KEY,
-          "X-Goog-FieldMask": "places.displayName,places.rating,places.userRatingCount,places.priceLevel,places.googleMapsUri"
+          "X-Goog-FieldMask": "places.displayName,places.rating,places.userRatingCount,places.priceLevel,places.googleMapsUri,places.photos,places.primaryTypeDisplayName"
         },
         body: JSON.stringify({
           includedTypes: ["restaurant"],
@@ -3298,6 +3381,8 @@ async function loadRestaurants(code){
         rating: p.rating || null,
         count: p.userRatingCount || 0,
         price: {PRICE_LEVEL_INEXPENSIVE:"€",PRICE_LEVEL_MODERATE:"€€",PRICE_LEVEL_EXPENSIVE:"€€€",PRICE_LEVEL_VERY_EXPENSIVE:"€€€€"}[p.priceLevel] || "",
+        cuisine: p.primaryTypeDisplayName?.text || "",
+        photo: (p.photos && p.photos[0] && p.photos[0].name) || null,
         url: p.googleMapsUri || "#"
       })).filter(p => p.name);
       try{ localStorage.setItem(ck, JSON.stringify({ts: Date.now(), data: places})); }catch(e){}
@@ -3312,12 +3397,19 @@ async function loadRestaurants(code){
   if (!places.length){ box.parentElement.style.display = "none"; return; }
 
   const VISIBLE = 3;
-  box.innerHTML = places.map((p, i) => `
+  box.innerHTML = places.map((p, i) => {
+    const img = (p.photo && i < 6)
+      ? `<span class="rest-photo" style="background-image:url('https://places.googleapis.com/v1/${p.photo}/media?maxWidthPx=200&key=${GOOGLE_PLACES_KEY}')"></span>`
+      : `<span class="rest-photo rest-photo-empty">🍽️</span>`;
+    return `
     <a class="rest-row${i >= VISIBLE ? ' rest-hidden' : ''}" href="${p.url}" target="_blank" rel="noopener">
-      <span class="rest-rank">${i+1}</span>
-      <span class="rest-name">${p.name}</span>
-      <span class="rest-meta">${p.rating ? `<span class="rest-star">★</span> <b>${p.rating.toFixed(1)}</b> (${p.count.toLocaleString()})` : ""}${p.price ? " · " + p.price : ""}</span>
-    </a>`).join("") +
+      ${img}
+      <span class="rest-body">
+        <span class="rest-name">${p.name}</span>
+        <span class="rest-sub">${p.cuisine || "Restaurant"}${p.price ? " · " + p.price : ""}</span>
+      </span>
+      <span class="rest-meta">${p.rating ? `<span class="rest-star">★</span> <b>${p.rating.toFixed(1)}</b><br><small>${p.count.toLocaleString()} reviews</small>` : ""}</span>
+    </a>`;}).join("") +
     (places.length > VISIBLE
       ? `<button class="rest-more" onclick="this.parentElement.querySelectorAll('.rest-hidden').forEach(e=>e.classList.remove('rest-hidden'));this.remove()">Show ${places.length - VISIBLE} more restaurants ↓</button>`
       : "");

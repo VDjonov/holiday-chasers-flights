@@ -164,9 +164,20 @@ CORK_SCHEDULE = {
     "ZRH": [({0,4}, "2026-04-03", "2026-09-15")],
 }
 
-def cork_operating(code, date):
-    """True/False if the schedule covers this route; None if route unknown."""
-    entries = CORK_SCHEDULE.get(code)
+# Dublin: only routes with a STABLE weekly pattern (flightsfrom.com, zoomed
+# captures Jul 2026). Dublin's other 35 routes are daily-or-aggregated —
+# fixed anchors + rescue probe are correct for them, so they're omitted.
+DUB_SCHEDULE = {
+    "WAW": [({6, 0, 2, 4}, "2026-03-29", "2026-10-24")],   # Sun Mon Wed Fri
+    "RHO": [({1, 2, 5}, "2026-03-29", "2026-10-24")],      # Tue Wed Sat
+    "ZAD": [({1, 5}, "2026-03-29", "2026-10-24")],         # Tue Sat
+}
+
+SCHEDULES = {"ORK": CORK_SCHEDULE, "DUB": DUB_SCHEDULE}
+
+def route_operating(origin, code, date):
+    """True/False if this airport's schedule covers the route; None if unknown."""
+    entries = SCHEDULES.get(origin, {}).get(code)
     if entries is None:
         return None
     iso = date.isoformat()
@@ -179,9 +190,9 @@ WEEK_NIGHTS_PREF = [7, 6, 8]
 WKND_DEP_PREF = [4, 5, 3]               # Fri, Sat, Thu
 WKND_NIGHTS_PREF = [2, 3]
 
-def snap_pair(code, target_dep, kind):
-    """Best operating (dep, ret, nights) near the target for a scheduled Cork
-    route, honouring the trip-shape rules. None = route can't make this shape
+def snap_pair(origin, code, target_dep, kind):
+    """Best operating (dep, ret, nights) near the target for a scheduled route,
+    honouring the trip-shape rules. None = route can't make this shape
     around these dates (honest absence — costs zero credits)."""
     if kind == "week":
         dep_pref, nights_pref, window = WEEK_DEP_PREF, WEEK_NIGHTS_PREF, 3
@@ -195,14 +206,14 @@ def snap_pair(code, target_dep, kind):
             continue
         if kind == "weekend" and day.weekday() not in WKND_DEP_PREF:
             continue
-        if cork_operating(code, day):
+        if route_operating(origin, code, day):
             cands.append((dep_pref.index(day.weekday()) if day.weekday() in dep_pref else 9,
                           abs(off), day))
     cands.sort()
     for _, _, dep in cands:
         for n in nights_pref:
             ret = dep + dt.timedelta(days=n)
-            if cork_operating(code, ret):
+            if route_operating(origin, code, ret):
                 return dep, ret, n
     return None
 
@@ -412,9 +423,9 @@ def build_board(origin, label, out_date, ret_date, nights, kind):
             continue
 
         d_out, d_ret, d_n = out_date, ret_date, nights
-        scheduled = origin == "ORK" and code in CORK_SCHEDULE
+        scheduled = code in SCHEDULES.get(origin, {})
         if scheduled:
-            pair = snap_pair(code, target_dep, kind)
+            pair = snap_pair(origin, code, target_dep, kind)
             if pair is None:
                 print(f"  [{i:>2}/{len(DESTINATIONS)}] {city:<12} (no {kind}-shaped direct these dates — schedule)")
                 continue                       # honest absence, zero credits
@@ -436,6 +447,30 @@ def build_board(origin, label, out_date, ret_date, nights, kind):
             if res:
                 d_out, d_ret, d_n = alt_dep.isoformat(), alt_ret.isoformat(), alt_n
             time.sleep(DELAY)
+
+        # ── Midweek saver probe (Phase 2) ────────────────────────────────
+        # Near-term week boards only: also price Tue→Tue and keep the cheaper.
+        # Airlines price Tue/Wed in the demand trough — often 20-40% under Sat.
+        # Each probe result also feeds Phase 3 (learning each route's cheapest
+        # day), logged via price_history as usual.
+        if (kind == "week" and res
+                and (target_dep - dt.date.today()).days <= 35):
+            tue = target_dep + dt.timedelta(days=(1 - target_dep.weekday()) % 7)
+            tue_ret = tue + dt.timedelta(days=7)
+            probe_ok = True
+            if code in SCHEDULES.get(origin, {}):
+                probe_ok = (route_operating(origin, code, tue)
+                            and route_operating(origin, code, tue_ret))
+            if probe_ok and tue.isoformat() != d_out:
+                alt = cheapest_return(origin, code, tue.isoformat(), tue_ret.isoformat())
+                time.sleep(DELAY)
+                if alt and alt["price"] < res["price"]:
+                    alt["midweek_saver"] = True
+                    alt["weekend_price"] = res["price"]   # for the €-less chip
+                    res = alt
+                    d_out, d_ret, d_n = tue.isoformat(), tue_ret.isoformat(), 7
+                    print(f"        💡 midweek saver: €{res['price']} on {d_out} "
+                          f"(vs €{res['weekend_price']} weekend)")
 
         if res:
             deals.append({"city": city, "country": country, "code": code,
