@@ -988,6 +988,17 @@ const DIRECT = [
   {code:"ACE",city:"Lanzarote",country:"Spain",airlines:"Ryanair, Aer Lingus"},
   {code:"FUE",city:"Fuerteventura",country:"Spain",airlines:"Ryanair"},
   {code:"LPA",city:"Las Palmas",country:"Spain",airlines:"Ryanair"},
+  {code:"FCO",city:"Rome",country:"Italy",airlines:"Ryanair, Aer Lingus"},
+  {code:"VCE",city:"Venice",country:"Italy",airlines:"Ryanair, Aer Lingus"},
+  {code:"BER",city:"Berlin",country:"Germany",airlines:"Ryanair"},
+  {code:"MUC",city:"Munich",country:"Germany",airlines:"Aer Lingus, Lufthansa"},
+  {code:"BUD",city:"Budapest",country:"Hungary",airlines:"Ryanair, Aer Lingus"},
+  {code:"KRK",city:"Krakow",country:"Poland",airlines:"Ryanair"},
+  {code:"WAW",city:"Warsaw",country:"Poland",airlines:"Aer Lingus, Ryanair"},
+  {code:"GVA",city:"Geneva",country:"Switzerland",airlines:"Aer Lingus"},
+  {code:"VIE",city:"Vienna",country:"Austria",airlines:"Ryanair, Aer Lingus"},
+  {code:"ATH",city:"Athens",country:"Greece",airlines:"Ryanair, Aer Lingus"},
+  {code:"CPH",city:"Copenhagen",country:"Denmark",airlines:"Ryanair"},
   {code:"AGP",city:"Malaga",country:"Spain",airlines:"Ryanair, Aer Lingus"},
   {code:"MAD",city:"Madrid",country:"Spain",airlines:"Ryanair"},
   {code:"PMI",city:"Palma Mallorca",country:"Spain",airlines:"Ryanair, Aer Lingus"},
@@ -2067,10 +2078,16 @@ async function guideGrids(){
   };
   const outDates = dates(g.dep), retDates = dates(g.ret).filter(x => x > g.dep);
   box.innerHTML = `<div id="gProg" style="font-size:13px;color:var(--muted);margin-bottom:10px">⏳ Checking real prices for every date — takes about 20 seconds… <span id="gProgN">0</span>/${outDates.length + retDates.length} done</div>
-    <div style="font-weight:700;font-size:14px;margin:6px 0">Departure — ${origin === "ORK" ? "Cork" : "Dublin"} → ${g.d.city}</div>
-    <div id="gOutGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px"></div>
-    <div style="font-weight:700;font-size:14px;margin:14px 0 6px">Return — ${g.d.city} → ${origin === "ORK" ? "Cork" : "Dublin"}</div>
-    <div id="gRetGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px"></div>
+    <div style="display:flex;gap:12px;align-items:flex-start">
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:13px;margin:6px 0">🛫 Out — ${origin === "ORK" ? "Cork" : "Dublin"} → ${g.d.city.split(" ")[0]}</div>
+        <div id="gOutGrid" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:13px;margin:6px 0">🛬 Return — ${g.d.city.split(" ")[0]} → ${origin === "ORK" ? "Cork" : "Dublin"}</div>
+        <div id="gRetGrid" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+    </div>
     <div id="gPick" style="margin-top:14px"></div>`;
   window._gPrices = { out: {}, ret: {} };
   window._gSel = { out: null, ret: null };            // stale picks reference old prices
@@ -2150,15 +2167,14 @@ function guideRenderGrid(bucket){
     const isSel = sel && sel.date === date;
     const isMin = f.price === minP;
     return `
-    <div onclick="guideSelect('${bucket}','${date}')" style="cursor:pointer;border-radius:10px;padding:10px 6px;text-align:center;transition:.15s;position:relative;
-        border:${isSel ? '2.5px solid var(--ink)' : '1px solid var(--line)'};
-        background:${isSel ? 'var(--gold-soft)' : 'var(--paper, #fff)'};
-        box-shadow:${isSel ? '0 2px 10px rgba(10,27,46,.18)' : 'none'}">
-      ${isSel ? '<div style="position:absolute;top:-8px;right:-6px;background:var(--ink);color:var(--ivory);border-radius:100px;width:20px;height:20px;font-size:12px;line-height:20px">✓</div>' : ''}
-      <div style="font-size:10px;color:var(--muted)">${fmtD(date)}</div>
-      <div style="font-weight:800;font-size:17px">€${f.price}</div>
-      <div style="font-size:10px;color:var(--muted)">${(f.airlines||"—").split(",")[0]}</div>
-      ${isMin ? '<div style="font-size:9px;color:#1B7A53;font-weight:700">💚 CHEAPEST</div>' : ''}
+    <div onclick="guideSelect('${bucket}','${date}')" style="cursor:pointer;border-radius:10px;padding:8px 10px;transition:.15s;position:relative;display:flex;align-items:center;justify-content:space-between;gap:6px;
+        border:${isSel ? '2px solid var(--ink)' : '1px solid var(--line)'};
+        background:${isSel ? 'var(--gold-soft)' : 'var(--paper, #fff)'}">
+      <div style="min-width:0">
+        <div style="font-size:11px;font-weight:600">${isSel ? '✓ ' : ''}${fmtD(date)}</div>
+        <div style="font-size:9px;color:${isMin ? '#1B7A53' : 'var(--muted)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${isMin ? '💚 cheapest · ' : ''}${(f.airlines||"—").split(",")[0]}</div>
+      </div>
+      <div style="font-weight:800;font-size:15px;flex:none">€${f.price}</div>
     </div>`;}).join("");
 }
 
@@ -2242,16 +2258,32 @@ function openPlanner(){
   track("view_destination", { source: "planner", dest: code });
 }
 
+const COUNTRY_FLAG = {
+  Spain:"🇪🇸", Portugal:"🇵🇹", Italy:"🇮🇹", France:"🇫🇷", England:"🇬🇧",
+  Scotland:"🏴󠁧󠁢󠁳󠁣󠁴󠁿", Germany:"🇩🇪", Netherlands:"🇳🇱", "Czech Republic":"🇨🇿",
+  Croatia:"🇭🇷", Malta:"🇲🇹", Switzerland:"🇨🇭", Turkey:"🇹🇷", Greece:"🇬🇷",
+  Hungary:"🇭🇺", Poland:"🇵🇱", Austria:"🇦🇹", Denmark:"🇩🇰",
+};
+
 function populateTimelineDest(){
   const sel = document.getElementById("tlDest");
   const ap = document.getElementById("tlAirport")?.value || "ORK";
   if (!sel) return;
   const keep = sel.value;
   sel.innerHTML = "";
-  DIRECT.filter(d => servedFrom(ap, d.code)).forEach(d => {
-    const o = document.createElement("option");
-    o.value = d.code; o.textContent = `${d.city}, ${d.country}`;
-    sel.appendChild(o);
+  // Group by country (A→Z), cities A→Z inside — with flag headers.
+  const served = DIRECT.filter(d => servedFrom(ap, d.code));
+  const byCountry = {};
+  served.forEach(d => { (byCountry[d.country] = byCountry[d.country] || []).push(d); });
+  Object.keys(byCountry).sort().forEach(country => {
+    const grp = document.createElement("optgroup");
+    grp.label = `${COUNTRY_FLAG[country] || "🌍"} ${country}`;
+    byCountry[country].sort((a,b) => a.city.localeCompare(b.city)).forEach(d => {
+      const o = document.createElement("option");
+      o.value = d.code; o.textContent = d.city;
+      grp.appendChild(o);
+    });
+    sel.appendChild(grp);
   });
   // keep the previous pick if the new airport also serves it
   if (keep && [...sel.options].some(o => o.value === keep)) sel.value = keep;
@@ -2790,7 +2822,8 @@ const TM_CITY = {
   NCE:"Nice", LYS:"Lyon", BOD:"Bordeaux", AMS:"Amsterdam", FRA:"Frankfurt",
   PRG:"Prague", ZRH:"Zurich", MLA:"Valletta", ZAD:"Zadar", RHO:"Rhodes",
   ADB:"Izmir", GVA:"Geneva", MUC:"Munich", BER:"Berlin", BUD:"Budapest",
-  KRK:"Krakow", WAW:"Warsaw",
+  KRK:"Krakow", WAW:"Warsaw", VIE:"Vienna", ATH:"Athens", CPH:"Copenhagen",
+  VCE:"Venice", FUE:"Fuerteventura", LPA:"Las Palmas de Gran Canaria",
 };
 
 // ── Curated top sights per city (v3.1) ───────────────────────────────────────
@@ -2906,6 +2939,18 @@ const CITY_SIGHTS = {
 // Structured: airport→centre options (with best pick), getting-around note,
 // family tip, and official transport site. Map uses CITY_COORDS.
 const CITY_TRANSPORT = {
+  VIE:{options:[{mode:"🚆 CAT train",detail:"to Wien Mitte",time:"~16 min",price:"~€15",best:true},{mode:"🚆 S7 train",detail:"to centre",time:"~25 min",price:"~€4.30"},{mode:"🚕 Taxi",detail:"to centre",time:"~25 min",price:"~€40"}],around:"U-Bahn, trams and buses run everywhere. Single ~€2.40; 24h pass ~€8.",family:"Children under 6 travel free; under-15s free on Sundays and holidays.",official:{name:"Wiener Linien",url:"https://www.wienerlinien.at/web/wl-en"}},
+  ATH:{options:[{mode:"🚇 Metro L3",detail:"to Syntagma",time:"~40 min",price:"~€9",best:true},{mode:"🚌 X95 bus",detail:"24h to Syntagma",time:"~50 min",price:"~€5.50"},{mode:"🚕 Taxi",detail:"flat fare, daytime",time:"~40 min",price:"~€40"}],around:"Metro, tram and buses. A 90-minute ticket ~€1.20; 24h pass ~€4.10.",family:"Children under 6 travel free; 6–18s pay reduced fare.",official:{name:"Athens Transport (OASA)",url:"https://www.oasa.gr/en/"}},
+  VLC:{options:[{mode:"🚇 Metro L3/L5",detail:"to centre",time:"~25 min",price:"~€4.90",best:true},{mode:"🚕 Taxi",detail:"to centre",time:"~20 min",price:"~€25"}],around:"Metro, trams and buses; single ~€1.50, SUMA 10-trip ~€8. The old town and Turia park are very walkable.",family:"Under-10s travel free on EMT buses with a Xiquets card.",official:{name:"Metrovalencia",url:"https://www.metrovalencia.es/en/"}},
+  CPH:{options:[{mode:"🚇 Metro M2",detail:"to Kongens Nytorv",time:"~15 min",price:"~DKK 30",best:true},{mode:"🚕 Taxi",detail:"to centre",time:"~20 min",price:"~DKK 300"}],around:"Driverless metro runs 24/7; buses and harbour buses too. City Pass 24h ~DKK 90. Cycling is everywhere.",family:"Two children under 12 travel free with each paying adult.",official:{name:"Copenhagen Metro",url:"https://m.dk/en/"}},
+  SVQ:{options:[{mode:"🚌 EA bus",detail:"to Plaza de Armas",time:"~35 min",price:"~€4",best:true},{mode:"🚕 Taxi",detail:"flat fare to centre",time:"~20 min",price:"~€25"}],around:"The centre is wonderfully walkable; trams and TUSSAM buses fill gaps, single ~€1.40.",family:"Under-5s free on buses; the tram through the centre is a hit with kids.",official:{name:"TUSSAM Sevilla",url:"https://www.tussam.es/"}},
+  VCE:{options:[{mode:"🚌 ATVO/ACTV bus",detail:"to Piazzale Roma",time:"~20 min",price:"~€10",best:true},{mode:"⛴️ Alilaguna boat",detail:"to San Marco",time:"~1h 15m",price:"~€15"},{mode:"🚤 Water taxi",detail:"direct to hotel",time:"~30 min",price:"~€120"}],around:"Vaporetto water buses: single ~€9.50, 24h pass ~€25 — the pass pays for itself quickly. Otherwise, walk.",family:"Under-6s travel free on vaporetti.",official:{name:"ACTV Venezia",url:"https://actv.avmspa.it/en"}},
+  PSA:{options:[{mode:"🚝 PisaMover",detail:"to Pisa Centrale",time:"~8 min",price:"~€5",best:true},{mode:"🚕 Taxi",detail:"to centre",time:"~10 min",price:"~€12"}],around:"Pisa is compact and walkable; regional trains reach Florence (~1h, ~€9) and the Cinque Terre.",family:"Under-4s free on Trenitalia; kids ride the PisaMover free under 6.",official:{name:"PisaMover",url:"https://pisa-mover.com/en/"}},
+  ZAD:{options:[{mode:"🚌 Airport bus",detail:"to old town",time:"~25 min",price:"~€3",best:true},{mode:"🚕 Taxi",detail:"to centre",time:"~15 min",price:"~€20"}],around:"The old town peninsula is car-free and walkable; Liburnija city buses ~€1.30 reach the beaches.",family:"Small children travel free on city buses.",official:{name:"Liburnija Zadar",url:"https://www.liburnija-zadar.hr/"}},
+  RHO:{options:[{mode:"🚌 Airport bus",detail:"to Rhodes Town",time:"~30 min",price:"~€2.60",best:true},{mode:"🚕 Taxi",detail:"to Rhodes Town",time:"~25 min",price:"~€25"}],around:"KTEL buses run the east and west coasts cheaply; the medieval Old Town is walk-only.",family:"Under-6s free on buses; agree taxi fares before longer island trips.",official:{name:"KTEL Rhodes",url:"https://ktelrodou.gr/en/"}},
+  FUE:{options:[{mode:"🚌 Bus L3/L10",detail:"to Puerto del Rosario / Caleta",time:"~20–30 min",price:"~€2–3",best:true},{mode:"🚕 Taxi",detail:"to nearby resorts",time:"~15 min",price:"~€15–25"}],around:"Tiadhe buses link the resorts, but they're infrequent — most visitors hire a car for the beaches.",family:"Under-4s free on buses; car seats should be booked with hire cars in advance.",official:{name:"Tiadhe Fuerteventura buses",url:"https://www.tiadhe.com/"}},
+  LPA:{options:[{mode:"🚌 Bus 60",detail:"to Las Palmas (San Telmo)",time:"~35 min",price:"~€2.95",best:true},{mode:"🚕 Taxi",detail:"to Las Palmas",time:"~25 min",price:"~€35"}],around:"Yellow Guaguas city buses ~€1.40 cover the city; Vegueta old town and Las Canteras beach are walkable.",family:"Under-4s free; the beachfront promenade is perfect for buggies.",official:{name:"Guaguas Municipales",url:"https://www.guaguas.com/"}},
+  ZRH:{options:[{mode:"🚆 Train",detail:"to Zürich HB",time:"~12 min",price:"~CHF 7",best:true},{mode:"🚊 Tram 10",detail:"to centre",time:"~35 min",price:"~CHF 7"},{mode:"🚕 Taxi",detail:"to centre",time:"~25 min",price:"~CHF 70"}],around:"Trams and trains (ZVV zones) are superb; a 24h city pass ~CHF 9. Lake boats are included on day passes.",family:"A Junior Card lets kids under 16 travel free with a parent.",official:{name:"ZVV Zürich",url:"https://www.zvv.ch/zvv/en/home.html"}},
   MAN:{options:[{mode:"🚆 Train",detail:"to Manchester Piccadilly",time:"~20 min",price:"~£5",best:true},{mode:"🚌 Bus 43",detail:"frequent to centre",time:"~35 min",price:"~£3"},{mode:"🚕 Taxi",detail:"to city centre",time:"~25 min",price:"~£25"}],around:"Trams (Metrolink) and buses cover the city. Single tram ~£1.40–£3; day ticket ~£5.",family:"Up to 2 kids under 11 travel free with a paying adult on Metrolink.",official:{name:"Transport for Greater Manchester",url:"https://tfgm.com/"}},
   FAO:{options:[{mode:"🚌 Bus 14/16",detail:"to bus station",time:"~20 min",price:"~€2.40",best:true},{mode:"🚕 Taxi",detail:"to centre",time:"~10 min",price:"~€15"}],around:"Faro centre is walkable. Próximo buses reach the beach; cheap regional trains link Algarve towns.",family:"Children under 4 travel free on regional trains; under-12s get reduced fares.",official:{name:"CP Trains Portugal",url:"https://www.cp.pt/passageiros/en"}},
   BCN:{options:[{mode:"🚌 Aerobús",detail:"to Plaça Catalunya",time:"~35 min",price:"~€7.25",best:true},{mode:"🚇 Metro L9 Sud",detail:"+ transfer",time:"~45 min",price:"~€5.50"},{mode:"🚆 R2 Train",detail:"to Sants/Passeig",time:"~30 min",price:"~€4.90"}],around:"Excellent Metro & bus network. A T-casual 10-trip ticket (~€12.55) is best value; single ~€2.65.",family:"Children under 4 ride free. The T-familiar multi-person ticket suits groups.",official:{name:"TMB Barcelona",url:"https://www.tmb.cat/en/home"}},
@@ -3468,12 +3513,12 @@ async function loadAttractionsFromPlaces(code, box){
   }
 
   box.innerHTML = spots.slice(0, 6).map((s, i) => {
-    const img = (s.photo && i < 4)
-      ? `background-image:url('https://places.googleapis.com/v1/${s.photo}/media?maxWidthPx=400&key=${GOOGLE_PLACES_KEY}');color:transparent`
-      : "";
+    const imgHtml = (s.photo && i < 4)
+      ? `<span class="dt-attraction-img" style="background-image:url('https://places.googleapis.com/v1/${s.photo}/media?maxWidthPx=400&key=${GOOGLE_PLACES_KEY}')"></span>`
+      : "";   // no photo → compact card, no empty block
     return `
     <div class="dt-attraction">
-      <span class="dt-attraction-img" style="display:flex;align-items:center;justify-content:center;color:var(--gold);${img}">✦</span>
+      ${imgHtml}
       <div class="dt-attraction-body">
         <div class="a-name"><a href="${s.url}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">${s.name}</a></div>
         <div class="a-desc">${s.rating ? '★ ' + s.rating + ' · ' + s.count.toLocaleString() + ' reviews' : 'Popular spot'}</div>
