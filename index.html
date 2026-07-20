@@ -673,12 +673,29 @@ img{max-width:100%}
 </head>
 <body>
 <button class="hc-top-btn" id="hcTopBtn" aria-label="Back to top"
-        onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+        onclick="hcScrollTop()">↑</button>
 <script>
-  addEventListener("scroll", () => {
-    const b = document.getElementById("hcTopBtn");
-    if (b) b.classList.toggle("show", scrollY > 600);
-  }, { passive: true });
+  (function(){
+    const btn = () => document.getElementById("hcTopBtn");
+    const overlay = () => document.getElementById("detailOverlay");
+    function update(){
+      const o = overlay();
+      const inGuide = o && o.classList.contains("open");
+      const pos = inGuide ? o.scrollTop : scrollY;
+      const b = btn();
+      if (b) b.classList.toggle("show", pos > 600);
+    }
+    addEventListener("scroll", update, { passive: true });
+    document.addEventListener("DOMContentLoaded", () => {
+      const o = overlay();
+      if (o) o.addEventListener("scroll", update, { passive: true });
+    });
+    window.hcScrollTop = function(){
+      const o = overlay();
+      if (o && o.classList.contains("open")) o.scrollTo({ top: 0, behavior: "smooth" });
+      else window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+  })();
 </script>
 
 <!-- ═══ NAV ═══ -->
@@ -3064,10 +3081,16 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = fal
       <h2>✈️ Flights for your dates</h2>
       <div class="dt-sub">Pick a departure and a return below — real prices per person, book each leg directly.</div>
       <div id="dtLive"><span class="dt-loading">Preparing flight search…</span></div>
-      <div style="font-size:12px;color:var(--muted);margin-top:10px">Need more options?
-        <a href="${liveFlightUrl}" target="_blank" rel="noopener noreferrer sponsored"
-           onclick="track('flight_click',{source:'guide_aviasales_more',dest:'${d.code}'})"
-           style="color:var(--gold);font-weight:600">compare all airlines on Aviasales →</a></div>
+      <a href="${liveFlightUrl}" target="_blank" rel="noopener noreferrer sponsored"
+         onclick="track('flight_click',{source:'guide_aviasales_more',dest:'${d.code}'})"
+         style="display:flex;align-items:center;gap:12px;margin-top:14px;padding:12px 16px;border:1px dashed var(--gold);border-radius:12px;background:var(--cream);text-decoration:none;color:var(--ink)">
+        <span style="font-size:22px;flex:none">🔀</span>
+        <span style="flex:1;min-width:0">
+          <span style="display:block;font-weight:700;font-size:14px">Not seeing the right flight?</span>
+          <span style="display:block;font-size:12px;color:var(--muted)">Aviasales compares 100+ airlines — including connecting flights and different carriers, sometimes cheaper.</span>
+        </span>
+        <span style="flex:none;font-weight:700;color:var(--gold);font-size:13px;white-space:nowrap">Compare all →</span>
+      </a>
     </div>
 
 ` : ""}
@@ -3088,6 +3111,10 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = fal
           <span class="tc-ic">🏠</span><span class="tc-lbl">or ${nights} night${nights>1?'s':''} on <span class="tc-brand">${BRAND.airbnb}</span></span>
           <span class="tc-val">≈ €${costs.airbnb*nights}</span>
         </a>
+        <a class="tc-row" href="${carUrlDiscover(d.city, dep, ret)}" target="_blank" rel="noopener noreferrer">
+          <span class="tc-ic">🚗</span><span class="tc-lbl">Optional: car hire <span class="tc-brand">${BRAND.discovercars}</span> <small style="color:var(--muted)">(not in total)</small></span>
+          <span class="tc-val">Check →</span>
+        </a>
         <div class="tc-total">
           <span class="tc-lbl">Estimated trip total <small>(flights + hotel)</small></span>
           <span class="tc-val">~ €${(hasPrice ? groupTot : 0) + costs.hotel*nights}${hasPrice ? '' : ' + flights'}</span>
@@ -3102,7 +3129,7 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = fal
       <div id="dtTimeline"></div>
     </div>
 
-    <div class="dt-section">
+    ${hasPrice ? `<div class="dt-section">
       <h2>✈️ Your flights</h2>
       <div class="dt-sub">${depFmt} → ${retFmt}</div>
       ${d.is_cheaper && d.hist_typical ? `<div class="dt-cheaper-note">↓ This fare is cheaper than usual for ${d.city} — typically around €${Math.round(d.hist_typical/cacheTravellers)} per person.</div>` : ''}
@@ -3121,9 +3148,9 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = fal
         </div>
       </div>
       <div style="margin-top:18px">
-        <a class="deal-book primary" style="display:inline-flex;padding:12px 24px;border-radius:10px" href="${hasPrice ? flightUrl(d.airlines, flightOrigin||'ORK', d.code, dep, ret, selAdults, selChildren) : liveFlightUrl}" target="_blank" rel="noopener noreferrer${hasPrice ? '' : ' sponsored'}">${hasPrice ? flightBtnLabel(d.airlines, 'Search flights') : '✈ Check live prices on Aviasales'} →</a>
+        <a class="deal-book primary" style="display:inline-flex;padding:12px 24px;border-radius:10px" href="${flightUrl(d.airlines, flightOrigin||'ORK', d.code, dep, ret, selAdults, selChildren)}" target="_blank" rel="noopener noreferrer">${flightBtnLabel(d.airlines, 'Search flights')} →</a>
       </div>
-    </div>
+    </div>` : ""}
 
     <div class="dt-section">
       <h2>🌤️ Weather around your trip</h2>
