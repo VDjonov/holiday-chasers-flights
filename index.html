@@ -721,8 +721,7 @@ img{max-width:100%}
   <div class="tabs-inner">
     <div class="tab-seg">
       <button class="tab-btn active" data-tab="deals"><span class="tab-ic">🏖️</span> Deal Board</button>
-      <button class="tab-btn" data-tab="direct"><span class="tab-ic">✈️</span> Direct Flights</button>
-      <button class="tab-btn" data-tab="europe"><span class="tab-ic">🗺️</span> Anywhere in Europe</button>
+      <button class="tab-btn" data-tab="plan"><span class="tab-ic">🗺️</span> Plan a Trip</button>
     </div>
   </div>
 </div>
@@ -825,99 +824,33 @@ img{max-width:100%}
   </div>
 </section>
 
-<!-- ═══ TAB: DIRECT FLIGHTS ═══ -->
-<section id="tab-direct" class="tab-content">
+<!-- ═══ TAB: PLAN A TRIP (merged Direct Flights + Anywhere in Europe) ═══ -->
+<section id="tab-plan" class="tab-content">
   <div class="section-hdr">
-    <h2>Direct flights from Cork & Dublin</h2>
-    <p>Pick a destination and a centre date — we scan ±5 days and show the cheapest price for each day.</p>
+    <h2>Plan a trip</h2>
+    <p>Any city in Europe — we build the whole trip for your dates: flights, hotels, car hire and costs. Cities we fly to direct from Cork or Dublin show live scanned prices; anywhere else opens the full planner.</p>
   </div>
-  <!-- Trip planner: pick a city, the full guide opens with date pickers,
-       live flights, scanned-date timeline, hotels, cars and costs. -->
-  <div id="directTimelineBlock">
-    <div class="search-form">
-      <div class="form-row">
-        <div class="form-group">
-          <label>From</label>
-          <select id="tlAirport" onchange="populateTimelineDest()">
-            <option value="ORK">Cork (ORK)</option>
-            <option value="DUB">Dublin (DUB)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Destination</label>
-          <select id="tlDest"></select>
-        </div>
-        <div class="form-group" style="align-self:end">
-          <button class="hc-signup-btn" style="width:100%" onclick="openPlanner()">Plan this trip →</button>
-        </div>
-      </div>
-      <div style="font-size:12px;color:var(--muted);margin-top:8px">Opens the full trip guide — pick your own dates, see live flight prices, book each leg, and get hotels, car hire and costs for those dates.</div>
-    </div>
-  </div>
-  <div class="search-form" id="directLiveForm" style="display:none">
+  <div class="search-form">
     <div class="form-row">
-      <div class="form-group">
+      <div class="form-group" style="flex:2;min-width:220px">
         <label>Destination</label>
-        <select id="directDest"></select>
+        <select id="planCity" onchange="onPlanCityChange()"></select>
       </div>
       <div class="form-group">
-        <label>Centre date</label>
-        <input type="date" id="directDate">
+        <label>Outbound</label>
+        <input type="date" id="planOut" onchange="onPlanDateChange()">
       </div>
       <div class="form-group">
-        <label>Nights away</label>
-        <select id="directNights">
-          <option value="0">One-way</option>
-          <option value="2">2 nights (weekend)</option>
-          <option value="4">4 nights</option>
-          <option value="7" selected>7 nights (1 week)</option>
-          <option value="14">14 nights (2 weeks)</option>
-        </select>
+        <label>Return</label>
+        <input type="date" id="planRet" onchange="onPlanDateChange()">
       </div>
-      <button class="search-btn" id="directSearch" onclick="searchDirectWindow()">Search ±5 days</button>
+      <button class="search-btn" id="planSearch" onclick="planBuildTrip()">Build my trip →</button>
     </div>
+    <div id="planRouteBadge" style="margin-top:14px"></div>
   </div>
-  <div id="directProgress" style="display:none;margin-bottom:16px">
-    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--gray);margin-bottom:6px">
-      <span id="directProgressText">Searching...</span>
-      <span id="directProgressCount"></span>
-    </div>
-    <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden">
-      <div id="directProgressBar" style="height:100%;background:linear-gradient(90deg,var(--blue),var(--green));width:0%;transition:width 0.3s;border-radius:2px"></div>
-    </div>
-  </div>
-  <div id="directResults"></div>
+  <div id="planResults"></div>
 </section>
 
-<!-- ═══ TAB: ANYWHERE IN EUROPE ═══ -->
-<section id="tab-europe" class="tab-content">
-  <div class="section-hdr">
-    <h2>Anywhere in Europe</h2>
-    <p>Reach any European city — including connections. Great for places with no direct route from Cork or Dublin.</p>
-  </div>
-  <div class="search-form" id="europeForm">
-    <div class="form-row">
-      <div class="form-group">
-        <label>Country</label>
-        <select id="europeCountry" onchange="updateCities()"></select>
-      </div>
-      <div class="form-group">
-        <label>City</label>
-        <select id="europeCity" onchange="refreshEuropeResults()"></select>
-      </div>
-      <div class="form-group">
-        <label>Outbound date</label>
-        <input type="date" id="europeDate" onchange="refreshEuropeResults()">
-      </div>
-      <div class="form-group">
-        <label>Return date</label>
-        <input type="date" id="europeReturn" onchange="refreshEuropeResults()">
-      </div>
-      <button class="search-btn" id="europeSearch" onclick="searchEurope()">Search</button>
-    </div>
-  </div>
-  <div id="europeResults"></div>
-</section>
 
 <!-- ═══ BACKEND CONNECT MODAL ═══ -->
 <div id="connectModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center">
@@ -2610,30 +2543,139 @@ function setLiveUi(online) {
 }
 
 // ── Populate dropdowns ───────────────────────────────────────────────────────
-function populateSelects() {
-  const sel = document.getElementById("directDest");
+// Build the merged, grouped "Plan a Trip" city picker.
+// One <select> with <optgroup> per country. Countries that have at least one
+// direct route from Cork/Dublin float to the top (A–Z), then the rest (A–Z).
+// Direct-served cities get a ✈ marker in the option text.
+function planCityList() {
+  // Merge DIRECT (tracked routes, carry airline info) with EUROPE (wider list).
+  // Key by the primary IATA code so a city appears once even if both lists hold it.
+  const byCode = new Map();
+  const primary = code => (code || "").split(",")[0].trim();
   DIRECT.forEach(d => {
-    const o = document.createElement("option");
-    o.value = d.code;
-    o.textContent = `${d.city}, ${d.country} — ${d.airlines}`;
-    sel.appendChild(o);
+    const key = primary(d.code);
+    byCode.set(key, { code: d.code, city: d.city, country: d.country, direct: true });
+  });
+  EUROPE.forEach(d => {
+    const key = primary(d.code);
+    if (!byCode.has(key)) byCode.set(key, { code: d.code, city: d.city, country: d.country, direct: false });
+  });
+  return [...byCode.values()];
+}
+
+function populateSelects() {
+  const sel = document.getElementById("planCity");
+  const cities = planCityList();
+
+  // Group by country; track which countries have any direct route.
+  const groups = {};        // country -> [city objects]
+  const directCountry = {}; // country -> bool
+  cities.forEach(c => {
+    (groups[c.country] = groups[c.country] || []).push(c);
+    if (c.direct) directCountry[c.country] = true;
   });
 
-  const cs = document.getElementById("europeCountry");
-  const countries = [...new Set(EUROPE.map(d => d.country))].sort();
-  countries.forEach(c => { const o = document.createElement("option"); o.value = c; o.textContent = c; cs.appendChild(o); });
-  updateCities();
+  const allCountries = Object.keys(groups);
+  const directFirst = allCountries.filter(c => directCountry[c]).sort();
+  const theRest     = allCountries.filter(c => !directCountry[c]).sort();
+  const ordered = [...directFirst, ...theRest];
 
-  // Default dates: 3 weeks out, 7 nights
+  sel.innerHTML = "";
+  ordered.forEach(country => {
+    const og = document.createElement("optgroup");
+    og.label = country;
+    groups[country].sort((a, b) => a.city.localeCompare(b.city)).forEach(c => {
+      const o = document.createElement("option");
+      o.value = c.code;
+      o.textContent = c.direct ? `${c.city} ✈` : c.city;
+      og.appendChild(o);
+    });
+    sel.appendChild(og);
+  });
+
+  // Default dates: 3 weeks out, 7 nights.
   const today = new Date();
   const out = new Date(today); out.setDate(out.getDate() + 21);
   const ret = new Date(out); ret.setDate(ret.getDate() + 7);
   const fmt = d => d.toISOString().split("T")[0];
-  document.getElementById("directDate").value = fmt(out);
-  document.getElementById("europeDate").value = fmt(out);
-  document.getElementById("europeReturn").value = fmt(ret);
-  document.getElementById("directDate").min = fmt(today);
-  document.getElementById("europeDate").min = fmt(today);
+  const outEl = document.getElementById("planOut");
+  const retEl = document.getElementById("planRet");
+  outEl.value = fmt(out); retEl.value = fmt(ret);
+  outEl.min = fmt(today); retEl.min = fmt(today);
+
+  onPlanCityChange();
+}
+
+// ── Plan a Trip: badge resolver + handlers ──────────────────────────────────
+// The gold badge under the picker resolves from data we already have:
+// DIRECT membership + CORK_ROUTES tell us the route status; the cache gives a
+// "from €X" teaser when we've scanned it. No API call — pure lookups.
+function planSelectedCode() {
+  const sel = document.getElementById("planCity");
+  return (sel.value || "").split(",")[0].trim();
+}
+
+function planCityMeta(code) {
+  return DIRECT.find(d => (d.code || "").split(",")[0].trim() === code) || null;
+}
+
+function planCheapestCached(code) {
+  const trav = _cacheTrav();
+  let best = null;
+  for (const ap of ["ORK", "DUB"]) {
+    for (const b of _allBoards(ap)) {
+      const d = _findDeal(b, code);
+      if (d) { const pp = Math.round(d.price / trav); if (best === null || pp < best) best = pp; }
+    }
+  }
+  return best;
+}
+
+function onPlanCityChange() {
+  const badge = document.getElementById("planRouteBadge");
+  if (!badge) return;
+  const code = planSelectedCode();
+  const meta = planCityMeta(code);
+  document.getElementById("planResults").innerHTML = "";
+
+  if (meta) {
+    const corkToo = servedFrom("ORK", meta.code);
+    const where = corkToo ? "Cork &amp; Dublin" : "Dublin";
+    const price = planCheapestCached(code);
+    const teaser = price !== null ? ` · from €${price}pp` : "";
+    badge.innerHTML = `<span style="display:inline-flex;align-items:center;gap:9px;background:var(--gold-soft);border:1px solid var(--gold);border-radius:100px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--ink)"><span style="font-size:14px">✈</span> Direct from ${where}${teaser}</span>`;
+  } else {
+    badge.innerHTML = `<span style="font-size:13px;color:var(--muted)">We don't fly here direct — we'll open the full planner and search live prices for your dates.</span>`;
+  }
+}
+
+function onPlanDateChange() {
+  // Keep the return date sensible: if it's not after outbound, push it +7 nights.
+  const out = document.getElementById("planOut").value;
+  const retEl = document.getElementById("planRet");
+  if (out && (!retEl.value || retEl.value <= out)) {
+    const r = new Date(out + "T12:00:00"); r.setDate(r.getDate() + 7);
+    retEl.value = r.toISOString().split("T")[0];
+  }
+}
+
+// "Build my trip" — one destination for every path: the full guide.
+function planBuildTrip() {
+  const sel = document.getElementById("planCity");
+  const code = planSelectedCode();
+  const opt = sel.selectedOptions[0];
+  const cityName = (opt ? opt.textContent : code).replace(/\s*✈\s*$/, "").trim();
+  const meta = planCityMeta(code);
+  const country = meta ? meta.country : (EUROPE.find(d => (d.code||"").split(",")[0].trim() === code) || {}).country || "";
+  const out = document.getElementById("planOut").value;
+  const ret = document.getElementById("planRet").value;
+
+  // Default to Dublin (wider network); the guide's own "same trip from Cork"
+  // strip lets them switch in one tap when Cork also flies the route.
+  const deal = { city: cityName, country, code, price: null, stops: null,
+                 total_time: "", airlines: meta ? meta.airlines : "", origin_airport: "DUB" };
+  openDetail(deal, out, ret, selAdults + selChildren, 1, true);
+  track("view_destination", { source: "plan", dest: code });
 }
 
 function updateCities() {
