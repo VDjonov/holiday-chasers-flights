@@ -32,51 +32,55 @@ select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8p
 .fmt-toggle button.active{background:var(--ink);color:var(--ivory)}
 #downloadBtn{width:100%;padding:12px;margin-top:6px;border:none;border-radius:8px;background:var(--gold);color:var(--ink);font-family:var(--font-body);font-weight:600;font-size:14px;cursor:pointer}
 #downloadBtn:disabled{opacity:.6;cursor:wait}
+.upload-btn{display:block;width:100%;padding:10px;margin-top:8px;border:1px dashed var(--line);border-radius:8px;text-align:center;font-size:13px;color:var(--muted);cursor:pointer;background:#fff}
+.upload-btn:hover{border-color:var(--gold)}
 #status{font-size:12px;color:var(--muted);margin-top:8px;text-align:center;min-height:16px}
 
 /* ── preview + capture card ────────────────────────────────── */
 #previewWrap{margin:0 auto;overflow:hidden}
-#card{width:1080px;height:1080px;background:var(--ink);position:relative;transform-origin:top left;overflow:hidden}
+#card{width:1080px;height:1080px;background:var(--ink);position:relative;transform-origin:top left;overflow:hidden;display:flex;flex-direction:column}
 #card.format-story{height:1920px}
-.card-inner{position:absolute;inset:0;display:flex;flex-direction:column;padding:64px 72px;color:var(--ivory)}
-.format-story .card-inner{padding:110px 72px}
 
-.brand-row{display:flex;justify-content:space-between;align-items:center}
+/* photo zone (top) */
+.photo-zone{position:relative;height:640px;flex-shrink:0;background-size:cover;background-position:center;overflow:hidden;display:flex;flex-direction:column}
+.format-story .photo-zone{height:1150px}
+.photo-zone.no-photo{background-image:repeating-linear-gradient(115deg,var(--ink) 0 34px,var(--ink-soft) 34px 38px)}
+.scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,27,46,.5) 0%,rgba(10,27,46,0) 20%,rgba(10,27,46,0) 52%,rgba(10,27,46,.96) 100%)}
+.photo-top-row{position:relative;display:flex;justify-content:space-between;align-items:center;padding:64px 72px 0}
 .brand-mark{font-family:var(--font-body);font-weight:600;font-size:26px;letter-spacing:.02em;color:var(--ivory)}
 .from-tag{font-family:var(--font-mono);font-size:20px;font-weight:500;color:var(--gold-soft);text-transform:uppercase;letter-spacing:.08em}
+.photo-bottom{position:relative;margin-top:auto;padding:0 72px 44px}
+.eyebrow{font-family:var(--font-mono);font-size:22px;font-weight:500;letter-spacing:.08em;color:var(--gold-soft);text-transform:uppercase;margin-bottom:10px}
+.city{font-family:var(--font-display);font-weight:600;font-size:100px;line-height:1.02;color:var(--ivory)}
+.format-story .city{font-size:112px}
+.country{font-family:var(--font-body);font-size:32px;color:var(--gold-soft);margin-top:2px}
 
-.hero{flex:1;display:flex;flex-direction:column;justify-content:center;gap:14px}
-.city{font-family:var(--font-display);font-weight:600;font-size:104px;line-height:1.02;color:var(--ivory)}
-.format-story .city{font-size:118px}
-.country{font-family:var(--font-body);font-size:34px;color:var(--gold-soft);margin-top:-4px}
-.price-row{display:flex;align-items:baseline;gap:16px;margin-top:26px}
-.price{font-family:var(--font-display);font-weight:700;font-size:168px;line-height:1;color:var(--gold)}
-.format-story .price{font-size:190px}
-.price-sub{font-family:var(--font-body);font-size:26px;color:var(--muted)}
-
-.badge-row{min-height:56px;margin-top:8px}
+/* info zone (bottom, solid) */
+.info-zone{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 72px;color:var(--ivory)}
+.price-row{display:flex;align-items:baseline;gap:16px}
+.price{font-family:var(--font-display);font-weight:700;font-size:128px;line-height:1;color:var(--gold)}
+.format-story .price{font-size:150px}
+.price-sub{font-family:var(--font-body);font-size:24px;color:var(--muted)}
+.badge-row{min-height:56px;margin-top:14px}
 .deal-badge{display:inline-block;font-family:var(--font-mono);font-size:22px;font-weight:700;letter-spacing:.04em;padding:10px 22px;border-radius:100px;text-transform:uppercase}
 .deal-badge.cheaper{color:#fff;background:var(--green)}
 .deal-badge.newbadge{color:var(--ink);background:var(--gold-soft)}
-
-.details-row{font-family:var(--font-body);font-size:30px;color:var(--cream);display:flex;gap:14px;flex-wrap:wrap}
+.details-row{font-family:var(--font-body);font-size:28px;color:var(--cream);display:flex;gap:14px;flex-wrap:wrap;margin-top:14px}
 .details-row .dot{color:var(--muted)}
-
-.stub{position:relative;margin:40px 0 32px;border-top:3px dashed rgba(251,248,241,.28)}
-.stub .notch{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;background:var(--ivory)}
+.stub{position:relative;margin:32px 0 26px;border-top:3px dashed rgba(251,248,241,.28)}
+.stub .notch{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;background:var(--ink)}
 .stub .notch.left{left:-96px}
 .stub .notch.right{right:-96px}
-
 .footer-row{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);font-size:22px;color:var(--gold-soft)}
 
-.empty-state{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:80px;color:var(--ivory);font-family:var(--font-body);font-size:28px;line-height:1.5}
+.empty-state{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:80px;color:var(--ivory);font-family:var(--font-body);font-size:28px;line-height:1.5;background:var(--ink);z-index:5}
 </style>
 </head>
 <body>
 
 <div id="controls">
   <h1>Social card generator</h1>
-  <p class="hint">Internal tool — not linked from the site. Pick a destination, check the board, download the PNG (or screenshot the card below if the download button doesn't work on your device).</p>
+  <p class="hint">Internal tool — not linked from the site. Pick a destination — a photo is fetched automatically. Prefer your own? Upload one. If Download doesn't work on your device, screenshot the card instead.</p>
 
   <div class="row">
     <div class="field">
@@ -108,23 +112,30 @@ select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8p
   </div>
 
   <button id="downloadBtn">Download PNG</button>
+  <label class="upload-btn">Upload your own photo instead
+    <input type="file" id="photoInput" accept="image/*" style="display:none">
+  </label>
   <div id="status">Loading deals_cache.json…</div>
 </div>
 
 <div id="previewWrap">
   <div id="card" class="format-square">
-    <div class="card-inner" id="cardInner">
-      <div class="brand-row">
+    <div class="photo-zone no-photo" id="photoZone">
+      <div class="scrim"></div>
+      <div class="photo-top-row">
         <span class="brand-mark">✈ Holiday Chasers</span>
-        <span class="from-tag" id="fromTag">from Cork</span>
+        <span class="from-tag" id="fromTag">FROM DUBLIN</span>
       </div>
-      <div class="hero">
+      <div class="photo-bottom">
+        <div class="eyebrow" id="eyebrowTxt">—</div>
         <div class="city" id="cityName">—</div>
         <div class="country" id="countryName">—</div>
-        <div class="price-row">
-          <span class="price" id="priceVal">—</span>
-          <span class="price-sub">per person, return</span>
-        </div>
+      </div>
+    </div>
+    <div class="info-zone" id="infoZone">
+      <div class="price-row">
+        <span class="price" id="priceVal">—</span>
+        <span class="price-sub">per person, return</span>
       </div>
       <div class="badge-row" id="badgeRow"></div>
       <div class="details-row">
@@ -152,14 +163,19 @@ let cache = null;
 let allDestinations = [];
 let currentFormat = 'square';
 let currentOptions = [];
+let manualPhotoUrl = null;   // user-uploaded data URL, always safe to capture
+let autoPhotoOk = false;     // whether the current auto-fetched photo passed the capture-safety probe
+const photoCache = new Map(); // city -> wikipedia image url (or null)
 
 const destSelect = document.getElementById('destSelect');
 const airportSelect = document.getElementById('airportSelect');
 const boardSelect = document.getElementById('boardSelect');
 const downloadBtn = document.getElementById('downloadBtn');
+const photoInput = document.getElementById('photoInput');
 const statusEl = document.getElementById('status');
 const card = document.getElementById('card');
-const cardInner = document.getElementById('cardInner');
+const photoZone = document.getElementById('photoZone');
+const infoZone = document.getElementById('infoZone');
 const emptyState = document.getElementById('emptyState');
 const previewWrap = document.getElementById('previewWrap');
 
@@ -259,7 +275,9 @@ function refreshBoardOptions(){
     return `<option value="${i}">${ap} · ${o.type} · ${fmtDate(dep)}–${fmtDate(ret)} · €${o.deal.price}</option>`;
   }).join('');
   boardSelect.value = 0;
+  manualPhotoUrl = null;
   paintCard(currentOptions[0]);
+  tryAutoPhoto(currentOptions[0].deal.city);
 }
 
 function addBadge(text, cls){
@@ -270,14 +288,17 @@ function addBadge(text, cls){
 function paintCard(opt){
   hideEmpty();
   const d = opt.deal;
+  const apName = opt.airport === 'ORK' ? 'Cork' : 'Dublin';
   document.getElementById('cityName').textContent = d.city;
   document.getElementById('countryName').textContent = d.country;
-  document.getElementById('fromTag').textContent = 'from ' + (opt.airport === 'ORK' ? 'Cork' : 'Dublin');
+  document.getElementById('fromTag').textContent = 'FROM ' + apName.toUpperCase();
   document.getElementById('priceVal').textContent = '€' + d.price;
 
   const dep = d.depart_date || opt.board.depart_date;
   const ret = d.return_date || opt.board.return_date;
   const nights = d.nights || opt.board.nights;
+  document.getElementById('eyebrowTxt').textContent =
+    `${apName.toUpperCase()} (${opt.airport}) \u2192 ${d.code} ${nights ? '\u00b7 ' + nights + ' NIGHTS' : ''}`;
   document.getElementById('datesVal').textContent = `${fmtDate(dep)} – ${fmtDate(ret)}` + (nights ? ` · ${nights}n` : '');
   const airline = (d.airlines||'').split(',')[0].trim() || '—';
   document.getElementById('airlineVal').textContent = `${airline} · Direct`;
@@ -298,14 +319,84 @@ function paintCard(opt){
 }
 
 function showEmpty(msg){
-  cardInner.style.visibility = 'hidden';
+  photoZone.style.visibility = 'hidden';
+  infoZone.style.visibility = 'hidden';
   emptyState.style.display = 'flex';
   emptyState.textContent = msg;
 }
 function hideEmpty(){
-  cardInner.style.visibility = 'visible';
+  photoZone.style.visibility = 'visible';
+  infoZone.style.visibility = 'visible';
   emptyState.style.display = 'none';
 }
+
+/* ── photo handling ──────────────────────────────────────────
+   Auto-fetch a Wikipedia photo for the destination (best effort).
+   Before trusting it for the Download button, probe whether it can
+   actually be drawn onto a canvas without tainting it — Wikimedia
+   usually sends CORS headers but this isn't 100% guaranteed for every
+   article/redirect, so we verify rather than assume. If the probe
+   fails, or fetch fails entirely, we fall back to the striped pattern;
+   a manual upload always overrides and is always capture-safe. */
+function testImageCanvasSafe(imgEl){
+  try{
+    const c = document.createElement('canvas');
+    c.width = 2; c.height = 2;
+    c.getContext('2d').drawImage(imgEl, 0, 0, 2, 2);
+    c.toDataURL();
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+
+async function tryAutoPhoto(city){
+  if(manualPhotoUrl) return; // manual upload takes priority
+  const requestedCity = city;
+  let url = photoCache.get(city);
+  if(url === undefined){
+    try{
+      const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(city)}`, {signal: AbortSignal.timeout(6000)});
+      const d = res.ok ? await res.json() : null;
+      url = (d && d.originalimage && d.originalimage.source) || (d && d.thumbnail && d.thumbnail.source) || null;
+    }catch(e){ url = null; }
+    photoCache.set(city, url);
+  }
+  if(destSelect.value && requestedCity !== (allDestinations.find(x=>x.code===destSelect.value)||{}).city) return; // selection moved on
+  if(!url){ setPhotoBackground(null); return; }
+
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    autoPhotoOk = testImageCanvasSafe(img);
+    if(!manualPhotoUrl) setPhotoBackground(url);
+  };
+  img.onerror = () => { if(!manualPhotoUrl) setPhotoBackground(null); };
+  img.src = url;
+}
+
+function setPhotoBackground(url){
+  if(url){
+    photoZone.style.backgroundImage = `url("${url}")`;
+    photoZone.classList.remove('no-photo');
+  } else {
+    photoZone.style.backgroundImage = 'none';
+    photoZone.classList.add('no-photo');
+  }
+}
+
+photoInput.addEventListener('change', () => {
+  const file = photoInput.files && photoInput.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    manualPhotoUrl = reader.result; // data URL, always capture-safe
+    autoPhotoOk = true;
+    setPhotoBackground(manualPhotoUrl);
+    statusEl.textContent = 'Using your uploaded photo.';
+  };
+  reader.readAsDataURL(file);
+});
 
 function setFormat(fmt){
   currentFormat = fmt;
@@ -348,6 +439,7 @@ downloadBtn.addEventListener('click', async ()=>{
       height: nativeH,
       backgroundColor: '#0A1B2E',
       scale: 1,
+      useCORS: true,
       onclone: (clonedDoc)=>{
         const clonedCard = clonedDoc.getElementById('card');
         if(clonedCard) clonedCard.style.transform = 'none';
@@ -360,7 +452,9 @@ downloadBtn.addEventListener('click', async ()=>{
     link.click();
     statusEl.textContent = 'Downloaded. Post it straight to Instagram or Facebook.';
   }catch(e){
-    statusEl.textContent = "Download didn't work on this browser — screenshot the card above instead.";
+    statusEl.textContent = manualPhotoUrl
+      ? "Download didn't work on this browser — screenshot the card above instead."
+      : "Couldn't export the auto photo — screenshot the card above, or upload your own photo and try again.";
   }
   downloadBtn.disabled = false;
   downloadBtn.textContent = oldLabel;
