@@ -485,7 +485,9 @@ img{max-width:100%}
 .ap-btn.active .ap-name,.ap-btn.active .ap-code{color:var(--ivory)}
 .ap-btn:nth-child(3).active .ap-ic{filter:none}
 /* Comparison mini-card below each deal */
-.alt-card{background:var(--cream);border:1px solid var(--line);border-top:none;border-radius:0 0 14px 14px;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.alt-card{background:var(--cream);border:1px solid var(--line);border-top:none;border-radius:0 0 14px 14px;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;transition:background .15s}
+.alt-card:hover,.alt-card:active{background:var(--gold-soft)}
+.alt-arrow{margin-left:auto;color:var(--gold);font-weight:700}
 .alt-badge{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.08em;background:var(--ink-soft);color:var(--ivory);padding:3px 7px;border-radius:6px}
 .alt-info{font-size:12px;color:var(--muted);flex:1}
 .alt-price{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--ink)}
@@ -1838,9 +1840,10 @@ function renderDeals() {
     const altBoard = altList[idx] || altList[0];
     for (const d of altBoard?.deals || []) {
       altLookup[d.code] = {
+        deal: d,
         price: d.price,
         airportCode: altAp.code,
-        airportName: altAp.data.name
+        airportName: altAp.code === "ORK" ? "Cork" : "Dublin"
       };
     }
   }
@@ -1928,7 +1931,8 @@ function renderDeals() {
            <span class="photo-city"><span class="pc-name">${d.city}</span><span class="pc-country" style="display:block">${d.country}</span></span>
          </div>`;
 
-    // Comparison mini-card: the other airport's price for this same destination
+    // Comparison mini-card: the other airport's price for this same destination —
+    // a real, tappable option, not just a comparison note.
     const alt = altLookup[d.code];
     let altCard = '';
     if (alt && selectedAirport !== "BEST") {
@@ -1937,13 +1941,17 @@ function renderDeals() {
       const diff = altPP - thisPP;
       const diffLabel = diff < 0
         ? `<span class="alt-cheaper">€${Math.abs(diff)} cheaper</span>`
+        : diff === 0 ? `<span class="alt-pricier">same price</span>`
         : `<span class="alt-pricier">€${diff} more</span>`;
+      const altDealJson = JSON.stringify({...alt.deal, origin_airport: alt.airportCode}).replace(/'/g, "&#39;");
       altCard = `
-      <div class="alt-card">
+      <div class="alt-card" role="button" tabindex="0" aria-label="View this trip from ${alt.airportName} instead"
+           onclick='event.stopPropagation(); openDetail(${altDealJson}, "${alt.deal.depart_date || dep}", "${alt.deal.return_date || ret}", ${groupSize}, ${cacheTravellers})'>
         <span class="alt-badge">${alt.airportCode}</span>
-        <span class="alt-info">Same trip from ${alt.airportName}</span>
+        <span class="alt-info">Or fly from ${alt.airportName} instead</span>
         <span class="alt-price">€${altPP}/pp</span>
         ${diffLabel}
+        <span class="alt-arrow">→</span>
       </div>`;
     }
 
@@ -2036,6 +2044,37 @@ function syncRetMin(){
   const minIso = minRet.toISOString().slice(0, 10);
   retEl.min = minIso;
   if (retEl.value && retEl.value < minIso) retEl.value = minIso;
+}
+
+// Debounced auto-search: fires shortly after either date changes, no button
+// press needed. A short delay just absorbs rapid back-to-back edits so we
+// don't fire two overlapping searches — the guide's generation counter
+// (window._gGen) already discards any in-flight request a newer one supersedes.
+let _dateChangeTimer = null;
+function scheduleAutoSearch(){
+  clearTimeout(_dateChangeTimer);
+  _dateChangeTimer = setTimeout(applyGuideDates, 250);
+}
+
+// Outbound date changed: auto-fill the return date to keep the same trip
+// length (nights) as the trip currently on screen, rather than leaving the
+// visitor to pick both dates by hand. Then search immediately.
+function onDepChange(){
+  const depEl = document.getElementById("dtDep");
+  const retEl = document.getElementById("dtRet");
+  const g = window._guide;
+  if (!depEl || !retEl || !depEl.value) return;
+  let nights = 7;
+  if (g && g.dep && g.ret) {
+    const n = Math.round((new Date(g.ret + "T12:00:00") - new Date(g.dep + "T12:00:00")) / 86400000);
+    if (n > 0) nights = n;
+  }
+  const newDep = new Date(depEl.value + "T12:00:00");
+  const newRet = new Date(newDep);
+  newRet.setDate(newRet.getDate() + nights);
+  retEl.value = newRet.toISOString().slice(0, 10);
+  syncRetMin();
+  scheduleAutoSearch();
 }
 
 function applyGuideDates(){
@@ -2163,6 +2202,7 @@ async function guideGrids(){
     </div>
     <div id="gPick" style="margin-top:14px"></div>`;
   window._gPrices = { out: {}, ret: {} };
+  window._gDone = false;
   window._gSel = { out: null, ret: null };            // stale picks reference old prices
   const gen = window._gGen = (window._gGen || 0) + 1;  // newer search invalidates this one
   let done = 0;
@@ -2172,7 +2212,10 @@ async function guideGrids(){
       const r = await fetch(BACKEND_URL + "/api/search/direct", {
         method: "POST", headers: {"Content-Type": "application/json"},
         body: JSON.stringify({ dest_code: to, outbound_date: date, return_date: null,
-                               departure_override: from === origin ? null : from }),
+                               // Always explicit — never rely on the Worker's default
+                               // origin (which is hardcoded to Cork and silently broke
+                               // every Dublin-origin outbound search).
+                               departure_override: from }),
         signal: AbortSignal.timeout(60000)
       });
       if (gen !== window._gGen) return;   // a newer search took over — discard
@@ -2203,6 +2246,8 @@ async function guideGrids(){
   });
   await Promise.all(workers);
   if (gen !== window._gGen) return;
+  window._gDone = true;
+  guideRenderGrid("out"); guideRenderGrid("ret");
 
   // Pre-pick the cheapest sensible combo so the booking bar is ready to go —
   // the visitor can tap any other date to change either leg.
@@ -2228,6 +2273,15 @@ async function guideGrids(){
 }
 
 function guideRenderGrid(bucket){
+  // Empty column → explain, don't just show blank space
+  {
+    const el = document.getElementById(bucket === "out" ? "gOutGrid" : "gRetGrid");
+    const prices = window._gPrices && window._gPrices[bucket];
+    if (el && prices && Object.keys(prices).length === 0 && window._gDone) {
+      el.innerHTML = `<div style="font-size:12px;color:var(--muted);border:1px dashed var(--line);border-radius:10px;padding:12px">No direct-flight prices available for these dates yet — airlines load new-season schedules gradually. Try the Aviasales comparison below, or check back in a little while.</div>`;
+      return;
+    }
+  }
   const grid = document.getElementById(bucket === "out" ? "gOutGrid" : "gRetGrid");
   if (!grid) return;
   const prices = window._gPrices[bucket];
@@ -2464,8 +2518,18 @@ function searchEuropeFromCache(){
     <div style="font-size:13px;color:var(--muted);margin-top:12px">Pick an outbound and return date above to plan the full trip.</div>`;
 
   if (!found.length) {
+    if (out && ret) {
+      // No scanned data for this city — don't make the visitor tap again.
+      // Open the full trip guide straight away, defaulting to Dublin (by far
+      // the wider network of the two airports). The guide's own "Same trip
+      // from Cork" strip lets them switch in one tap if Cork also flies there.
+      const dublinDeal = { city: cityName, country, code: (code || "").split(",")[0].trim(),
+                            price: null, stops: null, total_time: "", airlines: "", origin_airport: "DUB" };
+      openDetail(dublinDeal, out, ret, selAdults + selChildren, 1, true);
+      return;
+    }
     box.innerHTML = `
-      <p style="font-size:14px;color:var(--muted)">We don't scan ${city} regularly (it's beyond our direct-route boards), but you can plan the whole trip and check live prices in one click:</p>` + buildBtns + cta;
+      <p style="font-size:14px;color:var(--muted)">We don't scan ${city} regularly (it's beyond our direct-route boards) — pick your outbound and return dates above and we'll open the full trip planner straight away.</p>`;
     return;
   }
 
@@ -3127,9 +3191,9 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = fal
       <h2>📅 Your dates</h2>
       <div class="dt-sub">Change the dates and the whole trip — flights, hotels, costs — updates.</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-        <input type="date" id="dtDep" value="${dep}" class="hc-signup-input" style="flex:0 1 170px;min-width:150px" onchange="syncRetMin()">
+        <input type="date" id="dtDep" value="${dep}" class="hc-signup-input" style="flex:0 1 170px;min-width:150px" onchange="onDepChange()">
         <span style="color:var(--muted)">→</span>
-        <input type="date" id="dtRet" value="${ret}" class="hc-signup-input" style="flex:0 1 170px;min-width:150px" ${dep ? `min="${dep}"` : ""}>
+        <input type="date" id="dtRet" value="${ret}" class="hc-signup-input" style="flex:0 1 170px;min-width:150px" ${dep ? `min="${dep}"` : ""} onchange="scheduleAutoSearch()">
         <button class="hc-signup-btn" onclick="applyGuideDates()">Update trip</button>
       </div>
     </div>
