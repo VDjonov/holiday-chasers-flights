@@ -1468,13 +1468,31 @@ function flightBtnLabel(airlinesStr, fallback="Search flights") {
   return `✈ Search on Aviasales`;
 }
 
+function activateTab(name){
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+  document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+  const el = document.getElementById("tab-" + name);
+  if (el) el.classList.add("active");
+}
 document.querySelectorAll(".tab-btn").forEach(btn => {
   btn.addEventListener("click", () => {
-    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-    document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
-    btn.classList.add("active");
-    document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
+    activateTab(btn.dataset.tab);
+    // Shareable URL per tab (Deal Board stays clean "/")
+    const url = btn.dataset.tab === "deals" ? location.pathname : `?tab=${btn.dataset.tab}`;
+    history.replaceState({ hcTab: btn.dataset.tab }, "", url);
   });
+});
+
+// Back/forward: close the guide like an app instead of leaving the site.
+window.addEventListener("popstate", (e) => {
+  const overlay = document.getElementById("detailOverlay");
+  const guideOpen = overlay && overlay.classList.contains("open");
+  const wantsGuide = e.state && e.state.hcGuide;
+  if (guideOpen && !wantsGuide) {
+    overlay.classList.remove("open");
+    document.body.style.overflow = "";
+  }
+  if (e.state && e.state.hcTab) activateTab(e.state.hcTab);
 });
 
 // ── Board toggle ─────────────────────────────────────────────────────────────
@@ -1739,6 +1757,8 @@ async function loadDeals() {
       renderDeals();
       populateTimelineDest();       // fill the trip-planner destination list
       openDeepLink();               // /?dest=EDI from SEO pages lands on the guide
+      const tabQ = new URLSearchParams(location.search).get("tab");
+      if (tabQ && document.getElementById("tab-" + tabQ)) activateTab(tabQ);
       return;
     } else {
       document.getElementById("dealsLoading").innerHTML = "No deals found yet. Check back soon.";
@@ -3057,6 +3077,12 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = fal
   window._gSel = { out: null, ret: null };   // live-grid leg selections
   const overlay = document.getElementById("detailOverlay");
   const body = document.getElementById("detailBody");
+  // Shareable URL for this guide; in-guide re-renders replace instead of stack
+  try {
+    const url = `?dest=${encodeURIComponent(d.code)}`;
+    if (history.state && history.state.hcGuide) history.replaceState({ hcGuide: d.code }, "", url);
+    else history.pushState({ hcGuide: d.code }, "", url);
+  } catch (e) {}
   window.scrollTo(0,0);
   overlay.classList.add("open");
   document.body.style.overflow = "hidden";
@@ -3308,6 +3334,7 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = fal
 }
 
 function closeDetail(){
+  if (history.state && history.state.hcGuide) { history.back(); return; }
   document.getElementById("detailOverlay").classList.remove("open");
   document.body.style.overflow = "";
 }
