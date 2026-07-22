@@ -1125,19 +1125,22 @@ const CITY_WIKI = {
 };
 
 const photoUrlCache = {};
-async function fetchCityPhoto(code, cityName) {
+async function fetchCityPhoto(code, cityName, preferHiRes) {
   const title = CITY_WIKI[code] || cityName;
   if (!title) return "";
-  if (photoUrlCache[code] !== undefined) return photoUrlCache[code];
+  const cacheKey = preferHiRes ? code + ":hi" : code;
+  if (photoUrlCache[cacheKey] !== undefined) return photoUrlCache[cacheKey];
   try {
     const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${title}`);
     const d = await r.json();
-    const url = (d.thumbnail && d.thumbnail.source) ||
-                (d.originalimage && d.originalimage.source) || "";
-    photoUrlCache[code] = url;
+    const thumb = (d.thumbnail && d.thumbnail.source) || "";
+    const orig  = (d.originalimage && d.originalimage.source) || "";
+    // Board cards want the light thumbnail; the full-width hero wants the original.
+    const url = preferHiRes ? (orig || thumb) : (thumb || orig);
+    photoUrlCache[cacheKey] = url;
     return url;
   } catch(e) {
-    photoUrlCache[code] = "";
+    photoUrlCache[cacheKey] = "";
     return "";
   }
 }
@@ -3376,7 +3379,7 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = fal
   }
 
   // Hero photo
-  fetchCityPhoto(d.code, d.city).then(url => {
+  fetchCityPhoto(d.code, d.city, true).then(url => {
     if (!url) return;
     const hero = document.getElementById("dtHero");
     const img = new Image(); img.alt = d.city;
