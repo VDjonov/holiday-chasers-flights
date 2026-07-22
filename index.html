@@ -831,6 +831,26 @@ img{max-width:100%}
     <p>Any city in Europe — we build the whole trip for your dates: flights, hotels, car hire and costs. Cities we fly to direct from Cork or Dublin show live scanned prices; anywhere else opens the full planner.</p>
   </div>
   <div class="search-form">
+    <div class="traveller-bar" style="margin-bottom:18px">
+      <span class="tv-label">Who's travelling?</span>
+      <div class="tv-group">
+        <span class="tv-cap">Adults</span>
+        <div class="tv-stepper">
+          <button onclick="changeTravellers('adults',-1)" aria-label="Fewer adults">−</button>
+          <span id="planAdults">1</span>
+          <button onclick="changeTravellers('adults',1)" aria-label="More adults">+</button>
+        </div>
+      </div>
+      <div class="tv-group">
+        <span class="tv-cap">Children</span>
+        <div class="tv-stepper">
+          <button onclick="changeTravellers('children',-1)" aria-label="Fewer children">−</button>
+          <span id="planChildren">0</span>
+          <button onclick="changeTravellers('children',1)" aria-label="More children">+</button>
+        </div>
+      </div>
+      <span class="tv-total" id="planTvSummary">1 traveller</span>
+    </div>
     <div class="form-row">
       <div class="form-group" style="flex:2;min-width:220px">
         <label>Destination</label>
@@ -1249,9 +1269,14 @@ function travellerLabel(){
 function changeTravellers(kind, delta){
   if (kind === "adults") selAdults = Math.min(6, Math.max(1, selAdults + delta));
   else selChildren = Math.min(5, Math.max(0, selChildren + delta));
-  document.getElementById("tvAdults").textContent = selAdults;
-  document.getElementById("tvChildren").textContent = selChildren;
-  document.getElementById("tvSummary").textContent = travellerLabel();
+  // Update every traveller display that's present (deal board + plan tab share state).
+  const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  setTxt("tvAdults", selAdults);
+  setTxt("tvChildren", selChildren);
+  setTxt("tvSummary", travellerLabel());
+  setTxt("planAdults", selAdults);
+  setTxt("planChildren", selChildren);
+  setTxt("planTvSummary", travellerLabel());
   renderDeals();
 }
 let backendOnline = false;
@@ -2603,6 +2628,12 @@ function populateSelects() {
   outEl.value = fmt(out); retEl.value = fmt(ret);
   outEl.min = fmt(today); retEl.min = fmt(today);
 
+  // Reflect the shared traveller state (may already be set on the deal board).
+  const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  setTxt("planAdults", selAdults);
+  setTxt("planChildren", selChildren);
+  setTxt("planTvSummary", travellerLabel());
+
   onPlanCityChange();
 }
 
@@ -2650,13 +2681,8 @@ function onPlanCityChange() {
 }
 
 function onPlanDateChange() {
-  // Keep the return date sensible: if it's not after outbound, push it +7 nights.
-  const out = document.getElementById("planOut").value;
-  const retEl = document.getElementById("planRet");
-  if (out && (!retEl.value || retEl.value <= out)) {
-    const r = new Date(out + "T12:00:00"); r.setDate(r.getDate() + 7);
-    retEl.value = r.toISOString().split("T")[0];
-  }
+  // Both dates are picked manually — we never auto-touch the return date.
+  // (Validation that return is after outbound happens at "Build my trip".)
 }
 
 // "Build my trip" — one destination for every path: the full guide.
@@ -2674,6 +2700,9 @@ function planBuildTrip() {
   // strip lets them switch in one tap when Cork also flies the route.
   const deal = { city: cityName, country, code, price: null, stops: null,
                  total_time: "", airlines: meta ? meta.airlines : "", origin_airport: "DUB" };
+  // Dates were already chosen on this tab, so run the live flight search on
+  // arrival — no need to make the visitor press a button again in the guide.
+  window._gAutoSearch = true;
   openDetail(deal, out, ret, selAdults + selChildren, 1, true);
   track("view_destination", { source: "plan", dest: code });
 }
