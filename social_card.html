@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Holiday Chasers — social card generator</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0A1B2E;--ink-soft:#1C3148;--ivory:#FBF8F1;--cream:#F3ECDD;
+  --gold:#C9A24B;--gold-soft:#E4D2A0;--muted:#6E7C8C;--line:#E7E0D2;
+  --green:#2e7d52;
+  --font-display:'Fraunces',Georgia,serif;
+  --font-body:'Inter',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+body{font-family:var(--font-body);background:var(--cream);color:var(--ink);padding:20px;min-height:100vh}
+
+/* ── controls (never captured) ─────────────────────────────── */
+#controls{max-width:640px;margin:0 auto 24px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+#controls h1{font-family:var(--font-display);font-size:20px;font-weight:600;margin-bottom:4px}
+#controls p.hint{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+.row{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.field{flex:1;min-width:140px}
+.field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-family:var(--font-body);font-size:14px;background:#fff;color:var(--ink)}
+.fmt-toggle{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.fmt-toggle button{flex:1;padding:9px 0;border:none;background:#fff;font-family:var(--font-body);font-size:13px;font-weight:500;color:var(--muted);cursor:pointer}
+.fmt-toggle button.active{background:var(--ink);color:var(--ivory)}
+#downloadBtn{width:100%;padding:12px;margin-top:6px;border:none;border-radius:8px;background:var(--gold);color:var(--ink);font-family:var(--font-body);font-weight:600;font-size:14px;cursor:pointer}
+#downloadBtn:disabled{opacity:.6;cursor:wait}
+#status{font-size:12px;color:var(--muted);margin-top:8px;text-align:center;min-height:16px}
+
+/* ── preview + capture card ────────────────────────────────── */
+#previewWrap{margin:0 auto;overflow:hidden}
+#card{width:1080px;height:1080px;background:var(--ink);position:relative;transform-origin:top left;overflow:hidden}
+#card.format-story{height:1920px}
+.card-inner{position:absolute;inset:0;display:flex;flex-direction:column;padding:64px 72px;color:var(--ivory)}
+.format-story .card-inner{padding:110px 72px}
+
+.brand-row{display:flex;justify-content:space-between;align-items:center}
+.brand-mark{font-family:var(--font-body);font-weight:600;font-size:26px;letter-spacing:.02em;color:var(--ivory)}
+.from-tag{font-family:var(--font-mono);font-size:20px;font-weight:500;color:var(--gold-soft);text-transform:uppercase;letter-spacing:.08em}
+
+.hero{flex:1;display:flex;flex-direction:column;justify-content:center;gap:14px}
+.city{font-family:var(--font-display);font-weight:600;font-size:104px;line-height:1.02;color:var(--ivory)}
+.format-story .city{font-size:118px}
+.country{font-family:var(--font-body);font-size:34px;color:var(--gold-soft);margin-top:-4px}
+.price-row{display:flex;align-items:baseline;gap:16px;margin-top:26px}
+.price{font-family:var(--font-display);font-weight:700;font-size:168px;line-height:1;color:var(--gold)}
+.format-story .price{font-size:190px}
+.price-sub{font-family:var(--font-body);font-size:26px;color:var(--muted)}
+
+.badge-row{min-height:56px;margin-top:8px}
+.deal-badge{display:inline-block;font-family:var(--font-mono);font-size:22px;font-weight:700;letter-spacing:.04em;padding:10px 22px;border-radius:100px;text-transform:uppercase}
+.deal-badge.cheaper{color:#fff;background:var(--green)}
+.deal-badge.newbadge{color:var(--ink);background:var(--gold-soft)}
+
+.details-row{font-family:var(--font-body);font-size:30px;color:var(--cream);display:flex;gap:14px;flex-wrap:wrap}
+.details-row .dot{color:var(--muted)}
+
+.stub{position:relative;margin:40px 0 32px;border-top:3px dashed rgba(251,248,241,.28)}
+.stub .notch{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;background:var(--ivory)}
+.stub .notch.left{left:-96px}
+.stub .notch.right{right:-96px}
+
+.footer-row{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);font-size:22px;color:var(--gold-soft)}
+
+.empty-state{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:80px;color:var(--ivory);font-family:var(--font-body);font-size:28px;line-height:1.5}
+</style>
+</head>
+<body>
+
+<div id="controls">
+  <h1>Social card generator</h1>
+  <p class="hint">Internal tool — not linked from the site. Pick a destination, check the board, download the PNG (or screenshot the card below if the download button doesn't work on your device).</p>
+
+  <div class="row">
+    <div class="field">
+      <label for="destSelect">Destination</label>
+      <select id="destSelect"></select>
+    </div>
+    <div class="field">
+      <label for="airportSelect">Departure</label>
+      <select id="airportSelect">
+        <option value="BOTH">Cheapest of both</option>
+        <option value="ORK">Cork (ORK)</option>
+        <option value="DUB">Dublin (DUB)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="field">
+      <label for="boardSelect">Board</label>
+      <select id="boardSelect"></select>
+    </div>
+    <div class="field">
+      <label>Format</label>
+      <div class="fmt-toggle">
+        <button type="button" id="btnSquare" class="active">Square 1080×1080</button>
+        <button type="button" id="btnStory">Story 1080×1920</button>
+      </div>
+    </div>
+  </div>
+
+  <button id="downloadBtn">Download PNG</button>
+  <div id="status">Loading deals_cache.json…</div>
+</div>
+
+<div id="previewWrap">
+  <div id="card" class="format-square">
+    <div class="card-inner" id="cardInner">
+      <div class="brand-row">
+        <span class="brand-mark">✈ Holiday Chasers</span>
+        <span class="from-tag" id="fromTag">from Cork</span>
+      </div>
+      <div class="hero">
+        <div class="city" id="cityName">—</div>
+        <div class="country" id="countryName">—</div>
+        <div class="price-row">
+          <span class="price" id="priceVal">—</span>
+          <span class="price-sub">per person, return</span>
+        </div>
+      </div>
+      <div class="badge-row" id="badgeRow"></div>
+      <div class="details-row">
+        <span id="datesVal">—</span>
+        <span class="dot">·</span>
+        <span id="airlineVal">—</span>
+      </div>
+      <div class="stub"><span class="notch left"></span><span class="notch right"></span></div>
+      <div class="footer-row">
+        <span>holidaychasers.ie</span>
+        <span id="updatedTag">—</span>
+      </div>
+    </div>
+    <div class="empty-state" id="emptyState" style="display:none"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+const DEALS_JSON = "./deals_cache.json";
+const WD = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+let cache = null;
+let allDestinations = [];
+let currentFormat = 'square';
+let currentOptions = [];
+
+const destSelect = document.getElementById('destSelect');
+const airportSelect = document.getElementById('airportSelect');
+const boardSelect = document.getElementById('boardSelect');
+const downloadBtn = document.getElementById('downloadBtn');
+const statusEl = document.getElementById('status');
+const card = document.getElementById('card');
+const cardInner = document.getElementById('cardInner');
+const emptyState = document.getElementById('emptyState');
+const previewWrap = document.getElementById('previewWrap');
+
+function fmtDate(iso){
+  if(!iso) return '';
+  const [y,m,d] = iso.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m-1, d));
+  return `${WD[dt.getUTCDay()]} ${dt.getUTCDate()} ${MO[dt.getUTCMonth()]}`;
+}
+
+async function loadCache(){
+  try{
+    const res = await fetch(DEALS_JSON, {cache:'no-store'});
+    if(!res.ok) throw new Error('http '+res.status);
+    cache = await res.json();
+    buildDestinationList();
+    if(!allDestinations.length){
+      statusEl.textContent = 'deals_cache.json loaded but has no destinations yet.';
+      return;
+    }
+    populateDestinationSelect();
+    selectBestOverallDeal();
+    statusEl.textContent = 'Fares from ' + fmtDate((cache.updated_utc||'').slice(0,10));
+  }catch(e){
+    statusEl.textContent = "Couldn't load deals_cache.json — make sure this file is next to social_card.html on the live site, then reload.";
+    showEmpty("Couldn't load deals_cache.json.\nCheck it's uploaded alongside this file, then reload.");
+    downloadBtn.disabled = true;
+  }
+}
+
+function buildDestinationList(){
+  const map = new Map();
+  for(const ap of ['ORK','DUB']){
+    const airport = (cache.airports||{})[ap];
+    if(!airport) continue;
+    for(const boards of [airport.weekend_boards||[], airport.week_boards||[]]){
+      for(const board of boards){
+        for(const deal of board.deals||[]){
+          if(!map.has(deal.code)) map.set(deal.code, {code:deal.code, city:deal.city, country:deal.country});
+        }
+      }
+    }
+  }
+  allDestinations = Array.from(map.values()).sort((a,b)=>a.city.localeCompare(b.city));
+}
+
+function populateDestinationSelect(){
+  destSelect.innerHTML = allDestinations.map(d=>`<option value="${d.code}">${d.city}, ${d.country}</option>`).join('');
+}
+
+function getOptionsFor(code, airportChoice){
+  const airports = airportChoice === 'BOTH' ? ['ORK','DUB'] : [airportChoice];
+  const options = [];
+  for(const ap of airports){
+    const airport = (cache.airports||{})[ap];
+    if(!airport) continue;
+    for(const [type, boards] of [['Weekend', airport.weekend_boards||[]], ['Week', airport.week_boards||[]]]){
+      for(const board of boards){
+        const deal = (board.deals||[]).find(d=>d.code===code);
+        if(deal) options.push({airport:ap, type, board, deal});
+      }
+    }
+  }
+  options.sort((a,b)=>a.deal.price - b.deal.price);
+  return options;
+}
+
+function selectBestOverallDeal(){
+  let best = null;
+  for(const dest of allDestinations){
+    const opts = getOptionsFor(dest.code, 'BOTH');
+    if(opts.length && (!best || opts[0].deal.price < best.opt.deal.price)){
+      best = {dest, opt: opts[0]};
+    }
+  }
+  if(best){
+    destSelect.value = best.dest.code;
+    airportSelect.value = 'BOTH';
+  }
+  refreshBoardOptions();
+}
+
+function refreshBoardOptions(){
+  const code = destSelect.value;
+  currentOptions = getOptionsFor(code, airportSelect.value);
+  if(!currentOptions.length){
+    boardSelect.innerHTML = '';
+    showEmpty('No scanned fares for this route yet.\nTry a different destination or departure airport.');
+    downloadBtn.disabled = true;
+    return;
+  }
+  downloadBtn.disabled = false;
+  boardSelect.innerHTML = currentOptions.map((o,i)=>{
+    const ap = o.airport === 'ORK' ? 'Cork' : 'Dublin';
+    const dep = o.deal.depart_date || o.board.depart_date;
+    const ret = o.deal.return_date || o.board.return_date;
+    return `<option value="${i}">${ap} · ${o.type} · ${fmtDate(dep)}–${fmtDate(ret)} · €${o.deal.price}</option>`;
+  }).join('');
+  boardSelect.value = 0;
+  paintCard(currentOptions[0]);
+}
+
+function addBadge(text, cls){
+  const wrap = document.getElementById('badgeRow');
+  wrap.innerHTML = `<span class="deal-badge ${cls}">${text}</span>`;
+}
+
+function paintCard(opt){
+  hideEmpty();
+  const d = opt.deal;
+  document.getElementById('cityName').textContent = d.city;
+  document.getElementById('countryName').textContent = d.country;
+  document.getElementById('fromTag').textContent = 'from ' + (opt.airport === 'ORK' ? 'Cork' : 'Dublin');
+  document.getElementById('priceVal').textContent = '€' + d.price;
+
+  const dep = d.depart_date || opt.board.depart_date;
+  const ret = d.return_date || opt.board.return_date;
+  const nights = d.nights || opt.board.nights;
+  document.getElementById('datesVal').textContent = `${fmtDate(dep)} – ${fmtDate(ret)}` + (nights ? ` · ${nights}n` : '');
+  const airline = (d.airlines||'').split(',')[0].trim() || '—';
+  document.getElementById('airlineVal').textContent = `${airline} · Direct`;
+
+  const badgeRow = document.getElementById('badgeRow');
+  badgeRow.innerHTML = '';
+  if(d.midweek_saver && d.weekend_price){
+    const save = Math.round((d.weekend_price - d.price) / (cache.travellers || 1));
+    addBadge(`💡 Midweek saver · €${save} less`, 'cheaper');
+  } else if(d.is_cheaper){
+    addBadge('↓ Cheaper than usual', 'cheaper');
+  } else if(d.is_new){
+    addBadge('✦ New route', 'newbadge');
+  }
+
+  const updated = (cache.updated_utc||'').slice(0,10);
+  document.getElementById('updatedTag').textContent = updated ? 'Fares found ' + fmtDate(updated) : '';
+}
+
+function showEmpty(msg){
+  cardInner.style.visibility = 'hidden';
+  emptyState.style.display = 'flex';
+  emptyState.textContent = msg;
+}
+function hideEmpty(){
+  cardInner.style.visibility = 'visible';
+  emptyState.style.display = 'none';
+}
+
+function setFormat(fmt){
+  currentFormat = fmt;
+  card.classList.toggle('format-story', fmt === 'story');
+  card.classList.toggle('format-square', fmt === 'square');
+  document.getElementById('btnSquare').classList.toggle('active', fmt === 'square');
+  document.getElementById('btnStory').classList.toggle('active', fmt === 'story');
+  updatePreviewScale();
+}
+
+function updatePreviewScale(){
+  const nativeW = 1080;
+  const nativeH = currentFormat === 'story' ? 1920 : 1080;
+  const available = Math.min(document.body.clientWidth - 40, 640);
+  const scale = Math.min(1, available / nativeW);
+  card.style.transform = `scale(${scale})`;
+  previewWrap.style.width = Math.round(nativeW*scale) + 'px';
+  previewWrap.style.height = Math.round(nativeH*scale) + 'px';
+}
+
+destSelect.addEventListener('change', refreshBoardOptions);
+airportSelect.addEventListener('change', refreshBoardOptions);
+boardSelect.addEventListener('change', ()=>{
+  const opt = currentOptions[parseInt(boardSelect.value,10)];
+  if(opt) paintCard(opt);
+});
+document.getElementById('btnSquare').addEventListener('click', ()=>setFormat('square'));
+document.getElementById('btnStory').addEventListener('click', ()=>setFormat('story'));
+window.addEventListener('resize', updatePreviewScale);
+
+downloadBtn.addEventListener('click', async ()=>{
+  downloadBtn.disabled = true;
+  const oldLabel = downloadBtn.textContent;
+  downloadBtn.textContent = 'Rendering…';
+  try{
+    const nativeW = 1080;
+    const nativeH = currentFormat === 'story' ? 1920 : 1080;
+    const canvas = await html2canvas(card, {
+      width: nativeW,
+      height: nativeH,
+      backgroundColor: '#0A1B2E',
+      scale: 1,
+      onclone: (clonedDoc)=>{
+        const clonedCard = clonedDoc.getElementById('card');
+        if(clonedCard) clonedCard.style.transform = 'none';
+      }
+    });
+    const link = document.createElement('a');
+    const code = destSelect.value || 'deal';
+    link.download = `holiday-chasers-${code}-${currentFormat}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    statusEl.textContent = 'Downloaded. Post it straight to Instagram or Facebook.';
+  }catch(e){
+    statusEl.textContent = "Download didn't work on this browser — screenshot the card above instead.";
+  }
+  downloadBtn.disabled = false;
+  downloadBtn.textContent = oldLabel;
+});
+
+updatePreviewScale();
+loadCache();
+</script>
+</body>
+</html>
