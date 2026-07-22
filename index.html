@@ -2600,9 +2600,27 @@ function populateSelects() {
     if (c.direct) directCountry[c.country] = true;
   });
 
+  // Country order tuned for Irish holidaymakers: top sun + city-break
+  // destinations first, roughly by how many Irish travellers go there.
+  // Direct-route countries still rank ahead of connection-only ones within
+  // the same popularity band. Any country not listed falls to the end, A–Z,
+  // so nothing is ever dropped from the picker.
+  const POPULAR_ORDER = [
+    "Spain", "Portugal", "Italy", "Greece", "France",
+    "United Kingdom", "England", "Scotland", "Netherlands", "Germany",
+    "Poland", "Czech Republic", "Hungary", "Austria", "Croatia",
+    "Malta", "Switzerland", "Denmark", "Turkey", "Cyprus",
+  ];
+  const rank = c => {
+    const i = POPULAR_ORDER.indexOf(c);
+    return i === -1 ? POPULAR_ORDER.length : i;
+  };
   const allCountries = Object.keys(groups);
-  const directFirst = allCountries.filter(c => directCountry[c]).sort();
-  const theRest     = allCountries.filter(c => !directCountry[c]).sort();
+  // Direct-route countries first, then the rest; within each, by popularity
+  // rank, then alphabetically for anything past the ranked list.
+  const byPref = list => list.sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
+  const directFirst = byPref(allCountries.filter(c => directCountry[c] && c));
+  const theRest     = byPref(allCountries.filter(c => !directCountry[c] && c));
   const ordered = [...directFirst, ...theRest];
 
   sel.innerHTML = "";
