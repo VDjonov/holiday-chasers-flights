@@ -1241,6 +1241,36 @@ const BACKEND_HEADERS = {
   "ngrok-skip-browser-warning": "true"
 };
 let cachedDeals = null;
+
+// ── Deep links from the SEO destination pages ───────────────────────────────
+// /?dest=EDI (or a slug like edinburgh) opens that city's guide with its best
+// current deal, so Google visitors land on the real product, not just the top
+// of the page.
+function openDeepLink() {
+  try {
+    const q = new URLSearchParams(location.search).get("dest");
+    if (!q) return;
+    const want = q.trim().toUpperCase();
+    let best = null, bestAp = null;
+    for (const [apCode, ap] of Object.entries(cachedDeals.airports || {})) {
+      for (const b of [...(ap.weekend_boards || []), ...(ap.week_boards || [])]) {
+        for (const dl of (b.deals || [])) {
+          const code = (dl.code || "").toUpperCase();
+          const city = (dl.city || "").toUpperCase().replace(/[^A-Z]/g, "");
+          if (code === want || city === want.replace(/[^A-Z]/g, "")) {
+            if (!best || dl.price < best.deal.price) best = { deal: dl, board: b }, bestAp = apCode;
+          }
+        }
+      }
+    }
+    if (best) {
+      openDetail({ ...best.deal, origin_airport: bestAp },
+                 best.deal.depart_date || best.board.depart_date,
+                 best.deal.return_date || best.board.return_date,
+                 1, cachedDeals.travellers || 1, false);
+    }
+  } catch (e) { /* deep link is best-effort */ }
+}
 let currentBoard = "week";  // default landing view: one-week deals
 let selectedAirport = "ORK";  // ORK, DUB, or BEST (best of both)
 
@@ -1708,6 +1738,7 @@ async function loadDeals() {
       populateWeekendPicker();
       renderDeals();
       populateTimelineDest();       // fill the trip-planner destination list
+      openDeepLink();               // /?dest=EDI from SEO pages lands on the guide
       return;
     } else {
       document.getElementById("dealsLoading").innerHTML = "No deals found yet. Check back soon.";
@@ -3133,6 +3164,7 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = fal
       <h2>✈️ Your flights</h2>
       <div class="dt-sub">${depFmt} → ${retFmt}</div>
       ${d.is_cheaper && d.hist_typical ? `<div class="dt-cheaper-note">↓ This fare is cheaper than usual for ${d.city} — typically around €${Math.round(d.hist_typical/cacheTravellers)} per person.</div>` : ''}
+      ${d.midweek_saver && d.weekend_price ? `<div class="dt-cheaper-note">💡 Midweek saver — these ${new Date(dep+"T12:00:00").toLocaleDateString("en-IE",{weekday:"long"})} dates cost €${Math.round((d.weekend_price - d.price)/cacheTravellers)} less per person than the same trip on weekend dates.</div>` : ''}
       <div class="dt-leg">
         <div class="dt-leg-dir">OUT</div>
         <div class="dt-leg-main">

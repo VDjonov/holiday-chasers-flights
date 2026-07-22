@@ -141,6 +141,8 @@ def page_html(code, slug, city, country, blurb, rows, updated, all_slugs):
         "mainEntity": [{"@type": "Question", "name": q,
                         "acceptedAnswer": {"@type": "Answer", "text": a}}
                        for q, a in faq]})
+    # NOTE: the CTA uses /?dest=<code>, which the app resolves to the city's
+    # best current deal and opens its guide directly.
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -182,7 +184,7 @@ footer{{text-align:center;color:var(--muted);font-size:12px;padding:24px}}
 <h1>Cheap flights to {city} from Cork &amp; Dublin</h1>
 <p class="sub">{blurb}</p>
 <p>{('Direct returns from <b>€' + str(min_p) + ' per person</b> on our latest scan. ') if min_p else ''}We automatically scan real fares for weekend breaks and one-week holidays to {city}, so you don't have to keep checking.</p>
-<a class="cta" href="/">Plan this trip — live prices, hotels &amp; costs →</a>
+<a class="cta" href="/?dest={code}">Open the {city} deal — live prices, hotels &amp; costs →</a>
 
 <h2>Every scanned date for {city}</h2>
 <table>
