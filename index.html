@@ -487,6 +487,11 @@ img{max-width:100%}
 .ap-btn:nth-child(3).active .ap-ic{filter:none}
 /* Comparison mini-card below each deal */
 .alt-card{background:var(--cream);border:1px solid var(--line);border-top:none;border-radius:0 0 14px 14px;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;transition:background .15s}
+.alt-airport-banner{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--gold-soft);border:1px solid var(--gold);border-radius:12px;padding:13px 18px;margin:16px 0 4px;cursor:pointer;transition:filter .15s}
+.alt-airport-banner:hover,.alt-airport-banner:active{filter:brightness(.97)}
+.alt-airport-banner .aab-plane{font-size:18px}
+.alt-airport-banner .aab-text{flex:1;min-width:180px;font-size:14px;color:var(--ink)}
+.alt-airport-banner .aab-cta{font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--ink);white-space:nowrap}
 .alt-card:hover,.alt-card:active{background:var(--gold-soft)}
 .alt-arrow{margin-left:auto;color:var(--gold);font-weight:700}
 .alt-badge{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.08em;background:var(--ink-soft);color:var(--ivory);padding:3px 7px;border-radius:6px}
@@ -2332,6 +2337,32 @@ function _findDeal(board, codeStr){
   return (board.deals || []).find(d => codes.includes(d.code)) || null;
 }
 
+// Cheapest cached per-person fare from EACH airport for a destination.
+// Returns { ORK: {pp, deal, board} | null, DUB: {...} | null } — pure cache
+// read, zero API cost. Used for the smart default airport and the guide's
+// "cheaper from the other airport" banner.
+function cheapestByAirport(code){
+  const trav = _cacheTrav();
+  const out = { ORK: null, DUB: null };
+  for (const ap of ["ORK", "DUB"]) {
+    for (const b of _allBoards(ap)) {
+      const deal = _findDeal(b, code);
+      if (!deal) continue;
+      const pp = Math.round(deal.price / trav);
+      if (!out[ap] || pp < out[ap].pp) out[ap] = { pp, deal, board: b };
+    }
+  }
+  return out;
+}
+
+// Which airport is cheaper for this destination per the cache? Returns
+// "ORK" | "DUB" | null (null when only one or neither is scanned).
+function cheaperAirport(code){
+  const c = cheapestByAirport(code);
+  if (c.ORK && c.DUB) return c.ORK.pp <= c.DUB.pp ? "ORK" : "DUB";
+  return c.ORK ? "ORK" : (c.DUB ? "DUB" : null);
+}
+
 function openPlanner(){
   const apSel = document.getElementById("tlAirport");
   const destSel = document.getElementById("tlDest");
@@ -2714,10 +2745,13 @@ function planBuildTrip() {
   const out = document.getElementById("planOut").value;
   const ret = document.getElementById("planRet").value;
 
-  // Default to Dublin (wider network); the guide's own "same trip from Cork"
-  // strip lets them switch in one tap when Cork also flies the route.
+  // Default airport: if the cache knows which of Cork/Dublin is cheaper for
+  // this destination, open on that one (fixes "shows Dublin when Cork is
+  // cheaper"). Otherwise fall back to Dublin (wider network). The guide's
+  // banner + timeline still surface the other airport either way.
+  const defaultAp = cheaperAirport(code) || "DUB";
   const deal = { city: cityName, country, code, price: null, stops: null,
-                 total_time: "", airlines: meta ? meta.airlines : "", origin_airport: "DUB" };
+                 total_time: "", airlines: meta ? meta.airlines : "", origin_airport: defaultAp };
   // Dates were already chosen on this tab, so run the live flight search on
   // arrival — no need to make the visitor press a button again in the guide.
   window._gAutoSearch = true;
@@ -3278,6 +3312,8 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = fal
       <div class="dt-priceitem"><div class="lbl">Airline</div><div class="val" style="font-size:16px">${d.airlines||'—'}</div></div>
     </div>
 
+    <div id="dtAltAirport"></div>
+
     <div class="rainsun" style="margin:0 -0px"></div>
 
     ${planner ? `
@@ -3486,9 +3522,38 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = fal
   loadTransport(d.code);
   loadEvents(d.code, dep, ret, d.city);
   guideTimeline(d);
+  guideAltAirportBanner(d, dep, ret);
   if (planner) {
     guideLiveInit(d, dep, ret, hasPrice);
   }
+}
+
+// "Cheaper from the other airport" banner — pure cache read, zero API cost.
+// If the airport you're NOT viewing is cheaper for this destination, show a
+// tappable strip near the top so the saving isn't buried in the timeline.
+function guideAltAirportBanner(d, dep, ret){
+  const box = document.getElementById("dtAltAirport");
+  if (!box || !cachedDeals) return;
+  box.innerHTML = "";
+  const here = d.origin_airport || "DUB";
+  const other = here === "ORK" ? "DUB" : "ORK";
+  const c = cheapestByAirport(d.code);
+  const hereBest = c[here], otherBest = c[other];
+  // Only worth showing when the other airport is scanned AND cheaper than here.
+  if (!otherBest) return;
+  if (hereBest && otherBest.pp >= hereBest.pp) return;
+  const save = hereBest ? (hereBest.pp - otherBest.pp) : null;
+  const otherName = other === "ORK" ? "Cork" : "Dublin";
+  const g = window._guide || {};
+  const ad = otherBest.deal, ab = otherBest.board;
+  const dealJson = JSON.stringify({...ad, origin_airport: other}).replace(/'/g, "&#39;");
+  box.innerHTML = `
+    <div class="alt-airport-banner" role="button" tabindex="0"
+         onclick='openDetail(${dealJson}, "${ad.depart_date || ab.depart_date}", "${ad.return_date || ab.return_date}", ${g.groupSize || 1}, ${_cacheTrav()}, ${g.planner === true})'>
+      <span class="aab-plane">✈</span>
+      <span class="aab-text">${save ? `<b>${otherName} is €${save} cheaper</b> for this trip` : `<b>Also flies from ${otherName}</b>`} — from <b>€${otherBest.pp}pp</b> on scanned dates</span>
+      <span class="aab-cta">See ${otherName} dates →</span>
+    </div>`;
 }
 
 function closeDetail(){
