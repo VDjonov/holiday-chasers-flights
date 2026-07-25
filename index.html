@@ -695,6 +695,41 @@ img{max-width:100%}
 .hc-top-btn{position:fixed;right:16px;bottom:20px;z-index:900;width:44px;height:44px;border-radius:100px;border:none;background:var(--ink);color:var(--ivory);font-size:18px;cursor:pointer;box-shadow:0 4px 14px rgba(10,27,46,.3);opacity:0;pointer-events:none;transition:opacity .25s}
 .hc-top-btn.show{opacity:1;pointer-events:auto}
 
+/* ── Plan a Trip: single range date picker ────────────────────────────── */
+.pd-field{width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px;
+  background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:11px 14px;
+  font-family:var(--font-body);font-size:14px;color:var(--ink);cursor:pointer;text-align:left;
+  box-shadow:var(--shadow-sm)}
+.pd-field:hover,.pd-field.open{border-color:var(--gold)}
+.pd-field .pd-text{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pd-field .pd-ic{font-size:15px;opacity:.75}
+.pd-panel{margin-top:12px;background:var(--paper);border:1px solid var(--line);border-radius:14px;
+  padding:14px;box-shadow:var(--shadow-sm);max-width:760px}
+.pd-navrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.pd-labels{flex:1;display:flex;justify-content:space-around;gap:10px}
+.pd-months{display:flex;gap:22px}
+.pd-mo{flex:1;min-width:0}
+.pd-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.pd-month{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--ink)}
+.pd-nav{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:var(--paper);
+  color:var(--ink);font-size:18px;line-height:1;cursor:pointer}
+.pd-nav:hover:not(:disabled){border-color:var(--gold)}
+.pd-nav:disabled{opacity:.28;cursor:default}
+.pd-dow{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px}
+.pd-dow span{text-align:center;font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.04em}
+.pd-grid{display:grid;grid-template-columns:repeat(7,1fr);row-gap:2px}
+.pd-cell{height:38px;border:none;background:none;font-family:var(--font-body);font-size:13px;
+  color:var(--ink);cursor:pointer;border-radius:9px;padding:0}
+.pd-cell:hover:not(:disabled):not(.pd-past){background:var(--cream)}
+.pd-empty{pointer-events:none}
+.pd-past{color:var(--line);cursor:default}
+.pd-in{background:var(--gold-soft);border-radius:0}
+.pd-start,.pd-end{background:var(--ink);color:var(--ivory);font-weight:700}
+.pd-start{border-radius:9px 0 0 9px}
+.pd-end{border-radius:0 9px 9px 0}
+.pd-solo{border-radius:9px}
+.pd-hint{margin-top:10px;font-size:12px;color:var(--muted);text-align:center}
+
 /* ── Mobile compaction (final block: must stay last so it wins the cascade) ── */
 @media(max-width:600px){
   /* Hero: tighter still */
@@ -722,6 +757,13 @@ img{max-width:100%}
   .tv-cap{font-size:11px}
   .tv-stepper button{width:26px;height:26px;font-size:15px}
   .tv-stepper span{min-width:18px;font-size:13px}
+
+  /* Range date picker on small screens: one month only */
+  .pd-panel{max-width:100%;padding:12px}
+  .pd-cell{height:40px;font-size:13.5px}
+  .pd-mo2{display:none}
+  .pd-month2{display:none}
+  .pd-labels{justify-content:center}
 }
 </style>
 
@@ -763,7 +805,6 @@ img{max-width:100%}
   <div class="hero-eyebrow">Cork · ORK &nbsp;·&nbsp; Dublin · DUB &nbsp;·&nbsp; Ireland</div>
   <h1>Escape the drizzle.<br><em>Chase the sun.</em></h1>
   <p>Hand-picked return fares from Cork &amp; Dublin — checked daily, free to browse.</p>
-  <a href="#dealBoard" class="hero-cta" onclick="document.querySelector('.section-hdr').scrollIntoView({behavior:'smooth'});return false;">See this week's escapes <span>→</span></a>
   <div class="hero-stats" id="heroStats"></div>
 </section>
 <div class="rainsun"></div>
@@ -908,16 +949,16 @@ img{max-width:100%}
         <label>Destination</label>
         <select id="planCity" onchange="onPlanCityChange()"></select>
       </div>
-      <div class="form-group">
-        <label>Outbound</label>
-        <input type="date" id="planOut" onchange="onPlanDateChange()">
-      </div>
-      <div class="form-group">
-        <label>Return</label>
-        <input type="date" id="planRet" onchange="onPlanDateChange()">
+      <div class="form-group" style="flex:1.5;min-width:210px">
+        <label>Dates</label>
+        <button type="button" class="pd-field" id="planDatesBtn" onclick="pdToggle('plan')">
+          <span class="pd-text">Choose your dates</span><span class="pd-ic">📅</span>
+        </button>
       </div>
       <button class="search-btn" id="planSearch" onclick="planBuildTrip()">Build my trip →</button>
     </div>
+    <input type="hidden" id="planOut"><input type="hidden" id="planRet">
+    <div class="pd-panel" id="planCalPanel" style="display:none"></div>
     <div id="planRouteBadge" style="margin-top:14px"></div>
   </div>
   <div id="planResults"></div>
@@ -2724,6 +2765,9 @@ function populateSelects() {
   outEl.value = fmt(out); retEl.value = fmt(ret);
   outEl.min = fmt(today); retEl.min = fmt(today);
 
+  // Seed the range picker with those defaults and paint the summary field.
+  pdSeed('plan', outEl.value, retEl.value);
+
   // Reflect the shared traveller state (may already be set on the deal board).
   const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
   setTxt("planAdults", selAdults);
@@ -2779,6 +2823,138 @@ function onPlanCityChange() {
 function onPlanDateChange() {
   // Both dates are picked manually — we never auto-touch the return date.
   // (Validation that return is after outbound happens at "Build my trip".)
+}
+
+// ── Reusable range date picker ──────────────────────────────────────────
+// One tap for the outbound, one for the return; the nights between highlight.
+// Two instances share this code: the Plan a Trip tab and the destination guide.
+// Each writes to hidden inputs so the existing downstream code is unchanged.
+const PD_INST = {
+  plan:  { start:null, end:null, month:null, btn:'planDatesBtn', panel:'planCalPanel', out:'planOut', ret:'planRet' },
+  guide: { start:null, end:null, month:null, btn:'gdDatesBtn',   panel:'gdCalPanel',   out:'dtDep',   ret:'dtRet'   }
+};
+
+function pdToday(){ const n = new Date(); return new Date(Date.UTC(n.getFullYear(), n.getMonth(), n.getDate())).toISOString().slice(0,10); }
+function pdNights(a, b){
+  const [y1,m1,d1] = a.split('-').map(Number), [y2,m2,d2] = b.split('-').map(Number);
+  return Math.round((Date.UTC(y2,m2-1,d2) - Date.UTC(y1,m1-1,d1)) / 86400000);
+}
+
+function pdSummary(key){
+  const S = PD_INST[key];
+  if (S.start && S.end){
+    const n = pdNights(S.start, S.end);
+    return `${fmtDateShort(S.start)} → ${fmtDateShort(S.end)} · ${n} night${n===1?'':'s'}`;
+  }
+  if (S.start) return `${fmtDateShort(S.start)} → pick your return`;
+  return 'Choose your dates';
+}
+
+function pdPaintField(key){
+  const S = PD_INST[key];
+  const btn = document.getElementById(S.btn);
+  if (btn){ const t = btn.querySelector('.pd-text'); if (t) t.textContent = pdSummary(key); }
+  const o = document.getElementById(S.out), r = document.getElementById(S.ret);
+  if (o) o.value = S.start || '';
+  if (r) r.value = S.end   || '';
+}
+
+function pdSeed(key, startIso, endIso){
+  const S = PD_INST[key];
+  S.start = startIso || null; S.end = endIso || null; S.month = null;
+  pdPaintField(key);
+}
+
+function pdToggle(key, force){
+  const S = PD_INST[key];
+  const p = document.getElementById(S.panel);
+  if (!p) return;
+  const open = (force !== undefined) ? force : (p.style.display === 'none' || !p.style.display);
+  p.style.display = open ? 'block' : 'none';
+  const btn = document.getElementById(S.btn);
+  if (btn) btn.classList.toggle('open', open);
+  if (open) pdRender(key);
+}
+
+function pdShift(key, delta){
+  const S = PD_INST[key];
+  S.month = new Date(Date.UTC(S.month.getUTCFullYear(), S.month.getUTCMonth() + delta, 1));
+  pdRender(key);
+}
+
+function pdGrid(key, y, m){
+  const S = PD_INST[key];
+  const first = new Date(Date.UTC(y, m, 1));
+  const startDow = (first.getUTCDay() + 6) % 7;              // Monday-first
+  const daysInMonth = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+  const today = pdToday();
+  let cells = '';
+  for (let i = 0; i < startDow; i++) cells += '<span class="pd-cell pd-empty"></span>';
+  for (let d = 1; d <= daysInMonth; d++){
+    const iso = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const past = iso < today;
+    let cls = 'pd-cell';
+    if (past) cls += ' pd-past';
+    if (iso === S.start) cls += S.end ? ' pd-start' : ' pd-start pd-solo';
+    else if (iso === S.end) cls += ' pd-end';
+    else if (S.start && S.end && iso > S.start && iso < S.end) cls += ' pd-in';
+    cells += `<button type="button" class="${cls}"${past ? ' disabled' : ''} onclick="pdPick('${key}','${iso}')">${d}</button>`;
+  }
+  return `<div class="pd-dow"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+          <div class="pd-grid">${cells}</div>`;
+}
+
+function pdRender(key){
+  const S = PD_INST[key];
+  const panel = document.getElementById(S.panel);
+  if (!panel) return;
+  if (!S.month){
+    const base = S.start ? S.start.split('-').map(Number) : null;
+    const n = new Date();
+    S.month = base ? new Date(Date.UTC(base[0], base[1]-1, 1))
+                   : new Date(Date.UTC(n.getFullYear(), n.getMonth(), 1));
+  }
+  const y = S.month.getUTCFullYear(), m = S.month.getUTCMonth();
+  const next = new Date(Date.UTC(y, m + 1, 1));
+  const label = d => d.toLocaleDateString('en-IE', { month:'long', year:'numeric', timeZone:'UTC' });
+
+  const nowM = new Date();
+  const curKey  = `${nowM.getFullYear()}-${String(nowM.getMonth()+1).padStart(2,'0')}`;
+  const thisKey = `${y}-${String(m+1).padStart(2,'0')}`;
+  const prevDisabled = thisKey <= curKey;
+
+  const hint = (S.start && !S.end) ? 'Now tap your return date'
+             : (S.start && S.end)  ? `${pdNights(S.start, S.end)} nights selected`
+             : 'Tap your outbound date';
+
+  panel.innerHTML = `
+    <div class="pd-navrow">
+      <button type="button" class="pd-nav" onclick="pdShift('${key}',-1)"${prevDisabled ? ' disabled' : ''} aria-label="Previous month">‹</button>
+      <div class="pd-labels">
+        <span class="pd-month">${label(S.month)}</span>
+        <span class="pd-month pd-month2">${label(next)}</span>
+      </div>
+      <button type="button" class="pd-nav" onclick="pdShift('${key}',1)" aria-label="Next month">›</button>
+    </div>
+    <div class="pd-months">
+      <div class="pd-mo">${pdGrid(key, y, m)}</div>
+      <div class="pd-mo pd-mo2">${pdGrid(key, next.getUTCFullYear(), next.getUTCMonth())}</div>
+    </div>
+    <div class="pd-hint">${hint}</div>`;
+}
+
+function pdPick(key, iso){
+  const S = PD_INST[key];
+  if (!S.start || S.end){          // start a fresh range
+    S.start = iso; S.end = null;
+  } else if (iso > S.start){       // completes the range
+    S.end = iso;
+  } else {                         // tapped on/before the start → new start
+    S.start = iso; S.end = null;
+  }
+  pdPaintField(key);
+  pdRender(key);
+  if (S.start && S.end) setTimeout(() => pdToggle(key, false), 280);
 }
 
 // "Build my trip" — one destination for every path: the full guide.
@@ -3368,11 +3544,13 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = fal
       <h2>📅 Your dates</h2>
       <div class="dt-sub">Change the dates and the whole trip — flights, hotels, costs — updates.</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-        <input type="date" id="dtDep" value="${dep}" class="hc-signup-input" style="flex:0 1 170px;min-width:150px" onchange="onDepChange()">
-        <span style="color:var(--muted)">→</span>
-        <input type="date" id="dtRet" value="${ret}" class="hc-signup-input" style="flex:0 1 170px;min-width:150px" ${dep ? `min="${dep}"` : ""} onchange="scheduleAutoSearch()">
+        <button type="button" class="pd-field" id="gdDatesBtn" style="flex:0 1 320px;min-width:210px" onclick="pdToggle('guide')">
+          <span class="pd-text">Choose your dates</span><span class="pd-ic">📅</span>
+        </button>
+        <input type="hidden" id="dtDep" value="${dep}"><input type="hidden" id="dtRet" value="${ret}">
         <button class="hc-signup-btn" onclick="applyGuideDates()">Update trip</button>
       </div>
+      <div class="pd-panel" id="gdCalPanel" style="display:none"></div>
     </div>
 
     <div class="dt-section">
@@ -3570,6 +3748,7 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = fal
   loadEvents(d.code, dep, ret, d.city);
   guideTimeline(d);
   guideAltAirportBanner(d, dep, ret);
+  pdSeed('guide', dep, ret);
   if (planner) {
     guideLiveInit(d, dep, ret, hasPrice);
   }
