@@ -1035,7 +1035,7 @@ function renderDeals() {
     return `
     <div class="deal-card${i === 0 ? ' cheapest' : ''}">
       <button class="deal-fav" onclick='event.stopPropagation();toggleFav("${d.code}","${d.city.replace(/"/g,'')}")' aria-label="Save ${d.city}" data-fav="${d.code}">♡</button>
-      <div class="deal-clickable" onclick='openDetail(${JSON.stringify(d).replace(/'/g,"&#39;")}, "${d.depart_date || dep}", "${d.return_date || ret}", ${groupSize}, ${cacheTravellers})'>
+      <button type="button" class="deal-clickable" aria-label="View full details for ${d.city}" onclick='openDetail(${JSON.stringify(d).replace(/'/g,"&#39;")}, "${d.depart_date || dep}", "${d.return_date || ret}", ${groupSize}, ${cacheTravellers})'>
         ${banner}
         <div class="deal-card-top">
           ${i === 0 ? '<div class="deal-badge">Best fare</div>' : valueBadge(d)}
@@ -1061,7 +1061,7 @@ function renderDeals() {
         </div>
         <div class="deal-weather" id="weather-${d.code}-${i}"><span class="wx-loading">Checking weather…</span></div>
         <div class="deal-viewmore">View full details &amp; guide →</div>
-      </div>
+      </button>
       <div class="deal-actions">
         <a class="deal-book primary" href="${flightUrl(d.airlines, flightOrigin, d.code, d.depart_date || dep, d.return_date || ret, selAdults, selChildren)}" target="_blank" rel="noopener noreferrer">${flightBtnLabel(d.airlines)}</a>
         <a class="deal-book secondary" href="${carUrl(d.city, d.depart_date || dep, d.return_date || ret)}" target="_blank" rel="noopener">🚗 ${BRAND.discovercars}</a>
@@ -1371,7 +1371,7 @@ function guideRenderGrid(bucket){
     const isSel = sel && sel.date === date;
     const isMin = f.price === minP;
     return `
-    <div onclick="guideSelect('${bucket}','${date}')" style="cursor:pointer;border-radius:10px;padding:8px 10px;transition:.15s;position:relative;display:flex;align-items:center;justify-content:space-between;gap:6px;
+    <button type="button" onclick="guideSelect('${bucket}','${date}')" aria-pressed="${isSel ? 'true' : 'false'}" aria-label="${fmtD(date)}, €${f.price}${isMin ? ', cheapest' : ''}" style="cursor:pointer;border-radius:10px;padding:8px 10px;transition:.15s;position:relative;display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;font:inherit;color:inherit;text-align:left;appearance:none;-webkit-appearance:none;margin:0;
         border:${isSel ? '2px solid var(--ink)' : '1px solid var(--line)'};
         background:${isSel ? 'var(--gold-soft)' : 'var(--paper, #fff)'}">
       <div style="min-width:0">
@@ -1379,7 +1379,7 @@ function guideRenderGrid(bucket){
         <div style="font-size:9px;color:${isMin ? '#1B7A53' : 'var(--muted)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${isMin ? '💚 cheapest · ' : ''}${(f.airlines||"—").split(",")[0]}</div>
       </div>
       <div style="font-weight:800;font-size:15px;flex:none">€${f.price}</div>
-    </div>`;}).join("");
+    </button>`;}).join("");
 }
 
 function guideSelect(bucket, date){
