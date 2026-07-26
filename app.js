@@ -1,6 +1,10 @@
 // Holiday Chasers Ireland — main application script
 // Extracted from index.html for maintainability (CSS/JS split)
 
+// Bump this on every deploy so staging shows what's actually live.
+// Only ever displayed on non-production domains — see showDevBadge() below.
+const APP_VERSION = "v1.3 — lazy-loaded photos + accessible buttons (2026-07-26)";
+
 // --- Back-to-top button behaviour ---
   (function(){
     const btn = () => document.getElementById("hcTopBtn");
@@ -2898,7 +2902,7 @@ async function loadEvents(code, dep, ret, cityName){
       const venue = (ev._embedded && ev._embedded.venues && ev._embedded.venues[0] && ev._embedded.venues[0].name) || "";
       const img = (ev.images && (ev.images.find(i=>i.ratio==="16_9"&&i.width>500)||ev.images[0]) || {}).url || "";
       return `<a class="dt-event" href="${ev.url}" target="_blank" rel="noopener">
-        ${img?`<span class="dt-event-img" style="background-image:url('${img}')"></span>`:""}
+        ${img?`<img class="dt-event-img" src="${img}" alt="${(ev.name||"").replace(/"/g,'&quot;')}" loading="lazy">`:""}
         <span class="dt-event-body">
           <span class="dt-event-date">${date}</span>
           <span class="dt-event-name">${ev.name}</span>
@@ -3005,7 +3009,7 @@ async function loadRestaurants(code){
   const VISIBLE = 3;
   box.innerHTML = places.map((p, i) => {
     const img = (p.photo && i < 6)
-      ? `<span class="rest-photo" style="background-image:url('https://places.googleapis.com/v1/${p.photo}/media?maxWidthPx=200&key=${GOOGLE_PLACES_KEY}')"></span>`
+      ? `<img class="rest-photo" src="https://places.googleapis.com/v1/${p.photo}/media?maxWidthPx=200&key=${GOOGLE_PLACES_KEY}" alt="${(p.name||"").replace(/"/g,'&quot;')}" loading="lazy">`
       : `<span class="rest-photo rest-photo-empty">🍽️</span>`;
     return `
     <a class="rest-row${i >= VISIBLE ? ' rest-hidden' : ''}" href="${p.url}" target="_blank" rel="noopener">
@@ -3075,7 +3079,7 @@ async function loadAttractionsFromPlaces(code, box){
 
   box.innerHTML = spots.slice(0, 6).map((s, i) => {
     const imgHtml = (s.photo && i < 4)
-      ? `<span class="dt-attraction-img" style="background-image:url('https://places.googleapis.com/v1/${s.photo}/media?maxWidthPx=400&key=${GOOGLE_PLACES_KEY}')"></span>`
+      ? `<img class="dt-attraction-img" src="https://places.googleapis.com/v1/${s.photo}/media?maxWidthPx=400&key=${GOOGLE_PLACES_KEY}" alt="${(s.name||"").replace(/"/g,'&quot;')}" loading="lazy">`
       : "";   // no photo → compact card, no empty block
     return `
     <div class="dt-attraction">
@@ -3119,9 +3123,24 @@ async function loadAttractions(code){
   });
 }
 
+// ── Dev/staging version badge ───────────────────────────────────────────────
+// Shows a small fixed badge with the current APP_VERSION on any domain that
+// is NOT the production site. Never renders on holidaychasers.ie.
+function showDevBadge(){
+  if (location.hostname === "holidaychasers.ie" || location.hostname === "www.holidaychasers.ie") return;
+  const el = document.createElement("div");
+  el.textContent = APP_VERSION;
+  el.style.cssText = "position:fixed;left:8px;bottom:8px;z-index:99999;"
+    + "background:#111;color:#fff;font:12px/1.4 -apple-system,sans-serif;"
+    + "padding:6px 10px;border-radius:6px;opacity:0.85;pointer-events:none;"
+    + "max-width:70vw;box-shadow:0 2px 8px rgba(0,0,0,.3)";
+  document.body.appendChild(el);
+}
+
 // ── Init ─────────────────────────────────────────────────────────────────────
 populateSelects();
 loadDeals();
 checkBackend();
+showDevBadge();
 // Re-check backend every 30s
 setInterval(checkBackend, 30000);
