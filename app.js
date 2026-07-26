@@ -3,7 +3,7 @@
 
 // Bump this on every deploy so staging shows what's actually live.
 // Only ever displayed on non-production domains — see showDevBadge() below.
-const APP_VERSION = "v1.7 — fixed Open-Meteo rate limiting + contrast (2026-07-26)";
+const APP_VERSION = "v1.8 — reduced mobile above-the-fold height (2026-07-26)";
 
 // --- Back-to-top button behaviour ---
   (function(){
