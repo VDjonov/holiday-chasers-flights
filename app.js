@@ -3,7 +3,7 @@
 
 // Bump this on every deploy so staging shows what's actually live.
 // Only ever displayed on non-production domains — see showDevBadge() below.
-const APP_VERSION = "v1.9 — fixed weather caching failed lookups (2026-07-26)";
+const APP_VERSION = "v1.10 — throttled weather requests to avoid bursts (2026-07-26)";
 
 // --- Back-to-top button behaviour ---
   (function(){
@@ -253,6 +253,28 @@ const weatherCache = {};
 const WEATHER_FORECAST_TTL_MS = 3 * 3600 * 1000;        // 3h — real forecasts update often
 const WEATHER_TYPICAL_TTL_MS = 30 * 24 * 3600 * 1000;   // 30d — 3-year historical averages barely move
 
+// Concurrency limiter — caps how many Open-Meteo requests can be in flight at
+// once. Without this, rendering a full deal board (or a destination page with
+// many scanned dates) fires dozens of weather look-ups simultaneously, which
+// is exactly what trips Open-Meteo's burst rate limit (429s).
+const WEATHER_MAX_CONCURRENT = 4;
+let weatherActive = 0;
+const weatherQueue = [];
+function weatherAcquireSlot(){
+  return new Promise(resolve => {
+    const tryRun = () => {
+      if (weatherActive < WEATHER_MAX_CONCURRENT) { weatherActive++; resolve(); }
+      else weatherQueue.push(tryRun);
+    };
+    tryRun();
+  });
+}
+function weatherReleaseSlot(){
+  weatherActive--;
+  const next = weatherQueue.shift();
+  if (next) next();
+}
+
 async function getWeather(code, dateStr) {
   const coords = CITY_COORDS[code];
   if (!coords) return null;
@@ -289,6 +311,7 @@ async function getWeather(code, dateStr) {
   const today = new Date();
   const daysOut = Math.round((target - today) / 86400000);
 
+  await weatherAcquireSlot();
   try {
     // Near-term: real forecast
     if (daysOut >= 0 && daysOut <= 15) {
@@ -338,7 +361,10 @@ async function getWeather(code, dateStr) {
         typical: true,
       });
     }
-  } catch(e) {}
+  } catch(e) {
+  } finally {
+    weatherReleaseSlot();
+  }
 
   return store(null);
 }
