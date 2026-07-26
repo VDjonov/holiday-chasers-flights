@@ -613,13 +613,21 @@ img{max-width:100%}
 /* ── Mobile compaction (final block: must stay last so it wins the cascade) ── */
 @media(max-width:600px){
   /* Hero: tighter still */
-  .hero{padding:18px 16px 16px}
+  .hero{padding:16px 16px 14px}
   .hero h1{font-size:23px;margin-bottom:7px}
   .hero p{font-size:12.5px;margin-bottom:12px;line-height:1.4}
   .hero-cta{font-size:13px;padding:10px 20px;margin-bottom:12px}
-  .hero-stats{padding-top:10px}
+  .hero-stats{padding-top:8px}
   .hero-stat .val{font-size:18px}
   .hero-stat .lbl{font-size:8.5px;margin-top:3px}
+
+  /* Reduce the gap between hero and first deal card so less scrolling is
+     needed to see a real price on shorter phone screens (audit: "reduce
+     above-the-fold height on mobile"). */
+  .tab-content{padding-top:14px}
+  .section-hdr{margin-bottom:12px}
+  .airport-toggle{margin-bottom:6px}
+  .traveller-bar{margin-bottom:8px}
 
   /* Board header: small heading, one-line subtitle, plain trust note */
   .section-hdr h2{font-size:20px;line-height:1.15}
@@ -629,7 +637,7 @@ img{max-width:100%}
   .updated-tag{display:none}
 
   /* Traveller bar: keep it on ONE row — hide the redundant total + long label */
-  .traveller-bar{padding:8px 10px;gap:8px;margin-bottom:12px;flex-wrap:nowrap;
+  .traveller-bar{padding:8px 10px;gap:8px;flex-wrap:nowrap;
                  justify-content:space-between;overflow-x:auto}
   .traveller-bar .tv-label{display:none}
   .traveller-bar .tv-total{display:none}

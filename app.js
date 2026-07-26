@@ -3,7 +3,7 @@
 
 // Bump this on every deploy so staging shows what's actually live.
 // Only ever displayed on non-production domains — see showDevBadge() below.
-const APP_VERSION = "v1.7 — fixed Open-Meteo rate limiting + contrast (2026-07-26)";
+const APP_VERSION = "v1.12 — reduced flight-search concurrency + 429 retry (2026-07-26)";
 
 // --- Back-to-top button behaviour ---
   (function(){
@@ -46,7 +46,6 @@ function aviasalesUrl(origin, destCode, dep, ret, adults = 1) {
                   : `${origin}${ddmm(dep)}${d1}${adults}`;
   return `https://www.aviasales.com/search/${seg}?marker=${TP_MARKER}&currency=eur&locale=en`;
 }
-const NGROK_BYPASS = "?ngrok-skip-browser-warning=true";
 const DEALS_JSON = "./deals_cache.json"; // static file, always available
 
 // ── Destination data ─────────────────────────────────────────────────────────
@@ -253,6 +252,28 @@ const weatherCache = {};
 const WEATHER_FORECAST_TTL_MS = 3 * 3600 * 1000;        // 3h — real forecasts update often
 const WEATHER_TYPICAL_TTL_MS = 30 * 24 * 3600 * 1000;   // 30d — 3-year historical averages barely move
 
+// Concurrency limiter — caps how many Open-Meteo requests can be in flight at
+// once. Without this, rendering a full deal board (or a destination page with
+// many scanned dates) fires dozens of weather look-ups simultaneously, which
+// is exactly what trips Open-Meteo's burst rate limit (429s).
+const WEATHER_MAX_CONCURRENT = 4;
+let weatherActive = 0;
+const weatherQueue = [];
+function weatherAcquireSlot(){
+  return new Promise(resolve => {
+    const tryRun = () => {
+      if (weatherActive < WEATHER_MAX_CONCURRENT) { weatherActive++; resolve(); }
+      else weatherQueue.push(tryRun);
+    };
+    tryRun();
+  });
+}
+function weatherReleaseSlot(){
+  weatherActive--;
+  const next = weatherQueue.shift();
+  if (next) next();
+}
+
 async function getWeather(code, dateStr) {
   const coords = CITY_COORDS[code];
   if (!coords) return null;
@@ -261,7 +282,9 @@ async function getWeather(code, dateStr) {
 
   // Persistent cache across page loads/visits — avoids re-hitting Open-Meteo's
   // rate limit every time the deal board is refreshed.
-  const persistKey = "hc_wx_" + key;
+  // "wx2": bumped from "wx" to invalidate any entries written by the earlier,
+  // buggier version that could cache a failed lookup for hours.
+  const persistKey = "hc_wx2_" + key;
   try {
     const cached = JSON.parse(localStorage.getItem(persistKey) || "null");
     if (cached) {
@@ -272,7 +295,13 @@ async function getWeather(code, dateStr) {
 
   const store = (result) => {
     weatherCache[key] = result;
-    try{ localStorage.setItem(persistKey, JSON.stringify({ts: Date.now(), data: result})); }catch(e){}
+    // Only persist SUCCESSFUL lookups. A failed/null result must never be
+    // written to localStorage — otherwise a single transient hiccup (a
+    // rate limit, a network blip) gets "locked in" as a silent miss for
+    // hours, even once the underlying data is fetchable again.
+    if (result) {
+      try{ localStorage.setItem(persistKey, JSON.stringify({ts: Date.now(), data: result})); }catch(e){}
+    }
     return result;
   };
 
@@ -281,6 +310,7 @@ async function getWeather(code, dateStr) {
   const today = new Date();
   const daysOut = Math.round((target - today) / 86400000);
 
+  await weatherAcquireSlot();
   try {
     // Near-term: real forecast
     if (daysOut >= 0 && daysOut <= 15) {
@@ -330,13 +360,15 @@ async function getWeather(code, dateStr) {
         typical: true,
       });
     }
-  } catch(e) {}
+  } catch(e) {
+  } finally {
+    weatherReleaseSlot();
+  }
 
   return store(null);
 }
 const BACKEND_HEADERS = {
-  "Content-Type": "application/json",
-  "ngrok-skip-browser-warning": "true"
+  "Content-Type": "application/json"
 };
 let cachedDeals = null;
 
@@ -1291,7 +1323,7 @@ async function guideGrids(){
     return out;
   };
   const outDates = dates(g.dep), retDates = dates(g.ret).filter(x => x > g.dep);
-  box.innerHTML = `<div id="gProg" style="font-size:13px;color:var(--muted);margin-bottom:10px">⏳ Checking real prices for every date — takes about 20 seconds… <span id="gProgN">0</span>/${outDates.length + retDates.length} done</div>
+  box.innerHTML = `<div id="gProg" style="font-size:13px;color:var(--muted);margin-bottom:10px">⏳ Checking real prices for every date — takes about 30-40 seconds… <span id="gProgN">0</span>/${outDates.length + retDates.length} done</div>
     <div style="display:flex;gap:12px;align-items:flex-start">
       <div style="flex:1;min-width:0">
         <div style="font-weight:700;font-size:13px;margin:6px 0">🛫 Out — ${origin === "ORK" ? "Cork" : "Dublin"} → ${g.d.city.split(" ")[0]}</div>
@@ -1310,16 +1342,28 @@ async function guideGrids(){
   let done = 0;
   const bump = () => { const el = document.getElementById("gProgN"); if (el) el.textContent = ++done; };
   const fetchOne = async (from, to, date, bucket) => {
+    const body = JSON.stringify({ dest_code: to, outbound_date: date, return_date: null,
+                                   // Always explicit — never rely on the Worker's default
+                                   // origin (which is hardcoded to Cork and silently broke
+                                   // every Dublin-origin outbound search).
+                                   departure_override: from });
     try {
-      const r = await fetch(BACKEND_URL + "/api/search/direct", {
-        method: "POST", headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ dest_code: to, outbound_date: date, return_date: null,
-                               // Always explicit — never rely on the Worker's default
-                               // origin (which is hardcoded to Cork and silently broke
-                               // every Dublin-origin outbound search).
-                               departure_override: from }),
+      let r = await fetch(BACKEND_URL + "/api/search/direct", {
+        method: "POST", headers: {"Content-Type": "application/json"}, body,
         signal: AbortSignal.timeout(60000)
       });
+      // FlightAPI's Lite plan allows only 5 concurrent connections total —
+      // easy to exceed if the scheduled scanner runs at the same time, or if
+      // several browser tabs/destinations are open at once. A 429 here is
+      // usually transient, so one short backoff-and-retry clears most cases
+      // instead of leaving that date silently blank.
+      if (r.status === 429 && gen === window._gGen) {
+        await new Promise(res => setTimeout(res, 1500 + Math.random() * 1000));
+        r = await fetch(BACKEND_URL + "/api/search/direct", {
+          method: "POST", headers: {"Content-Type": "application/json"}, body,
+          signal: AbortSignal.timeout(60000)
+        });
+      }
       if (gen !== window._gGen) return;   // a newer search took over — discard
       if (r.ok) {
         const f = await r.json();
@@ -1333,13 +1377,14 @@ async function guideGrids(){
     guideRenderGrid(bucket);
   };
   // outbound: origin → dest; return: dest → origin (departure_override).
-  // 4 requests in parallel — the Worker + cache handle it easily, and the
-  // full grid lands in ~15-20s instead of a minute.
+  // 2 requests in parallel — FlightAPI's Lite plan caps concurrent connections
+  // at 5 total, and that budget is shared with the scheduled scanner and any
+  // other tabs/destinations open at once, so we stay well under it here.
   const jobs = [
     ...outDates.map(dt => ({ from: origin, to: code, dt, bucket: "out" })),
     ...retDates.map(dt => ({ from: code, to: origin, dt, bucket: "ret" })),
   ];
-  const workers = Array.from({ length: 4 }, async () => {
+  const workers = Array.from({ length: 2 }, async () => {
     while (jobs.length) {
       if (gen !== window._gGen) return;
       const j = jobs.shift();
@@ -2196,7 +2241,7 @@ async function searchDirectWindow() {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 15000);  // 15s per request
     try {
-      const r = await fetch(BACKEND_URL + "/api/search/direct" + NGROK_BYPASS, {
+      const r = await fetch(BACKEND_URL + "/api/search/direct", {
         method:"POST", headers:BACKEND_HEADERS, body: JSON.stringify(body), signal: ctrl.signal
       });
       clearTimeout(t);
@@ -2263,7 +2308,7 @@ async function searchEurope() {
   box.innerHTML = '<div class="loading"><div class="spinner"></div><br>Searching all routes…</div>';
 
   try {
-    const r = await fetch(BACKEND_URL + "/api/search/all" + NGROK_BYPASS, {
+    const r = await fetch(BACKEND_URL + "/api/search/all", {
       method:"POST", headers:BACKEND_HEADERS,
       body: JSON.stringify({dest_code:dest, outbound_date:out, return_date:ret||null})
     });
