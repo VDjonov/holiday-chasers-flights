@@ -3,7 +3,7 @@
 
 // Bump this on every deploy so staging shows what's actually live.
 // Only ever displayed on non-production domains — see showDevBadge() below.
-const APP_VERSION = "v1.8 — reduced mobile above-the-fold height (2026-07-26)";
+const APP_VERSION = "v1.9 — fixed weather caching failed lookups (2026-07-26)";
 
 // --- Back-to-top button behaviour ---
   (function(){
@@ -261,7 +261,9 @@ async function getWeather(code, dateStr) {
 
   // Persistent cache across page loads/visits — avoids re-hitting Open-Meteo's
   // rate limit every time the deal board is refreshed.
-  const persistKey = "hc_wx_" + key;
+  // "wx2": bumped from "wx" to invalidate any entries written by the earlier,
+  // buggier version that could cache a failed lookup for hours.
+  const persistKey = "hc_wx2_" + key;
   try {
     const cached = JSON.parse(localStorage.getItem(persistKey) || "null");
     if (cached) {
@@ -272,7 +274,13 @@ async function getWeather(code, dateStr) {
 
   const store = (result) => {
     weatherCache[key] = result;
-    try{ localStorage.setItem(persistKey, JSON.stringify({ts: Date.now(), data: result})); }catch(e){}
+    // Only persist SUCCESSFUL lookups. A failed/null result must never be
+    // written to localStorage — otherwise a single transient hiccup (a
+    // rate limit, a network blip) gets "locked in" as a silent miss for
+    // hours, even once the underlying data is fetchable again.
+    if (result) {
+      try{ localStorage.setItem(persistKey, JSON.stringify({ts: Date.now(), data: result})); }catch(e){}
+    }
     return result;
   };
 
