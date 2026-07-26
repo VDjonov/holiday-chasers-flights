@@ -288,7 +288,7 @@ img{max-width:100%}
 /* v3.2 — Where to eat (Google Places) */
 .dt-rest{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--paper)}
 .rest-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink);transition:.15s}
-.rest-photo{width:56px;height:56px;flex:none;border-radius:12px;background-size:cover;background-position:center;background-color:var(--cream)}
+.rest-photo{width:56px;height:56px;flex:none;border-radius:12px;object-fit:cover;background-color:var(--cream)}
 .rest-photo-empty{display:flex;align-items:center;justify-content:center;font-size:22px}
 .rest-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .rest-sub{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -500,7 +500,7 @@ img{max-width:100%}
 /* attractions */
 .dt-attractions{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
 .dt-attraction{background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-.dt-attraction-img{height:130px;background:var(--cream) center/cover;display:block}
+.dt-attraction-img{height:130px;width:100%;object-fit:cover;background-color:var(--cream);display:block}
 .dt-attraction-body{padding:14px}
 .dt-attraction-body .a-name{font-weight:600;font-size:14px}
 .dt-attraction-body .a-desc{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5}
@@ -537,7 +537,7 @@ img{max-width:100%}
 .dt-events{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
 .dt-event{display:flex;flex-direction:column;background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:transform .2s,box-shadow .2s}
 .dt-event:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
-.dt-event-img{height:120px;background:var(--cream) center/cover;display:block}
+.dt-event-img{height:120px;width:100%;object-fit:cover;background-color:var(--cream);display:block}
 .dt-event-body{padding:14px;display:flex;flex-direction:column;gap:3px}
 .dt-event-date{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.04em}
 .dt-event-name{font-weight:600;font-size:14px;line-height:1.3;color:var(--ink)}
