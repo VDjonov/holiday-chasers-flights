@@ -3,7 +3,7 @@
 
 // Bump this on every deploy so staging shows what's actually live.
 // Only ever displayed on non-production domains — see showDevBadge() below.
-const APP_VERSION = "v1.5 — Google Places key moved server-side (2026-07-26)";
+const APP_VERSION = "v1.5.1 — fixed Places photo rate limit (2026-07-26)";
 
 // --- Back-to-top button behaviour ---
   (function(){
