@@ -13,7 +13,7 @@
   --gold-soft:#E4D2A0;
   --paper:#FFFFFF;
   --line:#E7E0D2;         /* hairline on cream */
-  --muted:#6E7C8C;        /* secondary text */
+  --muted:#54626F;        /* secondary text — darkened from #6E7C8C for WCAG AA contrast */
   --ink-70:rgba(10,27,46,.7);
   --green:#1B7A53;        /* direct flight tag */
   --shadow-sm:0 1px 3px rgba(10,27,46,.06);
