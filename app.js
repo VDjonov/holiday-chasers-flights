@@ -3,7 +3,7 @@
 
 // Bump this on every deploy so staging shows what's actually live.
 // Only ever displayed on non-production domains — see showDevBadge() below.
-const APP_VERSION = "v1.3 — lazy-loaded photos + accessible buttons (2026-07-26)";
+const APP_VERSION = "v1.4 — Ticketmaster key moved server-side (2026-07-26)";
 
 // --- Back-to-top button behaviour ---
   (function(){
@@ -2323,8 +2323,8 @@ const CITY_TIER = {
 function cityCosts(code){ return COST_TIERS[CITY_TIER[code] || "mid"]; }
 
 // ── Ticketmaster Events API ──────────────────────────────────────────────────
-// Get a free key at developer.ticketmaster.com → paste it here.
-const TICKETMASTER_KEY = "wpGnJAvp5Ftf8TPjROGvYgyGdqi7hvqG";  // Ticketmaster Consumer Key
+// Proxied through the hc-live-search Worker (/api/events) so the Ticketmaster
+// key stays server-side and is never shipped to the browser.
 // Map airport codes to Ticketmaster city names for the events search
 const TM_CITY = {
   MAN:"Manchester", LHR:"London", LGW:"London", STN:"London", LTN:"London",
@@ -2872,9 +2872,8 @@ async function loadEvents(code, dep, ret, cityName){
   const el = document.getElementById("dtEvents");
   if (!el) return;
   const city = TM_CITY[code] || cityName;
-  // No key yet → honest message
-  if (!TICKETMASTER_KEY){
-    el.innerHTML = `<p style="color:var(--muted)">Live events feed isn't switched on yet. Once a Ticketmaster key is added, concerts, sport and major events for your dates will appear here automatically.</p>`;
+  if (!BACKEND_URL){
+    el.innerHTML = `<p style="color:var(--muted)">Live events feed isn't switched on yet.</p>`;
     return;
   }
   if (!city){ el.innerHTML = "<p style='color:var(--muted)'>No event listings for this city.</p>"; return; }
@@ -2886,27 +2885,23 @@ async function loadEvents(code, dep, ret, cityName){
     const eventStart = (new Date(secondDay) <= new Date(ret)) ? secondDay : dep;
     const start = eventStart + "T00:00:00Z";
     const end = ret + "T23:59:59Z";
-    const url = `https://app.ticketmaster.com/discovery/v2/events.json?apikey=${TICKETMASTER_KEY}`
-      + `&city=${encodeURIComponent(city)}&startDateTime=${start}&endDateTime=${end}&size=8&sort=date,asc`;
+    const url = `${BACKEND_URL}/api/events?city=${encodeURIComponent(city)}&start=${start}&end=${end}`;
     const r = await fetch(url);
-    const d = await r.json();
-    const events = (d._embedded && d._embedded.events) || [];
-    if (!events.length){
+    const events = await r.json();
+    if (!Array.isArray(events) || !events.length){
       el.innerHTML = `<p style="color:var(--muted)">No major ticketed events found for these dates. Local festivals and markets may still be on — worth checking the city's tourism site closer to your trip.</p>`;
       return;
     }
     el.innerHTML = `<div class="dt-events">` + events.map(ev => {
-      const date = ev.dates && ev.dates.start && ev.dates.start.localDate
-        ? new Date(ev.dates.start.localDate+"T12:00:00").toLocaleDateString("en-IE",{weekday:"short",day:"numeric",month:"short"})
+      const date = ev.date
+        ? new Date(ev.date+"T12:00:00").toLocaleDateString("en-IE",{weekday:"short",day:"numeric",month:"short"})
         : "";
-      const venue = (ev._embedded && ev._embedded.venues && ev._embedded.venues[0] && ev._embedded.venues[0].name) || "";
-      const img = (ev.images && (ev.images.find(i=>i.ratio==="16_9"&&i.width>500)||ev.images[0]) || {}).url || "";
       return `<a class="dt-event" href="${ev.url}" target="_blank" rel="noopener">
-        ${img?`<img class="dt-event-img" src="${img}" alt="${(ev.name||"").replace(/"/g,'&quot;')}" loading="lazy">`:""}
+        ${ev.image?`<img class="dt-event-img" src="${ev.image}" alt="${(ev.name||"").replace(/"/g,'&quot;')}" loading="lazy">`:""}
         <span class="dt-event-body">
           <span class="dt-event-date">${date}</span>
           <span class="dt-event-name">${ev.name}</span>
-          ${venue?`<span class="dt-event-venue">${venue}</span>`:""}
+          ${ev.venue?`<span class="dt-event-venue">${ev.venue}</span>`:""}
         </span>
       </a>`;
     }).join("") + `</div>
