@@ -3,7 +3,7 @@
 
 // Bump this on every deploy so staging shows what's actually live.
 // Only ever displayed on non-production domains — see showDevBadge() below.
-const APP_VERSION = "v1.10 — throttled weather requests to avoid bursts (2026-07-26)";
+const APP_VERSION = "v1.11 — removed leftover ngrok dev config (2026-07-26)";
 
 // --- Back-to-top button behaviour ---
   (function(){
@@ -46,7 +46,6 @@ function aviasalesUrl(origin, destCode, dep, ret, adults = 1) {
                   : `${origin}${ddmm(dep)}${d1}${adults}`;
   return `https://www.aviasales.com/search/${seg}?marker=${TP_MARKER}&currency=eur&locale=en`;
 }
-const NGROK_BYPASS = "?ngrok-skip-browser-warning=true";
 const DEALS_JSON = "./deals_cache.json"; // static file, always available
 
 // ── Destination data ─────────────────────────────────────────────────────────
@@ -369,8 +368,7 @@ async function getWeather(code, dateStr) {
   return store(null);
 }
 const BACKEND_HEADERS = {
-  "Content-Type": "application/json",
-  "ngrok-skip-browser-warning": "true"
+  "Content-Type": "application/json"
 };
 let cachedDeals = null;
 
@@ -2230,7 +2228,7 @@ async function searchDirectWindow() {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 15000);  // 15s per request
     try {
-      const r = await fetch(BACKEND_URL + "/api/search/direct" + NGROK_BYPASS, {
+      const r = await fetch(BACKEND_URL + "/api/search/direct", {
         method:"POST", headers:BACKEND_HEADERS, body: JSON.stringify(body), signal: ctrl.signal
       });
       clearTimeout(t);
@@ -2297,7 +2295,7 @@ async function searchEurope() {
   box.innerHTML = '<div class="loading"><div class="spinner"></div><br>Searching all routes…</div>';
 
   try {
-    const r = await fetch(BACKEND_URL + "/api/search/all" + NGROK_BYPASS, {
+    const r = await fetch(BACKEND_URL + "/api/search/all", {
       method:"POST", headers:BACKEND_HEADERS,
       body: JSON.stringify({dest_code:dest, outbound_date:out, return_date:ret||null})
     });
