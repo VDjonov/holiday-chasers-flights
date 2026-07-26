@@ -1,0 +1,647 @@
+/* Holiday Chasers Ireland — main stylesheet
+   Extracted from index.html for maintainability (CSS/JS split) */
+
+/* ═══ Premium design system — "Boarding pass meets boutique travel" ═══ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* Palette: deep ink navy, warm ivory, single gold accent */
+  --ink:#0A1B2E;          /* deep navy near-black */
+  --ink-soft:#1C3148;     /* lifted navy for cards on dark */
+  --ivory:#FBF8F1;        /* warm paper background */
+  --cream:#F3ECDD;        /* slightly deeper cream */
+  --gold:#C9A24B;         /* the one accent — muted antique gold */
+  --gold-soft:#E4D2A0;
+  --paper:#FFFFFF;
+  --line:#E7E0D2;         /* hairline on cream */
+  --muted:#54626F;        /* secondary text — darkened from #6E7C8C for WCAG AA contrast */
+  --ink-70:rgba(10,27,46,.7);
+  --green:#1B7A53;        /* direct flight tag */
+  --shadow-sm:0 1px 3px rgba(10,27,46,.06);
+  --shadow-md:0 8px 30px rgba(10,27,46,.10);
+  --shadow-lg:0 20px 60px rgba(10,27,46,.16);
+  --font-display:'Fraunces',Georgia,serif;
+  --font-body:'Inter',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);color:var(--ink);background:var(--ivory);line-height:1.6;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+a{color:inherit;text-decoration:none}
+button{font-family:var(--font-body);cursor:pointer}
+img{max-width:100%}
+::selection{background:var(--gold-soft);color:var(--ink)}
+
+/* ── Nav ── */
+.nav{position:sticky;top:0;z-index:100;background:rgba(10,27,46,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:60px;border-bottom:1px solid rgba(201,162,75,.2)}
+.nav-brand{font-family:var(--font-display);font-weight:600;font-size:19px;color:var(--ivory);display:flex;align-items:center;gap:10px;letter-spacing:-.01em}
+.nav-brand span{font-size:20px}
+.nav-logo{height:38px;width:38px;border-radius:50%;background:var(--ivory);padding:1px;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.detail-topbrand .nav-logo{height:34px;width:34px}
+.foot-logo{height:auto;width:220px;max-width:80%;margin:0 auto 12px;display:block}
+.nav-status{font-size:11px;padding:5px 12px;border-radius:100px;font-weight:600;letter-spacing:.02em;font-family:var(--font-mono)}
+.status-on{background:rgba(27,122,83,.18);color:#6FD8A8;border:1px solid rgba(27,122,83,.4)}
+.status-off{background:rgba(110,124,140,.15);color:#9DAEC0;border:1px solid rgba(110,124,140,.3)}
+
+/* ── Hero ── */
+.hero{position:relative;background:
+    linear-gradient(115deg,#39424e 0%,#4d5a68 24%,#8797a3 42%,#c8b98e 62%,#e4c268 82%,#f2d98a 100%);
+  padding:38px 24px 30px;text-align:center;color:var(--ivory);overflow:hidden}
+.hero::before{content:"";position:absolute;top:0;left:0;width:48%;height:100%;pointer-events:none;opacity:.32;background-image:
+    repeating-linear-gradient(105deg,transparent 0 12px,rgba(255,255,255,.35) 12px 13px,transparent 13px 26px)}
+.hero::after{content:"";position:absolute;inset:0;pointer-events:none;background:
+    radial-gradient(ellipse 55% 48% at 84% 22%, rgba(255,231,166,.6), transparent 62%),
+    linear-gradient(180deg, rgba(10,27,46,.18) 0%, rgba(10,27,46,.34) 100%)}
+.hero>*{position:relative;z-index:2}
+.hero-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--ivory);opacity:.95;margin-bottom:10px;position:relative;text-shadow:0 1px 10px rgba(10,27,46,.4)}
+.hero h1{font-family:var(--font-display);font-size:clamp(26px,4.6vw,44px);font-weight:600;line-height:1.04;letter-spacing:-.02em;margin-bottom:10px;position:relative;text-shadow:0 2px 26px rgba(10,27,46,.42)}
+.hero h1 em{font-style:italic;color:#FFE7A6}
+.hero p{font-size:clamp(13px,1.9vw,16px);color:rgba(251,248,241,.95);max-width:520px;margin:0 auto 18px;position:relative;text-shadow:0 1px 12px rgba(10,27,46,.4)}
+.hero-stats{display:flex;gap:0;justify-content:center;flex-wrap:wrap;position:relative;border-top:1px solid rgba(251,248,241,.32);padding-top:16px;max-width:680px;margin:0 auto}
+.hero-stat{text-align:center;padding:0 28px;position:relative}
+.hero-stat:not(:last-child)::after{content:"";position:absolute;right:0;top:6px;bottom:6px;width:1px;background:rgba(251,248,241,.3)}
+.hero-stat .val{font-family:var(--font-display);font-size:30px;font-weight:600;color:#FFE7A6;line-height:1;text-shadow:0 1px 14px rgba(10,27,46,.45)}
+.hero-stat .lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(251,248,241,.55);margin-top:8px;font-family:var(--font-mono)}
+
+/* ── Tabs ── */
+.tabs-bar{background:var(--ink);border-bottom:1px solid rgba(201,162,75,.18);position:sticky;top:60px;z-index:90;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tabs-inner{max-width:1180px;margin:0 auto;padding:16px 24px}
+.tab-seg{display:inline-flex;background:rgba(255,255,255,.06);border:1px solid rgba(251,248,241,.12);border-radius:100px;padding:5px;gap:4px}
+.tab-btn{display:flex;align-items:center;gap:8px;padding:10px 22px;border:none;border-radius:100px;background:transparent;cursor:pointer;font-family:var(--font-body);font-size:14px;font-weight:600;color:rgba(251,248,241,.6);transition:.2s;white-space:nowrap}
+.tab-btn .tab-ic{font-size:16px;line-height:1}
+.tab-btn:hover:not(.active){color:rgba(251,248,241,.9)}
+.tab-btn.active{background:var(--gold);color:var(--ink)}
+.tab-content{display:none;padding:44px 24px 60px;max-width:1120px;margin:0 auto}
+.tab-content.active{display:block;animation:fadeUp .4s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Section header ── */
+.section-hdr{margin-bottom:32px}
+.section-hdr h2{font-family:var(--font-display);font-size:30px;font-weight:600;letter-spacing:-.02em;line-height:1.1}
+.section-hdr p{font-size:15px;color:var(--muted);margin-top:8px;max-width:560px}
+.updated-tag{display:inline-block;font-family:var(--font-mono);font-size:11px;letter-spacing:.05em;color:var(--muted);background:var(--cream);border:1px solid var(--line);padding:4px 12px;border-radius:100px;margin-top:14px}
+
+/* ── Controls: toggle, picker, filters ── */
+.trip-toggle{display:inline-flex;gap:3px;margin-bottom:20px;background:var(--cream);border:1px solid var(--line);border-radius:100px;padding:4px}
+.trip-toggle button{padding:9px 22px;border:none;border-radius:100px;font-size:13px;font-weight:600;color:var(--muted);background:transparent;transition:.2s}
+.trip-toggle button.active{background:var(--ink);color:var(--ivory)}
+
+#weekendPickerRow label,.filter-bar label{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.weekend-buttons{display:flex;gap:10px;flex-wrap:wrap}
+.weekend-btn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:11px 18px;border:1px solid var(--line);border-radius:12px;background:var(--paper);cursor:pointer;transition:.18s;box-shadow:var(--shadow-sm);text-align:left}
+.weekend-btn:hover{border-color:var(--gold)}
+.weekend-btn.active{border-color:var(--ink);background:var(--ink)}
+.weekend-btn .wb-label{font-family:var(--font-body);font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap}
+.weekend-btn .wb-price{font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.02em}
+.weekend-btn.active .wb-label{color:var(--ivory)}
+.weekend-btn.active .wb-price{color:var(--gold-soft)}
+
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:28px}
+.traveller-bar{display:flex;align-items:center;gap:18px;flex-wrap:wrap;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 18px;margin-bottom:20px;box-shadow:var(--shadow-sm)}
+.tv-label{font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--ink)}
+.tv-group{display:flex;align-items:center;gap:10px}
+.tv-cap{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.tv-stepper{display:flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:100px;overflow:hidden}
+.tv-stepper button{width:32px;height:32px;border:none;background:var(--cream);color:var(--ink);font-size:18px;font-weight:600;line-height:1;cursor:pointer;transition:.15s}
+.tv-stepper button:hover{background:var(--gold-soft)}
+.tv-stepper span{min-width:32px;text-align:center;font-family:var(--font-display);font-weight:600;font-size:16px}
+.tv-total{margin-left:auto;font-family:var(--font-mono);font-size:12px;font-weight:600;letter-spacing:.03em;color:var(--ink);background:var(--cream);border:1px solid var(--line);padding:6px 14px;border-radius:100px}
+@media(max-width:600px){
+  .traveller-bar{gap:12px}
+  .tv-total{margin-left:0;width:100%;text-align:center}
+}
+.filter-btn{padding:8px 16px;border:1px solid var(--line);border-radius:100px;font-size:13px;font-weight:600;color:var(--ink);background:var(--paper);transition:.18s}
+.filter-btn.active{border-color:var(--ink);background:var(--ink);color:var(--ivory)}
+.filter-btn:hover:not(.active){border-color:var(--gold)}
+
+/* ── Deal cards: the signature — boarding pass stubs ── */
+.deal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+.deal-card{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:0;overflow:hidden;transition:transform .25s cubic-bezier(.2,.7,.3,1),box-shadow .25s;box-shadow:var(--shadow-sm)}
+.deal-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.deal-card.cheapest{border-color:var(--gold)}
+.deal-photo{position:relative;height:130px;overflow:hidden;border-bottom:1px solid var(--line);background:linear-gradient(135deg,#14304F 0%,var(--ink) 100%)}
+.deal-photo img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .5s}
+.deal-photo.loaded img{opacity:1}
+.deal-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,27,46,0) 45%,rgba(10,27,46,.5) 100%);pointer-events:none}
+.deal-photo.noimg{background:
+    repeating-linear-gradient(135deg,rgba(201,162,75,.06) 0 12px,transparent 12px 24px),
+    linear-gradient(135deg,#14304F 0%,var(--ink) 100%)}
+.deal-photo.noimg::before{content:"✦";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:28px;color:rgba(201,162,75,.4)}
+.deal-photo .deal-route-on-photo{position:absolute;left:16px;bottom:11px;z-index:2;font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.1em;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+.deal-card-top{padding:18px 22px 16px;position:relative}
+.deal-route{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;font-weight:500;color:var(--muted);letter-spacing:.08em;margin-bottom:14px}
+.deal-route .arrow{flex:1;height:1px;background:repeating-linear-gradient(90deg,var(--line) 0 4px,transparent 4px 8px);position:relative}
+.deal-route .arrow::after{content:"✈";position:absolute;right:-2px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--gold);background:var(--paper);padding-left:4px}
+.deal-city{font-family:var(--font-display);font-size:26px;font-weight:600;letter-spacing:-.02em;line-height:1}
+.deal-country{font-size:13px;color:var(--muted);margin-top:4px}
+.deal-badge{position:absolute;top:16px;right:18px;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--gold);background:var(--paper);border:1px solid var(--gold);padding:3px 8px;border-radius:100px;text-transform:uppercase;z-index:2}
+.deal-badge.value{color:#2e7d52;border-color:#2e7d52}
+.deal-badge.cheaper{color:#fff;background:#2e7d52;border-color:#2e7d52}
+.deal-badge.newbadge{color:var(--ink);background:var(--gold-soft);border-color:var(--gold)}
+.dt-cheaper-note{background:#eaf5ee;border:1px solid #2e7d52;color:#1e5637;border-radius:10px;padding:12px 16px;font-size:14px;font-weight:600;margin-bottom:16px}
+
+/* Live Direct-Flights combination box */
+.live-combo{background:linear-gradient(135deg,#14304F,var(--ink));border:1px solid rgba(201,162,75,.3);border-radius:16px;padding:22px;color:var(--ivory)}
+.live-combo-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:18px}
+.live-combo-lbl{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-soft);margin-bottom:6px}
+.live-combo-dates{font-family:var(--font-display);font-size:22px;font-weight:600}
+.live-combo-sub{font-size:13px;color:rgba(251,248,241,.65);margin-top:4px}
+.live-combo-price{text-align:right}
+.live-combo-price-lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:rgba(251,248,241,.55)}
+.live-combo-price-val{font-family:var(--font-display);font-size:34px;font-weight:600;color:var(--gold-soft);line-height:1}
+.live-combo-btn{width:100%;background:var(--gold);color:var(--ink);border:none;border-radius:12px;padding:15px;font-family:var(--font-body);font-size:15px;font-weight:700;cursor:pointer;transition:.2s}
+.live-combo-btn:hover{background:var(--gold-soft)}
+.live-combo-empty{text-align:center;padding:20px;color:var(--muted);font-size:14px;border:1px dashed var(--line);border-radius:12px}
+.deal-fav{position:absolute;top:14px;left:14px;z-index:3;width:34px;height:34px;border-radius:50%;border:none;background:rgba(10,27,46,.55);color:#fff;font-size:17px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.18s;backdrop-filter:blur(4px)}
+.deal-fav:hover{background:rgba(10,27,46,.8);transform:scale(1.08)}
+.deal-fav.on{color:#ff6b6b;background:rgba(255,255,255,.92)}
+.fav-chip{display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:7px 14px;background:var(--ink);color:var(--ivory);border-radius:100px;font-size:13px;font-weight:600;text-decoration:none;transition:.2s}
+.fav-chip:hover{background:var(--gold);color:var(--ink)}
+.fav-chip .fav-cta{text-decoration:underline;opacity:.9}
+.deal-card.cheapest .deal-route{padding-right:78px}
+/* perforated divider */
+.deal-perf{position:relative;height:0;border-top:2px dashed var(--line)}
+.deal-perf::before,.deal-perf::after{content:"";position:absolute;top:50%;transform:translateY(-50%);width:18px;height:18px;background:var(--ivory);border-radius:50%;border:1px solid var(--line)}
+.deal-perf::before{left:-9px}
+.deal-perf::after{right:-9px}
+.deal-card-bottom{padding:18px 22px 22px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.deal-perperson{text-align:right;flex-shrink:0;padding:6px 0 2px}
+.pp-amount{font-family:var(--font-display);font-size:20px;font-weight:600;color:var(--ink-soft);line-height:1}
+.deal-card.cheapest .pp-amount{color:var(--gold)}
+.pp-label{font-size:10px;color:var(--muted);letter-spacing:.04em;margin-top:3px;text-transform:uppercase;font-family:var(--font-mono)}
+.deal-price-block .deal-dates{font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:.03em;margin-bottom:6px}
+.deal-price{font-family:var(--font-display);font-size:34px;font-weight:600;line-height:1;color:var(--ink)}
+.deal-card.cheapest .deal-price{color:var(--gold)}
+.deal-price sup{font-size:16px;font-weight:500;top:-.7em;margin-right:1px}
+.deal-price small{display:block;font-family:var(--font-body);font-size:11px;color:var(--muted);font-weight:500;margin-top:4px;letter-spacing:.02em}
+.deal-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);padding:0 22px 18px}
+.deal-meta span{display:inline-flex;align-items:center;gap:5px}
+.tag-direct{color:var(--green);font-weight:600}
+.deal-weather{display:flex;align-items:center;gap:8px;padding:12px 22px;margin:0 22px;border-top:1px dashed var(--line);font-size:12px;color:var(--ink-70);min-height:0}
+.deal-weather:empty{display:none}
+.wx-icon{font-size:18px}
+.wx-temp{font-family:var(--font-display);font-weight:600;font-size:16px;color:var(--ink)}
+.wx-min{font-size:12px;color:var(--muted);font-weight:400}
+.wx-label{color:var(--muted)}
+.wx-tag{margin-left:auto;font-family:var(--font-mono);font-size:9px;letter-spacing:.05em;color:var(--muted);background:var(--cream);padding:2px 7px;border-radius:100px;text-transform:uppercase}
+.wx-loading{color:var(--muted);font-size:11px;font-style:italic}
+.deal-actions{display:flex;gap:8px;padding:16px 22px 10px}
+.deal-stays{display:flex;align-items:center;gap:8px;padding:0 22px 22px}
+.stay-label{font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-right:2px;white-space:nowrap}
+.stay-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:9px 8px;border-radius:9px;font-weight:600;font-size:12px;background:var(--cream);color:var(--ink);border:1px solid var(--line);transition:.2s;white-space:nowrap}
+.stay-btn:hover{background:var(--gold-soft);border-color:var(--gold)}
+.deal-book{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:11px 8px;border-radius:10px;font-weight:600;font-size:12px;letter-spacing:.01em;transition:.2s;white-space:nowrap}
+.deal-book.primary{background:var(--ink);color:var(--ivory);flex:1.3}
+.deal-book.primary:hover{background:var(--gold);color:var(--ink)}
+.deal-book.secondary{background:var(--cream);color:var(--ink);border:1px solid var(--line)}
+.deal-book.secondary:hover{background:var(--gold-soft);border-color:var(--gold)}
+.deal-card.cheapest .deal-book.primary{background:var(--gold);color:var(--ink)}
+.deal-card.cheapest .deal-book.primary:hover{background:var(--ink);color:var(--ivory)}
+
+/* ── Search form ── */
+.search-form{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:24px;margin-bottom:24px;box-shadow:var(--shadow-sm)}
+.form-row{display:flex;gap:16px;flex-wrap:wrap;align-items:end}
+.form-group{display:flex;flex-direction:column;gap:6px;flex:1;min-width:170px}
+.form-group label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.form-group select,.form-group input{padding:11px 14px;border:1px solid var(--line);border-radius:10px;font-size:14px;font-family:var(--font-body);color:var(--ink);background:var(--paper);transition:border-color .18s}
+.form-group select:focus,.form-group input:focus{outline:none;border-color:var(--gold)}
+.search-btn{padding:12px 28px;border:none;border-radius:10px;background:var(--ink);color:var(--ivory);font-weight:600;font-size:14px;letter-spacing:.02em;height:44px;white-space:nowrap;transition:.2s}
+.search-btn:hover{background:var(--gold);color:var(--ink)}
+.search-btn:disabled{opacity:.4;cursor:default}
+
+/* ── Results table ── */
+.results-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:18px;background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.results-table th{text-align:left;font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:14px 16px;background:var(--cream);border-bottom:1px solid var(--line)}
+.results-table td{padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
+.results-table tr:last-child td{border-bottom:none}
+.results-table tbody tr{transition:background .15s}
+.results-table tr:hover{background:var(--cream)}
+.price-cell{font-family:var(--font-display);font-weight:600;color:var(--ink);font-size:18px}
+.cheapest-row{background:rgba(201,162,75,.06)}
+.cheapest-row .price-cell{color:var(--gold)}
+.tag{display:inline-block;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:600;font-family:var(--font-mono);letter-spacing:.04em}
+.tag-direct-pill{background:rgba(27,122,83,.1);color:var(--green)}
+.tag-stops{background:rgba(201,162,75,.12);color:#9A7B2E}
+
+/* ── Loading / offline ── */
+.loading{text-align:center;padding:56px;color:var(--muted)}
+.loading .spinner{display:inline-block;width:26px;height:26px;border:2px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.offline-banner{background:linear-gradient(180deg,var(--cream),var(--paper));border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:12px;padding:16px 20px;margin-bottom:20px;font-size:13px;color:var(--ink-70);display:flex;align-items:center;gap:10px}
+
+/* ── Footer ── */
+.footer{text-align:center;padding:48px 24px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);margin-top:48px;background:var(--cream)}
+.footer a{color:var(--ink);font-weight:600;border-bottom:1px solid var(--gold)}
+.footer .foot-brand{font-family:var(--font-display);font-size:16px;color:var(--ink);margin-bottom:8px}
+
+/* ── Progress ── */
+#directProgress > div:first-child,#europeResults .progwrap{font-family:var(--font-mono)}
+
+/* ── Responsive — premium mobile ── */
+@media(max-width:600px){
+  .nav{padding:0 18px;height:56px}
+  .nav-brand{font-size:16px}
+  .hero{padding:20px 18px 18px}
+  .hero-eyebrow{display:none}
+  .hero h1{margin-bottom:8px}
+  .hero p{margin-bottom:14px}
+  .hero-cta{margin-bottom:14px}
+  .hero-stats{padding-top:12px;gap:0}
+  .hero-stat{padding:0 12px}
+  .hero-stat .val{font-size:20px}
+  .hero-stat .lbl{font-size:9px;margin-top:4px}
+  .hero-stat-dates{display:none}
+  .tabs-bar{top:56px}
+  .tabs-inner{padding:12px}
+  .tab-btn{padding:9px 16px;font-size:13px}
+  .tab-btn .tab-ic{font-size:15px}
+  .tab-content{padding:28px 16px 48px}
+  .section-hdr h2{font-size:21px}
+  .section-hdr p{font-size:13px;margin-top:5px}
+  .trust-line{margin-top:8px;padding:0;font-size:12px;line-height:1.4;background:none;border:none;color:var(--muted)}
+  .updated-tag{margin-top:10px;font-size:10px;padding:3px 10px}
+  .traveller-bar{padding:9px 12px;gap:10px;margin-bottom:12px}
+  .deal-grid{grid-template-columns:1fr;gap:16px}
+  .form-row{flex-direction:column;align-items:stretch}
+  .form-group{min-width:0}
+  .search-btn{width:100%}
+  .weekend-buttons{width:100%}
+  .weekend-btn{flex:1;min-width:calc(50% - 5px)}
+  .results-table{display:block;overflow-x:auto;white-space:nowrap}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+
+/* ── Trust / how-it-works line ── */
+.trust-line{margin-top:14px;padding:12px 16px;background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:8px;font-size:13px;line-height:1.6;color:var(--ink-70);max-width:680px}
+.signup-privacy{margin-top:12px;font-size:12px;color:rgba(251,248,241,.6);line-height:1.5}
+.foot-disclosure{display:inline-block;max-width:560px;margin:8px auto;font-size:12px;color:var(--muted);line-height:1.5}
+
+/* v3.3 — analytics consent bar */
+.consent-bar{position:fixed;left:0;right:0;bottom:0;z-index:900;background:var(--ink);color:var(--ivory);padding:14px 20px;display:none;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:0 -8px 30px rgba(10,27,46,.35)}
+.consent-bar.show{display:flex}
+.consent-txt{flex:1;font-size:13px;line-height:1.5;min-width:220px}
+.consent-txt b{color:var(--gold-soft)}
+.consent-btns{display:flex;gap:10px}
+.consent-btn{padding:9px 18px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:var(--font-body)}
+.consent-accept{background:var(--gold);color:var(--ink)}
+.consent-decline{background:transparent;color:var(--ivory);border:1px solid rgba(251,248,241,.35)}
+/* v3.2 — Where to eat (Google Places) */
+.dt-rest{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--paper)}
+.rest-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink);transition:.15s}
+.rest-photo{width:56px;height:56px;flex:none;border-radius:12px;object-fit:cover;background-color:var(--cream)}
+.rest-photo-empty{display:flex;align-items:center;justify-content:center;font-size:22px}
+.rest-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.rest-sub{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rest-meta small{color:var(--muted);font-weight:400;font-size:10px}
+.rest-meta{text-align:right;line-height:1.3}
+.tl-hidden{display:none}
+.rest-row:last-child{border-bottom:none}
+.rest-row:hover{background:var(--cream)}
+.rest-rank{font-family:var(--font-mono);font-size:11px;color:var(--gold);width:18px;flex:none}
+.rest-name{flex:1;font-size:14px;font-weight:600;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rest-meta{font-size:12px;color:var(--muted);white-space:nowrap}
+.rest-meta b{color:var(--ink)}
+.rest-star{color:var(--gold)}
+.rest-hidden{display:none}
+.rest-more{width:100%;padding:12px;background:var(--cream);border:none;border-top:1px solid var(--line);font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--ink);cursor:pointer}
+.rest-more:hover{background:var(--gold-soft)}
+/* v3.1 — equal-height aligned cards */
+.deal-card{display:flex;flex-direction:column}
+.deal-clickable{display:flex;flex-direction:column;flex:1;width:100%;border:none;background:none;padding:0;margin:0;font:inherit;color:inherit;text-align:left;appearance:none;-webkit-appearance:none}
+.deal-clickable .deal-viewmore{margin-top:auto}
+.deal-actions{margin-top:0}
+.ed-note{min-height:44px;display:flex;align-items:center}
+.ed-note.empty{border-left-color:transparent}
+.deal-weather{min-height:34px}
+/* ── v3 Rain to Sun: CTA + signature divider + card polish ── */
+.hero-cta{display:inline-block;background:var(--ink);color:var(--ivory);font-weight:600;font-size:14px;padding:12px 24px;border-radius:100px;text-decoration:none;margin-bottom:18px;box-shadow:0 10px 30px -8px rgba(10,27,46,.5);transition:.18s}
+.hero-cta:hover{transform:translateY(-1px)}
+.hero-cta span{color:var(--gold-soft)}
+.rainsun{height:5px;background:linear-gradient(90deg,#5b6875 0%,#8797a3 35%,var(--gold) 70%,#f0d386 100%)}
+/* Card polish: taller photo, city on photo, bigger serif price */
+.deal-photo{height:172px}
+.deal-photo .photo-city{position:absolute;left:18px;bottom:12px;z-index:2}
+.deal-photo .photo-city .pc-name{font-family:var(--font-display);font-size:27px;font-weight:600;color:#fff;letter-spacing:-.01em;line-height:1;text-shadow:0 1px 14px rgba(10,27,46,.65)}
+.deal-photo .photo-city .pc-country{font-size:12px;color:rgba(251,248,241,.9);margin-top:3px;text-shadow:0 1px 8px rgba(10,27,46,.6)}
+.deal-photo .deal-route-on-photo{left:auto;right:14px;bottom:auto;top:12px;background:rgba(10,27,46,.5);padding:5px 9px;border-radius:7px;backdrop-filter:blur(3px)}
+.deal-card .deal-city,.deal-card .deal-country{display:none}
+.deal-card-top{padding-top:16px;min-height:34px}
+.deal-price{font-size:38px}
+.deal-price sup{color:var(--gold)}
+.ed-note{font-family:var(--font-display);font-style:italic;font-size:13.5px;color:#5a6472;border-left:2px solid var(--gold);padding:2px 0 2px 12px;margin:0 22px 4px;line-height:1.5}
+@media(max-width:600px){.deal-photo{height:150px}.deal-photo .photo-city .pc-name{font-size:23px}}
+.airport-toggle{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+/* Airport deal counts + wins summary */
+.ap-count{font-family:var(--font-mono);font-size:10px;color:var(--gold);letter-spacing:.04em}
+.ap-btn.active .ap-count{color:var(--gold-soft)}
+.wins-line{font-size:13.5px;color:var(--ink-70);background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:9px 14px;margin-bottom:16px;display:none}
+.wins-line b{color:var(--ink)}
+/* Checked-today badge */
+.updated-tag.fresh{background:rgba(27,122,83,.1);border-color:var(--green);color:var(--green);font-weight:700}
+/* Complete-the-trip calculator */
+.dt-complete{background:linear-gradient(180deg,rgba(201,162,75,.06),transparent)}
+.trip-calc{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--paper)}
+.tc-row{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink);transition:.15s}
+.tc-row:hover{background:var(--cream)}
+.tc-ic{font-size:18px}
+.tc-lbl{flex:1;font-size:14px;font-weight:500}
+.tc-brand .brand{font-size:12px}
+.tc-val{font-family:var(--font-display);font-size:17px;font-weight:600}
+.tc-flight .tc-val{color:var(--gold)}
+.tc-total{display:flex;align-items:center;gap:12px;padding:15px 18px;background:var(--ink);color:var(--ivory)}
+.tc-total .tc-lbl{flex:1;font-size:14px;font-weight:600}
+.tc-total .tc-lbl small{font-weight:400;opacity:.65}
+.tc-total .tc-val{font-size:22px;color:var(--gold-soft)}
+.tc-note{font-size:12px;color:var(--muted);margin-top:10px}
+/* Card stay nudge line */
+.stay-nudge{font-size:11.5px;color:var(--muted);padding:0 22px 16px;margin-top:-8px}
+.stay-nudge b{color:var(--ink)}
+/* Mobile control compression */
+@media(max-width:600px){
+  .traveller-bar .tv-label{font-size:13px}
+  .board-tabs{margin-bottom:10px}
+  .budget-filter{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+  .budget-filter::-webkit-scrollbar{display:none}
+  .section-hdr{margin-bottom:20px}
+  .tc-lbl{font-size:13px}
+  .tc-val{font-size:15px}
+}
+.ap-btn{display:flex;align-items:center;gap:10px;padding:11px 20px;border:1px solid var(--line);border-radius:14px;background:var(--paper);cursor:pointer;transition:.18s;box-shadow:var(--shadow-sm)}
+.ap-btn:hover{border-color:var(--gold)}
+.ap-btn.active{background:var(--ink);border-color:var(--ink)}
+.ap-ic{font-size:18px}
+.ap-txt{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left}
+.ap-name{font-family:var(--font-body);font-size:14px;font-weight:600;color:var(--ink)}
+.ap-code{font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.06em}
+.ap-btn.active .ap-name,.ap-btn.active .ap-code{color:var(--ivory)}
+.ap-btn:nth-child(3).active .ap-ic{filter:none}
+/* Comparison mini-card below each deal */
+.alt-card{background:var(--cream);border:1px solid var(--line);border-top:none;border-radius:0 0 14px 14px;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;transition:background .15s}
+.alt-airport-banner{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--gold-soft);border:1px solid var(--gold);border-radius:12px;padding:13px 18px;margin:16px 0 4px;cursor:pointer;transition:filter .15s}
+.alt-airport-banner:hover,.alt-airport-banner:active{filter:brightness(.97)}
+.alt-airport-banner .aab-plane{font-size:18px}
+.alt-airport-banner .aab-text{flex:1;min-width:180px;font-size:14px;color:var(--ink)}
+.alt-airport-banner .aab-cta{font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--ink);white-space:nowrap}
+.alt-card:hover,.alt-card:active{background:var(--gold-soft)}
+.alt-arrow{margin-left:auto;color:var(--gold);font-weight:700}
+.alt-badge{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.08em;background:var(--ink-soft);color:var(--ivory);padding:3px 7px;border-radius:6px}
+.alt-info{font-size:12px;color:var(--muted);flex:1}
+.alt-price{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--ink)}
+.alt-cheaper{font-size:11px;font-weight:700;color:var(--green);background:rgba(27,122,83,.1);padding:2px 7px;border-radius:100px}
+.alt-pricier{font-size:11px;color:var(--muted)}
+/* Source badge on "Best of both" */
+.origin-badge{position:absolute;top:14px;left:52px;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.08em;background:rgba(10,27,46,.7);color:var(--ivory);padding:3px 7px;border-radius:6px;z-index:3}
+@media(max-width:600px){
+  .airport-toggle{gap:6px;flex-wrap:nowrap}
+  .ap-btn{flex:1;min-width:0;flex-direction:column;align-items:center;text-align:center;gap:3px;padding:9px 6px}
+  .ap-ic{font-size:15px}
+  .ap-txt{align-items:center;text-align:center}
+  .ap-name{font-size:13px}
+  .ap-code{font-size:9px}
+  .ap-count{font-size:9px}
+}
+.signup-band{margin-top:48px;background:radial-gradient(120% 140% at 0% 0%, #14304F 0%, var(--ink) 60%, #06121F 100%);border-radius:20px;padding:40px;position:relative;overflow:hidden}
+.signup-band::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(90deg,transparent 0 39px,rgba(201,162,75,.05) 39px 40px);pointer-events:none}
+.signup-inner{display:flex;gap:36px;align-items:center;flex-wrap:wrap;position:relative;z-index:1}
+.signup-copy{flex:1;min-width:280px;color:var(--ivory)}
+.signup-eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+.signup-copy h3{font-family:var(--font-display);font-size:clamp(22px,3vw,30px);font-weight:600;line-height:1.15;letter-spacing:-.01em;margin-bottom:10px}
+.signup-copy p{font-size:14px;color:rgba(251,248,241,.72);max-width:440px;line-height:1.6}
+.signup-form{flex:1;min-width:280px}
+.hc-signup-row{display:flex;gap:10px;flex-wrap:wrap}
+.hc-signup-input{flex:1;min-width:200px;background:rgba(255,255,255,.95);border:1px solid rgba(201,162,75,.4);border-radius:10px;padding:14px 16px;font-family:var(--font-body);font-size:15px;color:var(--ink)}
+.hc-signup-input::placeholder{color:var(--muted)}
+.hc-signup-btn{background:var(--ink);color:var(--ivory);border:none;border-radius:10px;padding:14px 26px;font-family:var(--font-body);font-weight:700;font-size:14px;cursor:pointer;transition:.2s}
+.hc-signup-btn:hover{background:var(--gold);color:var(--ink)}
+.hc-signup-btn:disabled{opacity:.6;cursor:default}
+#hcSignupMsg{font-size:14px;margin-top:10px;font-weight:600}
+#hcSignupMsg.ok{color:#7FE0A7}
+#hcSignupMsg.err{color:#FFB4A2}
+
+/* Restyle the MailerLite embedded form to match the premium look */
+.signup-form .ml-form-embedContainer .ml-form-embedWrapper{background:transparent!important;width:100%!important;max-width:none!important}
+.signup-form .ml-form-embedBody{padding:0!important}
+.signup-form .ml-form-embedContent{display:none!important}  /* hide ML's own heading; we have our own */
+.signup-form .ml-form-fieldRow{margin:0 0 12px 0!important}
+.signup-form .ml-form-fieldRow input{background:rgba(255,255,255,.95)!important;border:1px solid rgba(201,162,75,.4)!important;border-radius:10px!important;padding:14px 16px!important;font-family:var(--font-body)!important;font-size:15px!important;color:var(--ink)!important}
+.signup-form .ml-form-fieldRow input::placeholder{color:var(--muted)!important}
+.signup-form .ml-form-embedSubmit{margin:0!important}
+.signup-form .ml-form-embedSubmit button.primary{background:var(--gold)!important;color:var(--ink)!important;border:none!important;border-radius:10px!important;padding:14px!important;font-family:var(--font-body)!important;font-size:15px!important;font-weight:700!important;letter-spacing:.01em!important;transition:.2s!important;cursor:pointer!important}
+.signup-form .ml-form-embedSubmit button.primary:hover{background:var(--gold-soft)!important}
+.signup-form .ml-form-successContent h4{color:var(--gold-soft)!important;font-family:var(--font-display)!important}
+.signup-form .ml-form-successContent p{color:rgba(251,248,241,.8)!important}
+@media(max-width:600px){
+  .signup-band{padding:28px 22px;margin-top:36px}
+  .signup-inner{gap:22px}
+}
+
+/* ── Clickable card hint ── */
+.deal-clickable{cursor:pointer}
+.deal-viewmore{padding:10px 22px 4px;font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--gold);opacity:0;transition:opacity .2s}
+.deal-card:hover .deal-viewmore{opacity:1}
+@media(hover:none){.deal-viewmore{opacity:1}}
+
+/* ── Detail overlay ── */
+.detail-overlay{position:fixed;inset:0;z-index:500;background:var(--ivory);overflow-y:auto;display:none;animation:detailIn .35s ease}
+.detail-overlay.open{display:block}
+@keyframes detailIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.detail-topbar{position:sticky;top:0;z-index:10;background:rgba(10,27,46,.95);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:58px;border-bottom:1px solid rgba(201,162,75,.25)}
+.detail-back{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:var(--ivory);padding:8px 16px;border-radius:100px;font-size:13px;font-weight:600;font-family:var(--font-body)}
+.detail-back:hover{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+.detail-topbrand{font-family:var(--font-display);color:var(--ivory);font-size:15px;font-weight:600}
+.detail-body{max-width:980px;margin:0 auto;padding-bottom:60px}
+
+/* hero */
+.dt-hero{position:relative;height:340px;overflow:hidden;background:linear-gradient(135deg,#14304F,var(--ink))}
+.dt-hero img{width:100%;height:100%;object-fit:cover}
+.dt-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,27,46,.1) 0%,rgba(10,27,46,.85) 100%)}
+.dt-hero-text{position:absolute;left:0;right:0;bottom:0;padding:32px 28px;z-index:2;color:#fff}
+.dt-hero-eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-soft);margin-bottom:8px}
+.dt-hero-text h1,.dt-hero-text .dt-city-title{font-family:var(--font-display);font-size:clamp(32px,6vw,52px);font-weight:600;letter-spacing:-.02em;line-height:1;margin:0}
+.dt-hero-text .dt-country{font-size:15px;opacity:.85;margin-top:6px}
+
+/* price strip */
+.dt-pricestrip{display:flex;flex-wrap:wrap;gap:0;background:var(--ink);color:var(--ivory)}
+.dt-priceitem{flex:1;min-width:140px;padding:20px 24px;border-right:1px solid rgba(201,162,75,.18)}
+.dt-priceitem:last-child{border-right:none}
+.dt-priceitem .lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(251,248,241,.55);margin-bottom:6px}
+.dt-priceitem .val{font-family:var(--font-display);font-size:24px;font-weight:600;color:var(--gold-soft)}
+.dt-priceitem .val small{font-size:12px;color:rgba(251,248,241,.6);font-family:var(--font-body)}
+
+/* sections */
+.dt-section{padding:36px 28px;border-bottom:1px solid var(--line)}
+.dt-section h2{font-family:var(--font-display);font-size:24px;font-weight:600;letter-spacing:-.01em;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.dt-section .dt-sub{font-size:14px;color:var(--muted);margin-bottom:20px}
+.dt-section p{font-size:15px;line-height:1.7;color:var(--ink-70)}
+
+/* flight detail */
+.dt-leg{display:flex;align-items:center;gap:16px;padding:18px 0;border-bottom:1px dashed var(--line)}
+.dt-leg:last-child{border-bottom:none}
+.dt-leg-dir{font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--gold);width:64px;flex-shrink:0}
+.dt-leg-main{flex:1}
+.dt-leg-route{font-family:var(--font-display);font-size:18px;font-weight:600}
+.dt-leg-info{font-size:12px;color:var(--muted);margin-top:3px}
+
+/* weather strip */
+.dt-wx-grid{display:flex;gap:10px;flex-wrap:wrap}
+.dt-wx-day{flex:1;min-width:90px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+.dt-wx-day .d{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-bottom:6px}
+.dt-wx-day .ic{font-size:24px}
+.dt-wx-day .t{font-family:var(--font-display);font-weight:600;font-size:16px;margin-top:6px}
+.dt-wx-day .t small{color:var(--muted);font-size:12px;font-weight:400}
+
+/* cost grid */
+.dt-cost-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.dt-cost{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px}
+.dt-cost .c-ic{font-size:20px;margin-bottom:6px}
+.dt-cost .c-lbl{font-size:12px;color:var(--muted)}
+.dt-cost .c-val{font-family:var(--font-display);font-size:18px;font-weight:600;margin-top:2px}
+
+/* attractions */
+.dt-attractions{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.dt-attraction{background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.dt-attraction-img{height:130px;width:100%;object-fit:cover;background-color:var(--cream);display:block}
+.dt-attraction-body{padding:14px}
+.dt-attraction-body .a-name{font-weight:600;font-size:14px}
+.dt-attraction-body .a-desc{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5}
+
+/* stay options */
+.dt-stay-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.dt-car-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.dt-car{display:flex;flex-direction:column;gap:5px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px;transition:transform .2s,box-shadow .2s,border-color .2s}
+.dt-car:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:var(--gold)}
+.dt-car-name{font-family:var(--font-display);font-size:17px;font-weight:600;color:var(--ink)}
+/* ── Brand wordmark logos ── */
+.brand{display:inline-flex;align-items:center;gap:3px;font-family:'Inter',system-ui,sans-serif;font-weight:700;letter-spacing:-.02em;line-height:1}
+.brand-booking{color:#003580}.brand-booking .dot{color:#0896ff}
+.brand-airbnb{color:#FF5A5F}.brand-airbnb svg{margin-right:1px}
+.brand-dc{color:#ff5b00}.brand-dc .b{color:#0a1b2e}
+.brand-rc{color:#003580}.brand-rc .b{color:#0896ff}
+.brand-ae{color:#0a1b2e}.brand-ae .b{color:#e2231a}
+/* On dark backgrounds, brands stay readable on their chips/cards (light bg) */
+.stay-btn .brand,.deal-book .brand,.dt-car-name .brand{font-size:inherit}
+.dt-car-name .brand{font-size:17px}
+.dt-car-sub{font-size:12px;color:var(--muted);line-height:1.5;flex:1}
+.dt-car-go{font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--gold);letter-spacing:.03em;margin-top:6px}
+.dt-stay{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:22px;text-align:center}
+.dt-stay .s-ic{font-size:30px}
+.dt-stay .s-logo{font-size:22px;margin-bottom:10px;min-height:28px;display:flex;align-items:center;justify-content:center}
+.dt-stay .s-name{font-family:var(--font-display);font-size:19px;font-weight:600;margin:8px 0 4px}
+.dt-stay .s-price{font-size:13px;color:var(--muted);margin-bottom:16px}
+.dt-stay .s-price b{color:var(--ink);font-size:20px;font-family:var(--font-display)}
+.dt-stay a{display:block;padding:12px;border-radius:10px;background:var(--ink);color:var(--ivory);font-weight:600;font-size:13px;transition:.2s}
+.dt-stay a:hover{background:var(--gold);color:var(--ink)}
+.dt-loading{color:var(--muted);font-style:italic;font-size:14px}
+
+/* events */
+.dt-events{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.dt-event{display:flex;flex-direction:column;background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.dt-event:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.dt-event-img{height:120px;width:100%;object-fit:cover;background-color:var(--cream);display:block}
+.dt-event-body{padding:14px;display:flex;flex-direction:column;gap:3px}
+.dt-event-date{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.04em}
+.dt-event-name{font-weight:600;font-size:14px;line-height:1.3;color:var(--ink)}
+.dt-event-venue{font-size:12px;color:var(--muted)}
+
+/* transport */
+.dt-tr-block{margin-bottom:16px}
+.dt-tr-h2{font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.dt-tr-opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.dt-tr-opt{position:relative;display:block;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;transition:transform .2s,box-shadow .2s,border-color .2s}
+.dt-tr-opt:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:var(--gold)}
+.dt-tr-opt.best{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+.dt-tr-cta{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.03em;margin-top:10px;opacity:.85}
+.dt-tr-badge{position:absolute;top:-9px;left:14px;background:var(--gold);color:var(--ink);font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:100px}
+.dt-tr-mode{font-weight:600;font-size:15px;margin-bottom:3px}
+.dt-tr-detail{font-size:12px;color:var(--muted);margin-bottom:10px}
+.dt-tr-stats{display:flex;gap:12px;font-size:12px;color:var(--ink-70);font-family:var(--font-mono)}
+.dt-tr-item{display:flex;gap:14px;align-items:flex-start;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:12px}
+.dt-tr-fam{background:linear-gradient(180deg,var(--cream),var(--paper));border-color:var(--gold-soft)}
+.dt-tr-ic{font-size:22px;flex-shrink:0;line-height:1.2}
+.dt-tr-h{font-weight:600;font-size:14px;margin-bottom:4px}
+.dt-tr-b{font-size:13px;color:var(--ink-70);line-height:1.6}
+.dt-map{margin-top:14px;border-radius:14px;overflow:hidden;border:1px solid var(--line);height:260px}
+.dt-map iframe{width:100%;height:100%;border:0;display:block}
+.dt-tr-official{display:inline-block;margin-top:14px;font-size:13px;font-weight:600;color:var(--ink);border-bottom:1px solid var(--gold);padding-bottom:2px}
+.dt-tr-official:hover{color:var(--gold)}
+
+@media(max-width:600px){
+  .dt-hero{height:240px}
+  .dt-section{padding:28px 18px}
+  .dt-stay-cards{grid-template-columns:1fr}
+  .detail-body{padding-bottom:40px}
+}
+
+.hc-top-btn{position:fixed;right:16px;bottom:20px;z-index:900;width:44px;height:44px;border-radius:100px;border:none;background:var(--ink);color:var(--ivory);font-size:18px;cursor:pointer;box-shadow:0 4px 14px rgba(10,27,46,.3);opacity:0;pointer-events:none;transition:opacity .25s}
+.hc-top-btn.show{opacity:1;pointer-events:auto}
+
+/* ── Plan a Trip: single range date picker ────────────────────────────── */
+.pd-field{width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px;
+  background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:11px 14px;
+  font-family:var(--font-body);font-size:14px;color:var(--ink);cursor:pointer;text-align:left;
+  box-shadow:var(--shadow-sm)}
+.pd-field:hover,.pd-field.open{border-color:var(--gold)}
+.pd-field .pd-text{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pd-field .pd-ic{font-size:15px;opacity:.75}
+.pd-panel{margin-top:12px;background:var(--paper);border:1px solid var(--line);border-radius:14px;
+  padding:14px;box-shadow:var(--shadow-sm);max-width:760px}
+.pd-navrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.pd-labels{flex:1;display:flex;justify-content:space-around;gap:10px}
+.pd-months{display:flex;gap:22px}
+.pd-mo{flex:1;min-width:0}
+.pd-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.pd-month{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--ink)}
+.pd-nav{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:var(--paper);
+  color:var(--ink);font-size:18px;line-height:1;cursor:pointer}
+.pd-nav:hover:not(:disabled){border-color:var(--gold)}
+.pd-nav:disabled{opacity:.28;cursor:default}
+.pd-dow{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px}
+.pd-dow span{text-align:center;font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.04em}
+.pd-grid{display:grid;grid-template-columns:repeat(7,1fr);row-gap:2px}
+.pd-cell{height:38px;border:none;background:none;font-family:var(--font-body);font-size:13px;
+  color:var(--ink);cursor:pointer;border-radius:9px;padding:0}
+.pd-cell:hover:not(:disabled):not(.pd-past){background:var(--cream)}
+.pd-empty{pointer-events:none}
+.pd-past{color:var(--line);cursor:default}
+.pd-in{background:var(--gold-soft);border-radius:0}
+.pd-start,.pd-end{background:var(--ink);color:var(--ivory);font-weight:700}
+.pd-start{border-radius:9px 0 0 9px}
+.pd-end{border-radius:0 9px 9px 0}
+.pd-solo{border-radius:9px}
+.pd-hint{margin-top:10px;font-size:12px;color:var(--muted);text-align:center}
+
+/* ── Mobile compaction (final block: must stay last so it wins the cascade) ── */
+@media(max-width:600px){
+  /* Hero: tighter still */
+  .hero{padding:18px 16px 16px}
+  .hero h1{font-size:23px;margin-bottom:7px}
+  .hero p{font-size:12.5px;margin-bottom:12px;line-height:1.4}
+  .hero-cta{font-size:13px;padding:10px 20px;margin-bottom:12px}
+  .hero-stats{padding-top:10px}
+  .hero-stat .val{font-size:18px}
+  .hero-stat .lbl{font-size:8.5px;margin-top:3px}
+
+  /* Board header: small heading, one-line subtitle, plain trust note */
+  .section-hdr h2{font-size:20px;line-height:1.15}
+  .section-hdr p{font-size:12.5px;margin-top:4px;line-height:1.4}
+  .trust-line{margin-top:7px;padding:0;font-size:11.5px;line-height:1.4;
+              background:none;border:none;border-left:none;border-radius:0;color:var(--muted)}
+  .updated-tag{display:none}
+
+  /* Traveller bar: keep it on ONE row — hide the redundant total + long label */
+  .traveller-bar{padding:8px 10px;gap:8px;margin-bottom:12px;flex-wrap:nowrap;
+                 justify-content:space-between;overflow-x:auto}
+  .traveller-bar .tv-label{display:none}
+  .traveller-bar .tv-total{display:none}
+  .tv-group{gap:6px;flex-shrink:0}
+  .tv-cap{font-size:11px}
+  .tv-stepper button{width:26px;height:26px;font-size:15px}
+  .tv-stepper span{min-width:18px;font-size:13px}
+
+  /* Range date picker on small screens: one month only */
+  .pd-panel{max-width:100%;padding:12px}
+  .pd-cell{height:40px;font-size:13.5px}
+  .pd-mo2{display:none}
+  .pd-month2{display:none}
+  .pd-labels{justify-content:center}
+}
