@@ -307,7 +307,7 @@ img{max-width:100%}
 .rest-more:hover{background:var(--gold-soft)}
 /* v3.1 — equal-height aligned cards */
 .deal-card{display:flex;flex-direction:column}
-.deal-clickable{display:flex;flex-direction:column;flex:1}
+.deal-clickable{display:flex;flex-direction:column;flex:1;width:100%;border:none;background:none;padding:0;margin:0;font:inherit;color:inherit;text-align:left;appearance:none;-webkit-appearance:none}
 .deal-clickable .deal-viewmore{margin-top:auto}
 .deal-actions{margin-top:0}
 .ed-note{min-height:44px;display:flex;align-items:center}
