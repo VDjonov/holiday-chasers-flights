@@ -3,7 +3,7 @@
 
 // Bump this on every deploy so staging shows what's actually live.
 // Only ever displayed on non-production domains — see showDevBadge() below.
-const APP_VERSION = "v1.4 — Ticketmaster key moved server-side (2026-07-26)";
+const APP_VERSION = "v1.5 — Google Places key moved server-side (2026-07-26)";
 
 // --- Back-to-top button behaviour ---
   (function(){
@@ -2943,14 +2943,14 @@ async function loadCityAbout(code, city){
 }
 
 
-// ── Where to eat — Google Places API (New), browser-safe with referrer-restricted key
-const GOOGLE_PLACES_KEY = "AIzaSyBs2PZEmBAkx32FxWL9nmTAlQ_tnUorrhM";
+// ── Where to eat — proxied through the hc-live-search Worker (/api/places)
+// so the Google Places key stays server-side and is never shipped to the browser.
 
 async function loadRestaurants(code){
   const box = document.getElementById("dtRestaurants");
   if (!box) return;
   const coords = CITY_COORDS[code];
-  if (!coords || !GOOGLE_PLACES_KEY){ box.parentElement.style.display = "none"; return; }
+  if (!coords || !BACKEND_URL){ box.parentElement.style.display = "none"; return; }
 
   // 7-day localStorage cache — one API call per city per visitor per week
   const ck = "hc_rest2_" + code;   // v2: includes photos + cuisine
@@ -2962,34 +2962,11 @@ async function loadRestaurants(code){
 
   if (!places){
     try{
-      const r = await fetch("https://places.googleapis.com/v1/places:searchNearby", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Goog-Api-Key": GOOGLE_PLACES_KEY,
-          "X-Goog-FieldMask": "places.displayName,places.rating,places.userRatingCount,places.priceLevel,places.googleMapsUri,places.photos,places.primaryTypeDisplayName"
-        },
-        body: JSON.stringify({
-          includedTypes: ["restaurant"],
-          maxResultCount: 10,
-          rankPreference: "POPULARITY",
-          locationRestriction: { circle: {
-            center: { latitude: coords[0], longitude: coords[1] },
-            radius: 4000
-          }}
-        })
-      });
+      const url = `${BACKEND_URL}/api/places?kind=restaurant&lat=${coords[0]}&lng=${coords[1]}`;
+      const r = await fetch(url);
       if (!r.ok) throw new Error("HTTP " + r.status);
-      const d = await r.json();
-      places = (d.places || []).map(p => ({
-        name: p.displayName?.text || "",
-        rating: p.rating || null,
-        count: p.userRatingCount || 0,
-        price: {PRICE_LEVEL_INEXPENSIVE:"€",PRICE_LEVEL_MODERATE:"€€",PRICE_LEVEL_EXPENSIVE:"€€€",PRICE_LEVEL_VERY_EXPENSIVE:"€€€€"}[p.priceLevel] || "",
-        cuisine: p.primaryTypeDisplayName?.text || "",
-        photo: (p.photos && p.photos[0] && p.photos[0].name) || null,
-        url: p.googleMapsUri || "#"
-      })).filter(p => p.name);
+      places = await r.json();
+      if (!Array.isArray(places)) throw new Error("bad payload");
       try{ localStorage.setItem(ck, JSON.stringify({ts: Date.now(), data: places})); }catch(e){}
     }catch(e){
       // Honest graceful fallback: link out instead of an empty error box
@@ -3004,7 +2981,7 @@ async function loadRestaurants(code){
   const VISIBLE = 3;
   box.innerHTML = places.map((p, i) => {
     const img = (p.photo && i < 6)
-      ? `<img class="rest-photo" src="https://places.googleapis.com/v1/${p.photo}/media?maxWidthPx=200&key=${GOOGLE_PLACES_KEY}" alt="${(p.name||"").replace(/"/g,'&quot;')}" loading="lazy">`
+      ? `<img class="rest-photo" src="${BACKEND_URL}/api/places/photo?name=${encodeURIComponent(p.photo)}&w=200" alt="${(p.name||"").replace(/"/g,'&quot;')}" loading="lazy">`
       : `<span class="rest-photo rest-photo-empty">🍽️</span>`;
     return `
     <a class="rest-row${i >= VISIBLE ? ' rest-hidden' : ''}" href="${p.url}" target="_blank" rel="noopener">
@@ -3021,10 +2998,10 @@ async function loadRestaurants(code){
 }
 
 // Fallback sights for cities beyond the curated 26: top-rated attractions
-// from Google Places (same referrer-locked key as restaurants), cached 7 days.
+// from Google Places, proxied through the same Worker, cached 7 days.
 async function loadAttractionsFromPlaces(code, box){
   const coords = CITY_COORDS[code];
-  if (!coords || !GOOGLE_PLACES_KEY){
+  if (!coords || !BACKEND_URL){
     box.innerHTML = "<span class='dt-loading'>City guide coming soon.</span>"; return;
   }
   const ck = "hc_attr_" + code;
@@ -3036,32 +3013,11 @@ async function loadAttractionsFromPlaces(code, box){
 
   if (!spots){
     try{
-      const r = await fetch("https://places.googleapis.com/v1/places:searchNearby", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Goog-Api-Key": GOOGLE_PLACES_KEY,
-          "X-Goog-FieldMask": "places.displayName,places.rating,places.userRatingCount,places.googleMapsUri,places.photos"
-        },
-        body: JSON.stringify({
-          includedTypes: ["tourist_attraction"],
-          maxResultCount: 8,
-          rankPreference: "POPULARITY",
-          locationRestriction: { circle: {
-            center: { latitude: coords[0], longitude: coords[1] },
-            radius: 8000
-          }}
-        })
-      });
+      const url = `${BACKEND_URL}/api/places?kind=attraction&lat=${coords[0]}&lng=${coords[1]}`;
+      const r = await fetch(url);
       if (!r.ok) throw new Error("HTTP " + r.status);
-      const d = await r.json();
-      spots = (d.places || []).map(p => ({
-        name: p.displayName?.text || "",
-        rating: p.rating || null,
-        count: p.userRatingCount || 0,
-        url: p.googleMapsUri || "#",
-        photo: (p.photos && p.photos[0] && p.photos[0].name) || null
-      })).filter(p => p.name);
+      spots = await r.json();
+      if (!Array.isArray(spots)) throw new Error("bad payload");
       try{ localStorage.setItem(ck, JSON.stringify({ts: Date.now(), data: spots})); }catch(e){}
     }catch(e){
       box.innerHTML = "<span class='dt-loading'>City guide coming soon.</span>"; return;
@@ -3074,7 +3030,7 @@ async function loadAttractionsFromPlaces(code, box){
 
   box.innerHTML = spots.slice(0, 6).map((s, i) => {
     const imgHtml = (s.photo && i < 4)
-      ? `<img class="dt-attraction-img" src="https://places.googleapis.com/v1/${s.photo}/media?maxWidthPx=400&key=${GOOGLE_PLACES_KEY}" alt="${(s.name||"").replace(/"/g,'&quot;')}" loading="lazy">`
+      ? `<img class="dt-attraction-img" src="${BACKEND_URL}/api/places/photo?name=${encodeURIComponent(s.photo)}&w=400" alt="${(s.name||"").replace(/"/g,'&quot;')}" loading="lazy">`
       : "";   // no photo → compact card, no empty block
     return `
     <div class="dt-attraction">
