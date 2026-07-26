@@ -3,7 +3,7 @@
 
 // Bump this on every deploy so staging shows what's actually live.
 // Only ever displayed on non-production domains — see showDevBadge() below.
-const APP_VERSION = "v1.5.1 — fixed Places photo rate limit (2026-07-26)";
+const APP_VERSION = "v1.7 — fixed Open-Meteo rate limiting + contrast (2026-07-26)";
 
 // --- Back-to-top button behaviour ---
   (function(){
@@ -250,11 +250,31 @@ function weatherIcon(code) {
 // Fetch weather for a city on a date. Forecast if within 16 days; otherwise
 // the average of the same date across the last 3 years ("typical").
 const weatherCache = {};
+const WEATHER_FORECAST_TTL_MS = 3 * 3600 * 1000;        // 3h — real forecasts update often
+const WEATHER_TYPICAL_TTL_MS = 30 * 24 * 3600 * 1000;   // 30d — 3-year historical averages barely move
+
 async function getWeather(code, dateStr) {
   const coords = CITY_COORDS[code];
   if (!coords) return null;
   const key = code + dateStr;
   if (weatherCache[key] !== undefined) return weatherCache[key];
+
+  // Persistent cache across page loads/visits — avoids re-hitting Open-Meteo's
+  // rate limit every time the deal board is refreshed.
+  const persistKey = "hc_wx_" + key;
+  try {
+    const cached = JSON.parse(localStorage.getItem(persistKey) || "null");
+    if (cached) {
+      const ttl = cached.data && cached.data.typical ? WEATHER_TYPICAL_TTL_MS : WEATHER_FORECAST_TTL_MS;
+      if (Date.now() - cached.ts < ttl) { weatherCache[key] = cached.data; return cached.data; }
+    }
+  } catch(e) {}
+
+  const store = (result) => {
+    weatherCache[key] = result;
+    try{ localStorage.setItem(persistKey, JSON.stringify({ts: Date.now(), data: result})); }catch(e){}
+    return result;
+  };
 
   const [lat, lon] = coords;
   const target = new Date(dateStr + "T12:00:00");
@@ -267,51 +287,52 @@ async function getWeather(code, dateStr) {
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&start_date=${dateStr}&end_date=${dateStr}&timezone=auto`;
       const d = await (await fetch(url)).json();
       if (d.daily && d.daily.temperature_2m_max && d.daily.temperature_2m_max[0] != null) {
-        const result = {
+        return store({
           tmax: Math.round(d.daily.temperature_2m_max[0]),
           tmin: Math.round(d.daily.temperature_2m_min[0]),
           code: d.daily.weather_code[0],
           rain: d.daily.precipitation_probability_max ? d.daily.precipitation_probability_max[0] : null,
           typical: false,
-        };
-        weatherCache[key] = result; return result;
+        });
       }
     }
 
-    // Far-out: average the same date over the last 3 years from the archive.
+    // Far-out: average the same date over the last 3 years — fetched as ONE
+    // spanning request instead of 3 separate calls, to stay well within
+    // Open-Meteo's free-tier rate limit even when the board shows many cities.
     const mmdd = dateStr.slice(5); // "08-07"
-    const years = [target.getFullYear()-1, target.getFullYear()-2, target.getFullYear()-3];
+    const y = target.getFullYear();
+    const spanStart = `${y-3}-${mmdd}`;
+    const spanEnd = `${y-1}-${mmdd}`;
+    const targetDates = [`${y-1}-${mmdd}`, `${y-2}-${mmdd}`, `${y-3}-${mmdd}`];
+    const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min&start_date=${spanStart}&end_date=${spanEnd}&timezone=auto`;
+    const d = await (await fetch(url)).json();
     const maxes = [], mins = [], codes = [];
-    for (const y of years) {
-      const ds = `${y}-${mmdd}`;
-      const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min&start_date=${ds}&end_date=${ds}&timezone=auto`;
-      try {
-        const d = await (await fetch(url)).json();
-        if (d.daily && d.daily.temperature_2m_max && d.daily.temperature_2m_max[0] != null) {
-          maxes.push(d.daily.temperature_2m_max[0]);
-          mins.push(d.daily.temperature_2m_min[0]);
-          if (d.daily.weather_code && d.daily.weather_code[0] != null) codes.push(d.daily.weather_code[0]);
-        }
-      } catch(e) {}
+    if (d.daily && d.daily.time) {
+      targetDates.forEach(ds => {
+        const idx = d.daily.time.indexOf(ds);
+        if (idx === -1) return;
+        if (d.daily.temperature_2m_max[idx] != null) maxes.push(d.daily.temperature_2m_max[idx]);
+        if (d.daily.temperature_2m_min[idx] != null) mins.push(d.daily.temperature_2m_min[idx]);
+        if (d.daily.weather_code && d.daily.weather_code[idx] != null) codes.push(d.daily.weather_code[idx]);
+      });
     }
     if (maxes.length) {
       const avg = a => a.reduce((s,x)=>s+x,0)/a.length;
       // most common weather code
       const code2 = codes.length ? codes.sort((a,b)=>
         codes.filter(v=>v===a).length - codes.filter(v=>v===b).length).pop() : 1;
-      const result = {
+      return store({
         tmax: Math.round(avg(maxes)),
         tmin: Math.round(avg(mins)),
         code: code2,
         rain: null,
         typical: true,
-      };
-      weatherCache[key] = result; return result;
+      });
     }
   } catch(e) {}
 
-  weatherCache[key] = null;
-  return null;
+  return store(null);
 }
 const BACKEND_HEADERS = {
   "Content-Type": "application/json",
