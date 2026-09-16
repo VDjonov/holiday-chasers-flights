@@ -1,5 +1,5 @@
 {
-  "updated_utc": "2026-09-13T10:12:40Z",
+  "updated_utc": "2026-09-16T09:56:59Z",
   "travellers": 1,
   "passenger_label": "per person (1 adult, return)",
   "airports": {
@@ -7,13 +7,6 @@
       "name": "Cork",
       "weekend_boards": [
         {
-          "depart_date": "2026-09-18",
-          "return_date": "2026-09-20",
-          "nights": 2,
-          "deals": [],
-          "label": "Fri 18 Sep – Sun 20 Sep"
-        },
-        {
           "depart_date": "2026-09-25",
           "return_date": "2026-09-27",
           "nights": 2,
@@ -61,16 +54,16 @@
           "nights": 2,
           "deals": [],
           "label": "Fri 06 Nov – Sun 08 Nov"
+        },
+        {
+          "depart_date": "2026-11-13",
+          "return_date": "2026-11-15",
+          "nights": 2,
+          "deals": [],
+          "label": "Fri 13 Nov – Sun 15 Nov"
         }
       ],
       "week_boards": [
-        {
-          "depart_date": "2026-09-19",
-          "return_date": "2026-09-26",
-          "nights": 7,
-          "deals": [],
-          "label": "Sat 19 Sep – Sat 26 Sep"
-        },
         {
           "depart_date": "2026-09-26",
           "return_date": "2026-10-03",
@@ -133,6 +126,13 @@
           "nights": 7,
           "deals": [],
           "label": "Sat 21 Nov – Sat 28 Nov"
+        },
+        {
+          "depart_date": "2026-11-28",
+          "return_date": "2026-12-05",
+          "nights": 7,
+          "deals": [],
+          "label": "Sat 28 Nov – Sat 05 Dec"
         }
       ]
     },
@@ -140,13 +140,6 @@
       "name": "Dublin",
       "weekend_boards": [
         {
-          "depart_date": "2026-09-18",
-          "return_date": "2026-09-20",
-          "nights": 2,
-          "deals": [],
-          "label": "Fri 18 Sep – Sun 20 Sep"
-        },
-        {
           "depart_date": "2026-09-25",
           "return_date": "2026-09-27",
           "nights": 2,
@@ -194,16 +187,16 @@
           "nights": 2,
           "deals": [],
           "label": "Fri 06 Nov – Sun 08 Nov"
+        },
+        {
+          "depart_date": "2026-11-13",
+          "return_date": "2026-11-15",
+          "nights": 2,
+          "deals": [],
+          "label": "Fri 13 Nov – Sun 15 Nov"
         }
       ],
       "week_boards": [
-        {
-          "depart_date": "2026-09-19",
-          "return_date": "2026-09-26",
-          "nights": 7,
-          "deals": [],
-          "label": "Sat 19 Sep – Sat 26 Sep"
-        },
         {
           "depart_date": "2026-09-26",
           "return_date": "2026-10-03",
@@ -266,18 +259,18 @@
           "nights": 7,
           "deals": [],
           "label": "Sat 21 Nov – Sat 28 Nov"
+        },
+        {
+          "depart_date": "2026-11-28",
+          "return_date": "2026-12-05",
+          "nights": 7,
+          "deals": [],
+          "label": "Sat 28 Nov – Sat 05 Dec"
         }
       ]
     }
   },
   "weekend_boards": [
-    {
-      "depart_date": "2026-09-18",
-      "return_date": "2026-09-20",
-      "nights": 2,
-      "deals": [],
-      "label": "Fri 18 Sep – Sun 20 Sep"
-    },
     {
       "depart_date": "2026-09-25",
       "return_date": "2026-09-27",
@@ -326,16 +319,16 @@
       "nights": 2,
       "deals": [],
       "label": "Fri 06 Nov – Sun 08 Nov"
+    },
+    {
+      "depart_date": "2026-11-13",
+      "return_date": "2026-11-15",
+      "nights": 2,
+      "deals": [],
+      "label": "Fri 13 Nov – Sun 15 Nov"
     }
   ],
   "week_boards": [
-    {
-      "depart_date": "2026-09-19",
-      "return_date": "2026-09-26",
-      "nights": 7,
-      "deals": [],
-      "label": "Sat 19 Sep – Sat 26 Sep"
-    },
     {
       "depart_date": "2026-09-26",
       "return_date": "2026-10-03",
@@ -398,13 +391,20 @@
       "nights": 7,
       "deals": [],
       "label": "Sat 21 Nov – Sat 28 Nov"
+    },
+    {
+      "depart_date": "2026-11-28",
+      "return_date": "2026-12-05",
+      "nights": 7,
+      "deals": [],
+      "label": "Sat 28 Nov – Sat 05 Dec"
     }
   ],
   "week_board": {
-    "depart_date": "2026-09-19",
-    "return_date": "2026-09-26",
+    "depart_date": "2026-09-26",
+    "return_date": "2026-10-03",
     "nights": 7,
     "deals": [],
-    "label": "Sat 19 Sep – Sat 26 Sep"
+    "label": "Sat 26 Sep – Sat 03 Oct"
   }
 }
