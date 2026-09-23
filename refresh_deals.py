@@ -97,6 +97,26 @@ DESTINATIONS = [
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT_FILE = os.path.join(HERE, "deals_cache.json")
 HISTORY_FILE = os.path.join(HERE, "price_history.json")
+
+# Safety check: if a run finds far fewer deals than the live cache (e.g. API
+# credits ran out mid-run), keep the old cache and fail the job instead of
+# publishing a near-empty site. Override once with FORCE_CACHE_WRITE=1.
+MIN_KEEP_RATIO = float(os.environ.get("MIN_KEEP_RATIO", "0.5"))
+FORCE_CACHE_WRITE = os.environ.get("FORCE_CACHE_WRITE") == "1"
+
+
+def count_deals(airports):
+    return sum(len(b.get("deals") or [])
+               for a in (airports or {}).values()
+               for b in (a.get("weekend_boards") or []) + (a.get("week_boards") or []))
+
+
+def previous_deal_count():
+    try:
+        with open(OUT_FILE, "r", encoding="utf-8") as f:
+            return count_deals(json.load(f).get("airports"))
+    except Exception:
+        return 0
 MAX_HISTORY = 12
 MIN_HISTORY_POINTS = 2
 CHEAPER_THRESHOLD = 0.85
@@ -529,6 +549,17 @@ def main():
         airport_data[origin] = {"name": name,
                                 "weekend_boards": weekend_boards,
                                 "week_boards": week_boards}
+
+    new_count = count_deals(airport_data)
+    prev_count = previous_deal_count()
+    if prev_count and new_count < prev_count * MIN_KEEP_RATIO and not FORCE_CACHE_WRITE:
+        print(f"\n✋ SAFETY CHECK: this run found {new_count} deals, the live cache has "
+              f"{prev_count} (minimum to publish: {int(prev_count * MIN_KEEP_RATIO)}).")
+        print("   Keeping the existing deals_cache.json and price_history.json unchanged.")
+        if FLIGHTAPI_DOWN:
+            print("   Cause: FlightAPI quota ran out during this run — top up credits and re-run.")
+        print("   If the drop is intentional, re-run with FORCE_CACHE_WRITE=1.")
+        sys.exit(1)
 
     save_history(hist)
 
