@@ -3108,6 +3108,27 @@ async function loadAttractionsFromPlaces(code, box){
     </div>`;}).join("");
 }
 
+// Find a real photo for a Wikipedia article: its lead image first, and if that is
+// missing or a drawing/icon (.svg), the first photo anywhere in the article.
+async function sightPhoto(wiki){
+  const t = encodeURIComponent(wiki);
+  const isPhoto = u => !!u && !/\.svg/i.test(u);
+  try{
+    const d = await (await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${t}`)).json();
+    const u = (d.thumbnail && d.thumbnail.source) || (d.originalimage && d.originalimage.source) || "";
+    if (isPhoto(u)) return u;
+  }catch(e){}
+  try{
+    const m = await (await fetch(`https://en.wikipedia.org/api/rest_v1/page/media-list/${t}`)).json();
+    for (const it of (m.items || [])){
+      if (it.type !== "image") continue;
+      const src = it.srcset && it.srcset[0] && it.srcset[0].src;
+      if (isPhoto(src)) return src.startsWith("//") ? "https:" + src : src;
+    }
+  }catch(e){}
+  return "";
+}
+
 async function loadAttractions(code){
   const box = document.getElementById("dtAttractions");
   const sights = CITY_SIGHTS[code];
@@ -3127,14 +3148,16 @@ async function loadAttractions(code){
   // Fetch each sight's photo from its own Wikipedia page (reliable, title-based)
   sights.forEach(async ([wiki], i) => {
     try{
-      const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wiki)}`);
-      const d = await r.json();
-      const url = (d.thumbnail && d.thumbnail.source) ||
-                  (d.originalimage && d.originalimage.source) || "";
+      const url = await sightPhoto(wiki);
       const el = document.getElementById(`sight-${code}-${i}`);
       if (url && el){
-        el.style.backgroundImage = `url('${url}')`;
-        el.style.color = "transparent";
+        // Try a sharper 640px version; if Wikimedia can't make one, use the original
+        const sharp = url.replace(/\/\d+px-/, "/640px-");
+        const show = u => { el.style.backgroundImage = `url('${u}')`; el.style.color = "transparent"; };
+        const probe = new Image();
+        probe.onload  = () => show(sharp);
+        probe.onerror = () => show(url);
+        probe.src = sharp;
       }
     }catch(e){/* keep the ✦ placeholder */}
   });
