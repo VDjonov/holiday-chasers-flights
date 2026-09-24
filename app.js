@@ -372,6 +372,20 @@ const BACKEND_HEADERS = {
 };
 let cachedDeals = null;
 
+// Hero "Destinations" stat: every city with at least one deal on any board,
+// from either airport — stable, and matches the destination pages.
+function totalDestinations(){
+  if (!cachedDeals) return 0;
+  const cities = new Set();
+  const sources = cachedDeals.airports ? Object.values(cachedDeals.airports) : [cachedDeals];
+  for (const ap of sources){
+    for (const b of [...(ap.weekend_boards || []), ...(ap.week_boards || [])]){
+      for (const d of (b.deals || [])) if (d && d.city) cities.add(d.city);
+    }
+  }
+  return cities.size;
+}
+
 // ── Deep links from the SEO destination pages ───────────────────────────────
 // /?dest=EDI (or a slug like edinburgh) opens that city's guide with its best
 // current deal, so Google visitors land on the real product, not just the top
@@ -1043,7 +1057,7 @@ function renderDeals() {
   if (deals.length) {
     document.getElementById("heroStats").innerHTML = `
       <div class="hero-stat"><div class="val">€${perPerson(deals[0])}</div><div class="lbl">Cheapest · per person</div></div>
-      <div class="hero-stat"><div class="val">${deals.length}</div><div class="lbl">Destinations</div></div>
+      <div class="hero-stat"><div class="val">${totalDestinations() || deals.length}</div><div class="lbl">Destinations</div></div>
       <div class="hero-stat"><div class="val">${board.nights}n</div><div class="lbl">${currentBoard==="weekend"?"Weekend":"Week"} trip</div></div>
       <div class="hero-stat hero-stat-dates"><div class="val" style="font-size:16px">${depFmt} → ${retFmt}</div><div class="lbl">Travel dates</div></div>`;
   }
