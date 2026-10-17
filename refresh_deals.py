@@ -92,6 +92,14 @@ DESTINATIONS = [
     ("FUE", "Fuerteventura", "Spain", ("ORK", "DUB")),
     ("LPA", "Las Palmas", "Spain", ("ORK", "DUB")),
     ("ZRH", "Zurich",     "Switzerland", ("ORK", "DUB")),
+    # Cork-only direct routes (Cork Airport schedule, Winter 2026/27)
+    ("BHX", "Birmingham", "England", ("ORK",)),
+    ("BRS", "Bristol",    "England", ("ORK",)),
+    ("LPL", "Liverpool",  "England", ("ORK",)),
+    ("GLA", "Glasgow",    "Scotland", ("ORK",)),
+    ("CRL", "Brussels",   "Belgium", ("ORK",)),   # Charleroi
+    ("LYS", "Lyon",       "France", ("ORK",)),
+    ("ADB", "Izmir",      "Turkey", ("ORK",)),
 ]
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -160,6 +168,27 @@ def week_starts(count):
 # Dublin routes use fixed anchors + a rescue probe instead.
 ALL = {0, 1, 2, 3, 4, 5, 6}
 CORK_SCHEDULE = {
+    # --- Cork-only routes added Oct 2026 (official Cork Airport table) ---
+    "BHX": [({0,1,2,3,5,6}, "2026-03-29", "2026-10-25"),
+            (ALL,           "2026-10-26", "2026-11-01"),
+            ({0,3,4,5,6},   "2026-11-02", "2027-03-21"),
+            ({0,1,2,3,4,5}, "2027-03-22", "2027-03-27")],
+    "BRS": [(ALL,           "2026-03-29", "2027-03-28")],          # Aer Lingus Regional daily (end year typo on Cork's page fixed)
+    "LPL": [(ALL,           "2026-03-29", "2026-11-01"),
+            ({0,4,6},       "2026-11-02", "2027-03-27")],          # start-year typo on Cork's page fixed
+    "GLA": [({0,3,4,6},     "2026-10-25", "2027-03-27"),
+            ({0,1,2,3,4,6}, "2027-03-28", "2027-07-31")],
+    "CRL": [({2,5},         "2026-03-29", "2026-10-24"),
+            ({0,4},         "2026-10-25", "2026-12-20"),
+            ({1,6},         "2026-12-22", "2026-12-27"),
+            ({1,4,6},       "2026-12-29", "2027-01-03"),
+            ({4,6},         "2027-01-08", "2027-03-21"),           # year typos on Cork's page fixed
+            ({1,4},         "2027-03-23", "2027-03-26")],
+    "LYS": [({2,5},         "2026-12-19", "2027-01-26"),
+            ({5},           "2027-02-04", "2027-03-24")],
+    "ADB": [({2,5},         "2026-10-28", "2026-11-07"),
+            ({5},           "2027-05-01", "2027-05-15"),
+            ({2,5},         "2027-05-19", "2027-07-31")],
     "ALC": [({1,2,3,5,6},   "2026-03-29", "2026-10-18"),
             ({1,2,3,5},     "2026-10-20", "2026-10-24"),
             ({1,2,3,4,5},   "2026-10-26", "2026-10-31"),

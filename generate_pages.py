@@ -58,6 +58,13 @@ CITIES = {
     "FUE": ("fuerteventura", "Fuerteventura", "Spain", "The Canaries' best beaches — huge dunes and turquoise water."),
     "LPA": ("las-palmas", "Las Palmas", "Spain", "Gran Canaria's capital: city beach, old town and winter warmth."),
     "ZRH": ("zurich", "Zurich", "Switzerland", "Lake swims, old-town lanes and trains straight into the Alps."),
+    "BHX": ("birmingham", "Birmingham", "England", "Canals, curry mile and a revived city centre — a quick hop from Cork."),
+    "BRS": ("bristol", "Bristol", "England", "Harbourside street art, Clifton Bridge and a thriving food scene."),
+    "LPL": ("liverpool", "Liverpool", "England", "Beatles history, waterfront museums and a famously warm welcome."),
+    "GLA": ("glasgow", "Glasgow", "Scotland", "Music venues, Victorian architecture and the gateway to the Highlands."),
+    "CRL": ("brussels", "Brussels", "Belgium", "Grand Place, waffles and chocolate — flying into Charleroi, with a shuttle to the centre."),
+    "LYS": ("lyon", "Lyon", "France", "France's food capital: bouchons, Roman ruins and a hillside old town."),
+    "ADB": ("izmir", "Izmir", "Turkey", "Aegean sunshine, bazaars and Ephesus within easy reach."),
 }
 
 

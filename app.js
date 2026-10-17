@@ -181,7 +181,7 @@ const CITY_WIKI = {
   VIE:"Vienna", ATH:"Athens", CPH:"Copenhagen", VCE:"Venice",
   FUE:"Fuerteventura", LPA:"Las_Palmas_de_Gran_Canaria",
   MAN:"Manchester", LHR:"London", LGW:"London", STN:"London", LTN:"London",
-  EDI:"Edinburgh", BRS:"Bristol",
+  EDI:"Edinburgh", BRS:"Bristol", BHX:"Birmingham", LPL:"Liverpool", GLA:"Glasgow", CRL:"Brussels",
   FAO:"Faro,_Portugal", LIS:"Lisbon", OPO:"Porto",
   BCN:"Barcelona", MAD:"Madrid", AGP:"Málaga", ALC:"Alicante",
   ACE:"Lanzarote", PMI:"Palma_de_Mallorca", TFS:"Tenerife", VLC:"Valencia",
@@ -220,7 +220,7 @@ const CITY_COORDS = {
   VIE:[48.21,16.37], ATH:[37.98,23.73], CPH:[55.68,12.57],
   VCE:[45.44,12.34], FUE:[28.50,-13.86], LPA:[28.12,-15.43],
   MAN:[53.48,-2.24], LHR:[51.51,-0.13], LGW:[51.51,-0.13], STN:[51.51,-0.13], LTN:[51.51,-0.13],
-  EDI:[55.95,-3.19], BRS:[51.45,-2.59],
+  EDI:[55.95,-3.19], BRS:[51.45,-2.59], BHX:[52.48,-1.90], LPL:[53.41,-2.98], GLA:[55.86,-4.25], CRL:[50.85,4.35],
   FAO:[37.02,-7.93], LIS:[38.72,-9.14], OPO:[41.16,-8.62],
   BCN:[41.39,2.17], MAD:[40.42,-3.70], AGP:[36.72,-4.42], ALC:[38.35,-0.48],
   ACE:[28.96,-13.55], PMI:[39.57,2.65], TFS:[28.05,-16.57], VLC:[39.47,-0.38],
@@ -2393,7 +2393,7 @@ const CITY_TIER = {
   // mid
   LIS:"mid", MAD:"mid", BCN:"mid", AGP:"mid", VLC:"mid", BIO:"mid", PMI:"mid", ACE:"mid",
   TFS:"mid", BER:"mid", FCO:"mid", BGY:"mid", MXP:"mid", PSA:"mid", MLA:"mid", BRS:"mid",
-  MAN:"mid", EDI:"mid", BOD:"mid", LYS:"mid",
+  MAN:"mid", EDI:"mid", BOD:"mid", LYS:"mid", BHX:"mid", LPL:"mid", GLA:"mid", CRL:"mid",
   // high
   AMS:"high", FRA:"high", MUC:"high", NCE:"high", LHR:"high", LGW:"high", STN:"high", LTN:"high",
   CDG:"high", BVA:"high",
@@ -2408,7 +2408,7 @@ function cityCosts(code){ return COST_TIERS[CITY_TIER[code] || "mid"]; }
 // Map airport codes to Ticketmaster city names for the events search
 const TM_CITY = {
   MAN:"Manchester", LHR:"London", LGW:"London", STN:"London", LTN:"London",
-  EDI:"Edinburgh", BRS:"Bristol", FAO:"Faro", LIS:"Lisbon", OPO:"Porto",
+  EDI:"Edinburgh", BRS:"Bristol", BHX:"Birmingham", LPL:"Liverpool", GLA:"Glasgow", CRL:"Brussels", FAO:"Faro", LIS:"Lisbon", OPO:"Porto",
   BCN:"Barcelona", MAD:"Madrid", AGP:"Malaga", ALC:"Alicante", PMI:"Palma",
   TFS:"Tenerife", ACE:"Arrecife", VLC:"Valencia", SVQ:"Seville", BIO:"Bilbao",
   BGY:"Milan", MXP:"Milan", PSA:"Pisa", FCO:"Rome", CDG:"Paris", BVA:"Paris",
