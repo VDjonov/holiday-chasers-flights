@@ -39,7 +39,7 @@ CITIES = {
     "MUC": ("munich", "Munich", "Germany", "Beer gardens, Alpine day trips and Bavaria's handsome capital."),
     "BUD": ("budapest", "Budapest", "Hungary", "Thermal baths, ruin bars and grand Danube views — superb value."),
     "KRK": ("krakow", "Krakow", "Poland", "A perfectly preserved old town, hearty food and easy day trips."),
-    "WAW": ("warsaw", "Warsaw", "Poland", "A rebuilt old town, serious museums and a booming food scene."),
+    "WMI": ("warsaw", "Warsaw", "Poland", "A rebuilt old town, serious museums and a booming food scene."),
     "PRG": ("prague", "Prague", "Czech Republic", "Fairytale bridges, castle views and Europe's best beer."),
     "EDI": ("edinburgh", "Edinburgh", "Scotland", "Castle, closes and cosy pubs — a short hop with big atmosphere."),
     "STN": ("london", "London", "England", "Theatre, markets, museums — the quickest big-city fix from Ireland."),

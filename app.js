@@ -89,7 +89,7 @@ const DIRECT = [
   {code:"MUC",city:"Munich",country:"Germany",airlines:"Aer Lingus, Lufthansa"},
   {code:"BUD",city:"Budapest",country:"Hungary",airlines:"Ryanair, Aer Lingus"},
   {code:"KRK",city:"Krakow",country:"Poland",airlines:"Ryanair"},
-  {code:"WAW",city:"Warsaw",country:"Poland",airlines:"Aer Lingus, Ryanair"},
+  {code:"WMI",city:"Warsaw",country:"Poland",airlines:"Ryanair"},
   {code:"GVA",city:"Geneva",country:"Switzerland",airlines:"Aer Lingus"},
   {code:"VIE",city:"Vienna",country:"Austria",airlines:"Ryanair, Aer Lingus"},
   {code:"ATH",city:"Athens",country:"Greece",airlines:"Ryanair, Aer Lingus"},
@@ -159,7 +159,7 @@ const EUROPE = [
   {code:"CTA",city:"Catania",country:"Italy"},{code:"RIX",city:"Riga",country:"Latvia"},
   {code:"VNO",city:"Vilnius",country:"Lithuania"},{code:"MLA",city:"Malta",country:"Malta"},
   {code:"AMS",city:"Amsterdam",country:"Netherlands"},{code:"OSL",city:"Oslo",country:"Norway"},
-  {code:"WAW",city:"Warsaw",country:"Poland"},{code:"KRK",city:"Krakow",country:"Poland"},
+  {code:"WMI",city:"Warsaw",country:"Poland"},{code:"KRK",city:"Krakow",country:"Poland"},
   {code:"GDN",city:"Gdansk",country:"Poland"},{code:"LIS",city:"Lisbon",country:"Portugal"},
   {code:"OPO",city:"Porto",country:"Portugal"},{code:"FAO",city:"Faro",country:"Portugal"},
   {code:"OTP",city:"Bucharest",country:"Romania"},{code:"BTS",city:"Bratislava",country:"Slovakia"},
@@ -191,7 +191,7 @@ const CITY_WIKI = {
   AMS:"Amsterdam", FRA:"Frankfurt", PRG:"Prague", ZRH:"Zurich",
   MLA:"Valletta", ZAD:"Zadar", RHO:"Rhodes_(city)", ADB:"İzmir",
   GVA:"Geneva", MUC:"Munich", BER:"Berlin", BUD:"Budapest",
-  KRK:"Kraków", WAW:"Warsaw",
+  KRK:"Kraków", WMI:"Warsaw",
 };
 
 const photoUrlCache = {};
@@ -230,7 +230,7 @@ const CITY_COORDS = {
   AMS:[52.37,4.90], FRA:[50.11,8.68], PRG:[50.08,14.44], ZRH:[47.37,8.54],
   MLA:[35.90,14.51], ZAD:[44.12,15.23], RHO:[36.43,28.22], ADB:[38.42,27.14],
   BER:[52.52,13.40], BUD:[47.50,19.04], GVA:[46.20,6.14], KRK:[50.06,19.94],
-  MUC:[48.14,11.58], WAW:[52.23,21.01],
+  MUC:[48.14,11.58], WMI:[52.45,20.65],
 };
 
 // Map Open-Meteo weather codes to emoji + label
@@ -2388,7 +2388,7 @@ const COST_TIERS = {
 };
 const CITY_TIER = {
   // budget
-  KRK:"budget", WAW:"budget", BUD:"budget", PRG:"budget", SVQ:"budget", ALC:"budget",
+  KRK:"budget", WMI:"budget", BUD:"budget", PRG:"budget", SVQ:"budget", ALC:"budget",
   ZAD:"budget", RHO:"budget", ADB:"budget", FAO:"budget", OPO:"budget",
   // mid
   LIS:"mid", MAD:"mid", BCN:"mid", AGP:"mid", VLC:"mid", BIO:"mid", PMI:"mid", ACE:"mid",
@@ -2415,7 +2415,7 @@ const TM_CITY = {
   NCE:"Nice", LYS:"Lyon", BOD:"Bordeaux", AMS:"Amsterdam", FRA:"Frankfurt",
   PRG:"Prague", ZRH:"Zurich", MLA:"Valletta", ZAD:"Zadar", RHO:"Rhodes",
   ADB:"Izmir", GVA:"Geneva", MUC:"Munich", BER:"Berlin", BUD:"Budapest",
-  KRK:"Krakow", WAW:"Warsaw", VIE:"Vienna", ATH:"Athens", CPH:"Copenhagen",
+  KRK:"Krakow", WMI:"Warsaw", VIE:"Vienna", ATH:"Athens", CPH:"Copenhagen",
   VCE:"Venice", FUE:"Fuerteventura", LPA:"Las Palmas de Gran Canaria",
 };
 
@@ -2510,7 +2510,7 @@ const CITY_SIGHTS = {
         ["Wawel Castle","Wawel Castle","Kings, a cathedral and a dragon's den."],
         ["Kazimierz","Kazimierz","The old Jewish quarter — zapiekanka at Plac Nowy."],
         ["Wieliczka Salt Mine","Wieliczka Salt Mine","Chapels carved from salt, 135m underground."]],
-  WAW: [["Old Town Market Square, Warsaw","Old Town","Rebuilt brick-by-brick — a UNESCO story of defiance."],
+  WMI: [["Old Town Market Square, Warsaw","Old Town","Rebuilt brick-by-brick — a UNESCO story of defiance."],
         ["Łazienki Park","Łazienki Park","Peacocks, palaces and free Chopin concerts in summer."],
         ["Warsaw Uprising Museum","Uprising Museum","Moving, brilliant telling of 1944."],
         ["Palace of Culture and Science","Palace of Culture","Love it or hate it — the view deck settles it."]],
@@ -2565,7 +2565,7 @@ const CITY_TRANSPORT = {
   BER:{options:[{mode:"🚆 FEX / S-Bahn",detail:"to centre (ABC ticket)",time:"~30–45 min",price:"~€4.40",best:true},{mode:"🚕 Taxi",detail:"to centre",time:"~40 min",price:"~€50"}],around:"U-Bahn, S-Bahn, trams and buses (BVG). An AB single ~€3.50; day ticket ~€9.90.",family:"Up to 3 kids (6–14) travel cheap; under-6s free. A day ticket covers the family.",official:{name:"BVG Berlin",url:"https://www.bvg.de/en"}},
   BUD:{options:[{mode:"🚌 Bus 100E",detail:"direct to Deák tér",time:"~40 min",price:"~€4.40",best:true},{mode:"🚌 200E + Metro M3",detail:"cheaper combo",time:"~50 min",price:"~€1.50"},{mode:"🚕 Taxi (Főtaxi)",detail:"to centre",time:"~30 min",price:"~€25"}],around:"Metro (4 lines), trams and buses (BKK). A single ~€1; 24h travelcard ~€6.50. Tram 2 is scenic.",family:"Under-6s travel free; a 24h group travelcard suits families.",official:{name:"BKK Budapest",url:"https://bkk.hu/en/"}},
   KRK:{options:[{mode:"🚆 Train",detail:"to Kraków Główny",time:"~20 min",price:"~12 PLN",best:true},{mode:"🚌 Bus 252/208",detail:"to centre",time:"~40 min",price:"~6 PLN"},{mode:"🚕 Taxi",detail:"to centre",time:"~25 min",price:"~90 PLN"}],around:"Trams and buses (MPK). A 20-min ticket ~4 PLN; the Old Town is pedestrian-friendly.",family:"Under-4s free; family day tickets available on MPK.",official:{name:"MPK Kraków",url:"https://www.mpk.krakow.pl/en/"}},
-  WAW:{options:[{mode:"🚆 Train S2/S3",detail:"to centre",time:"~25 min",price:"~4.40 PLN",best:true},{mode:"🚌 Bus 175",detail:"to centre",time:"~35 min",price:"~4.40 PLN"},{mode:"🚕 Taxi",detail:"to centre",time:"~25 min",price:"~50 PLN"}],around:"Metro (2 lines), trams and buses (ZTM). A 20-min ticket ~3.40 PLN; 24h ~15 PLN.",family:"Under-7s travel free; a family weekend ticket is great value.",official:{name:"ZTM Warsaw",url:"https://www.wtp.waw.pl/en/"}},
+  WMI:{options:[{mode:"🚆 Shuttle + KM train",detail:"Modlin station to Warsaw Centralna",time:"~1 hr",price:"~25 PLN",best:true},{mode:"🚌 Direct coach",detail:"to centre (Flixbus/Contbus)",time:"~1 hr",price:"varies"},{mode:"🚕 Taxi",detail:"to centre (~35 km)",time:"~40 min",price:"~160 PLN"}],around:"Metro (2 lines), trams and buses (ZTM). A 20-min ticket ~3.40 PLN; 24h ~15 PLN. Modlin is a budget airport ~35 km out, so allow extra time.",family:"Under-7s travel free; a family weekend ticket is great value.",official:{name:"ZTM Warsaw",url:"https://www.wtp.waw.pl/en/"}},
   ZRH:{options:[{mode:"🚆 Train",detail:"to main station",time:"~10 min",price:"~€7",best:true},{mode:"🚕 Taxi",detail:"to centre",time:"~20 min",price:"~€55"}],around:"Trams, buses and S-Bahn (ZVV). Short hops ~€2.70; a 24h pass ~€8.80. The centre is walkable.",family:"Children 6–16 travel half-price; under-6s free with an adult.",official:{name:"ZVV Zurich",url:"https://www.zvv.ch/zvv/en/home.html"}},
   GVA:{options:[{mode:"🚆 Train (free ticket)",detail:"grab the free ticket at the airport",time:"~10 min",price:"Free",best:true},{mode:"🚕 Taxi",detail:"to centre",time:"~15 min",price:"~€35"}],around:"Trams, buses and trains (TPG). Hotels give a free Geneva Transport Card for your whole stay.",family:"The free airport ticket + hotel transport card make Geneva very family-friendly.",official:{name:"TPG Geneva",url:"https://www.tpg.ch/en"}},
   MLA:{options:[{mode:"🚌 Bus X4",detail:"to Valletta",time:"~30 min",price:"~€2",best:true},{mode:"🚕 Taxi (fixed)",detail:"to centre",time:"~20 min",price:"~€15"}],around:"Buses (Tallinja) cover the islands; a single ~€2 (2h). No rail — buses or ferries between towns.",family:"A Tallinja Explore card gives unlimited family travel for a week.",official:{name:"Tallinja Malta",url:"https://www.publictransport.com.mt/"}},

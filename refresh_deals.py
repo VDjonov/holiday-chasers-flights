@@ -73,7 +73,7 @@ DESTINATIONS = [
     ("MUC", "Munich",     "Germany", ("ORK", "DUB")),
     ("BUD", "Budapest",   "Hungary", ("DUB",)),
     ("KRK", "Krakow",     "Poland", ("DUB",)),
-    ("WAW", "Warsaw",     "Poland", ("DUB",)),
+    ("WMI", "Warsaw",     "Poland", ("DUB",)),   # Modlin — Ryanair; Chopin (WAW) is Aer Lingus only, not covered by the fare API
     ("PRG", "Prague",     "Czech Republic", ("ORK", "DUB")),
     ("EDI", "Edinburgh",  "Scotland", ("ORK", "DUB")),
     ("STN", "London",     "England", ("ORK", "DUB")),
@@ -278,7 +278,6 @@ CORK_SCHEDULE = {
 # captures Jul 2026). Dublin's other 35 routes are daily-or-aggregated —
 # fixed anchors + rescue probe are correct for them, so they're omitted.
 DUB_SCHEDULE = {
-    "WAW": [({6, 0, 2, 4}, "2026-03-29", "2026-10-24")],   # Sun Mon Wed Fri
     "RHO": [({1, 2, 5}, "2026-03-29", "2026-10-24")],      # Tue Wed Sat
     "ZAD": [({1, 5}, "2026-03-29", "2026-10-24")],         # Tue Sat
 }
