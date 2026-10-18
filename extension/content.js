@@ -19,8 +19,10 @@
   }, 2500);
 
   box.querySelector("#hc-fill").onclick = async () => {
-    const dlg = document.querySelector('[role="dialog"]');
-    const tb = (dlg || document).querySelector('[role="textbox"][contenteditable="true"]');
+    const vis = e => e.getClientRects().length > 0;
+    const eds = [...document.querySelectorAll('[contenteditable="true"], [contenteditable="plaintext-only"], [role="textbox"]')].filter(vis);
+    const tb = eds.find(e => e.closest('[role="dialog"]')) || eds.find(e => /mind|say something|write/i.test((e.getAttribute("aria-label") || "") + (e.getAttribute("aria-placeholder") || "") + (e.textContent || ""))) || eds[0];
+    const dlg = (tb && tb.closest('[role="dialog"]')) || document;
     if (!tb) return msg("Composer not open yet. Click \"What's on your mind?\" first.");
     tb.focus();
     document.execCommand("selectAll");
@@ -32,11 +34,11 @@
       const blob = await (await fetch(r.dataUrl)).blob();
       const file = new File([blob], pending.id + ".png", { type: "image/png" });
       const dt = new DataTransfer(); dt.items.add(file);
-      let inp = (dlg || document).querySelector('input[type="file"][accept*="image"]');
+      let inp = dlg.querySelector('input[type="file"][accept*="image"]');
       if (!inp) {
-        const ph = [...(dlg || document).querySelectorAll('[aria-label]')].find(e => /photo\/video/i.test(e.getAttribute("aria-label")));
+        const ph = [...dlg.querySelectorAll('[aria-label]')].find(e => /photo\/video/i.test(e.getAttribute("aria-label")));
         if (ph) { ph.click(); await new Promise(r => setTimeout(r, 800)); }
-        inp = (dlg || document).querySelector('input[type="file"][accept*="image"]');
+        inp = dlg.querySelector('input[type="file"][accept*="image"]');
       }
       if (!inp) throw new Error("no upload field");
       inp.files = dt.files; inp.dispatchEvent(new Event("change", { bubbles: true }));
