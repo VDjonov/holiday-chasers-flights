@@ -6,7 +6,7 @@
       "id": "hero_ork",
       "type": "hero",
       "airport": "ORK",
-      "caption": "From Cork: Faro from €37 return per person, Fri 4 – Fri 11 Dec. Book with the airline in a couple of clicks. holidaychasers.ie/?dest=FAO&from=ORK&utm_source=facebook&utm_medium=social",
+      "caption": "✈️ Return flights from Cork to Faro from €37 per person, Fri 4 – Fri 11 Dec. Flights only. Book with the airline in a couple of clicks. holidaychasers.ie/?dest=FAO&from=ORK&utm_source=facebook&utm_medium=social",
       "link": "holidaychasers.ie/?dest=FAO&from=ORK&utm_source=facebook&utm_medium=social",
       "poster": "social/out/hero_ork.png",
       "deals": [
@@ -28,7 +28,7 @@
       "id": "hero_dub",
       "type": "hero",
       "airport": "DUB",
-      "caption": "From Dublin: Faro from €38 return per person, Sat 5 – Sat 12 Dec. Book with the airline in a couple of clicks. holidaychasers.ie/?dest=FAO&from=DUB&utm_source=facebook&utm_medium=social",
+      "caption": "✈️ Return flights from Dublin to Faro from €38 per person, Sat 5 – Sat 12 Dec. Flights only. Book with the airline in a couple of clicks. holidaychasers.ie/?dest=FAO&from=DUB&utm_source=facebook&utm_medium=social",
       "link": "holidaychasers.ie/?dest=FAO&from=DUB&utm_source=facebook&utm_medium=social",
       "poster": "social/out/hero_dub.png",
       "deals": [
@@ -50,7 +50,7 @@
       "id": "sun_ork",
       "type": "cards",
       "airport": "ORK",
-      "caption": "Winter sun from Cork: Fuerteventura from €53 return per person, Sun 22 – Sun 29 Nov. Or Lanzarote from €59 (Sat 12 – Sat 19 Dec). Fares change, so check the live deal: holidaychasers.ie/?dest=FUE&from=ORK&utm_source=facebook&utm_medium=social",
+      "caption": "✈️ Winter sun, return flights from Cork: Fuerteventura from €53 per person, Sun 22 – Sun 29 Nov. Or Lanzarote from €59 (Sat 12 – Sat 19 Dec). Flights only. Fares change, so check the live deal: holidaychasers.ie/?dest=FUE&from=ORK&utm_source=facebook&utm_medium=social",
       "link": "holidaychasers.ie/?dest=FUE&from=ORK&utm_source=facebook&utm_medium=social",
       "poster": "social/out/sun_ork.png",
       "deals": [
@@ -83,7 +83,7 @@
       "id": "week_ork",
       "type": "cards",
       "airport": "ORK",
-      "caption": "A week away from Cork: Edinburgh from €30 return per person, Sat 31 Oct – Sat 7 Nov. Or Manchester from €30 (Tue 3 – Tue 10 Nov). Fares change, so check the live deal: holidaychasers.ie/?dest=EDI&from=ORK&utm_source=facebook&utm_medium=social",
+      "caption": "✈️ A week away, return flights from Cork: Edinburgh from €30 per person, Sat 31 Oct – Sat 7 Nov. Or Manchester from €30 (Tue 3 – Tue 10 Nov). Flights only. Fares change, so check the live deal: holidaychasers.ie/?dest=EDI&from=ORK&utm_source=facebook&utm_medium=social",
       "link": "holidaychasers.ie/?dest=EDI&from=ORK&utm_source=facebook&utm_medium=social",
       "poster": "social/out/week_ork.png",
       "deals": [
@@ -116,7 +116,7 @@
       "id": "sun_dub",
       "type": "cards",
       "airport": "DUB",
-      "caption": "Winter sun from Dublin: Malaga from €48 return per person, Sat 5 – Sat 12 Dec. Or Lanzarote from €49 (Sat 21 – Sat 28 Nov). Fares change, so check the live deal: holidaychasers.ie/?dest=AGP&from=DUB&utm_source=facebook&utm_medium=social",
+      "caption": "✈️ Winter sun, return flights from Dublin: Malaga from €48 per person, Sat 5 – Sat 12 Dec. Or Lanzarote from €49 (Sat 21 – Sat 28 Nov). Flights only. Fares change, so check the live deal: holidaychasers.ie/?dest=AGP&from=DUB&utm_source=facebook&utm_medium=social",
       "link": "holidaychasers.ie/?dest=AGP&from=DUB&utm_source=facebook&utm_medium=social",
       "poster": "social/out/sun_dub.png",
       "deals": [
@@ -149,7 +149,7 @@
       "id": "week_dub",
       "type": "cards",
       "airport": "DUB",
-      "caption": "A week away from Dublin: Manchester from €33 return per person, Sat 7 – Sat 14 Nov. Or London from €33 (Sat 28 Nov – Sat 5 Dec). Fares change, so check the live deal: holidaychasers.ie/?dest=MAN&from=DUB&utm_source=facebook&utm_medium=social",
+      "caption": "✈️ A week away, return flights from Dublin: Manchester from €33 per person, Sat 7 – Sat 14 Nov. Or London from €33 (Sat 28 Nov – Sat 5 Dec). Flights only. Fares change, so check the live deal: holidaychasers.ie/?dest=MAN&from=DUB&utm_source=facebook&utm_medium=social",
       "link": "holidaychasers.ie/?dest=MAN&from=DUB&utm_source=facebook&utm_medium=social",
       "poster": "social/out/week_dub.png",
       "deals": [

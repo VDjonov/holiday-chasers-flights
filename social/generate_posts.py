@@ -9,7 +9,7 @@ Run after refresh_deals.py. Needs Playwright + Chromium to render posters
 (pip install playwright && playwright install chromium).
 Nothing is posted automatically: the Chrome extension (or you) posts.
 """
-import json, os, datetime as dt, html, shutil, hashlib
+import json, os, re, datetime as dt, html, shutil, hashlib, io
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(ROOT)
@@ -17,6 +17,7 @@ CACHE = os.path.join(REPO, "deals_cache.json")
 OUT = os.path.join(ROOT, "out")
 BUILD = os.path.join(ROOT, "_build")
 SITE = "holidaychasers.ie"
+CITIES = os.path.join(ROOT, "assets", "cities")   # <CODE>.jpg; drop your own photo here to override
 
 ORIGIN = {"ORK": "Cork", "DUB": "Dublin"}
 SUN = {"ACE", "LPA", "FUE", "TFS", "FAO", "AGP", "ALC", "PMI", "MLA", "SVQ", "VLC"}
@@ -79,6 +80,56 @@ def link(c):
     return f"{SITE}/?dest={c['code']}&from={c['ap']}&utm_source=facebook&utm_medium=social"
 
 
+# ── city photos ─────────────────────────────────────────────────────────────
+def wiki_titles():
+    """code -> Wikipedia article title, read from app.js so there is one source of truth."""
+    try:
+        js = open(os.path.join(REPO, "app.js"), encoding="utf-8").read()
+        block = js[js.index("const CITY_WIKI"):]
+        block = block[:block.index("};")]
+        return dict(re.findall(r'([A-Z]{3}):"([^"]+)"', block))
+    except Exception:
+        return {}
+
+
+def city_photo(code, city):
+    """Path to a cached photo for this destination, downloading from Wikipedia once. None if unavailable."""
+    path = os.path.join(CITIES, f"{code}.jpg")
+    if os.path.exists(path):
+        return path
+    try:
+        import requests
+        from PIL import Image
+        title = wiki_titles().get(code) or city.replace(" ", "_")
+        hdr = {"User-Agent": "HolidayChasersBot/1.0 (https://holidaychasers.ie; info@holidaychasers.ie)"}
+        r = requests.get("https://en.wikipedia.org/api/rest_v1/page/summary/" + requests.utils.quote(title, safe="_,()"),
+                         headers=hdr, timeout=20)
+        r.raise_for_status()
+        j = r.json()
+        src = (j.get("thumbnail") or {}).get("source") or (j.get("originalimage") or {}).get("source")
+        if not src:
+            return None
+        src = re.sub(r"/\d+px-", "/1280px-", src)
+        img = requests.get(src, headers=hdr, timeout=30)
+        img.raise_for_status()
+        im = Image.open(io.BytesIO(img.content)).convert("RGB")
+        if im.width < 700:                       # too small to look good full-bleed
+            return None
+        im.thumbnail((1280, 1280))
+        os.makedirs(CITIES, exist_ok=True)
+        im.save(path, quality=82, optimize=True)
+        print("  photo:", code, title, im.size)
+        return path
+    except Exception as ex:
+        print("  no photo for", code, "-", ex)
+        return None
+
+
+def bg_url(code, city):
+    p = city_photo(code, city)
+    return None if not p else "file://" + p
+
+
 # ── captions ────────────────────────────────────────────────────────────────
 def pickv(seed, options):
     h = int(hashlib.md5(seed.encode()).hexdigest(), 16)
@@ -88,20 +139,20 @@ def pickv(seed, options):
 def caption_hero(c, today):
     o = ORIGIN[c["ap"]]
     tag = pickv(c["code"] + str(today), [
-        "Direct, return, per person.",
+        "Direct flights, per-person fares.",
         "Real fare, checked this week.",
         "Book with the airline in a couple of clicks.",
     ])
-    return (f"From {o}: {c['city']} from €{c['price']} return per person, {fmt_range(c['dep'], c['ret'])}. "
-            f"{tag} {link(c)}")
+    return (f"✈️ Return flights from {o} to {c['city']} from €{c['price']} per person, {fmt_range(c['dep'], c['ret'])}. "
+            f"Flights only. {tag} {link(c)}")
 
 
 def caption_cards(label, cs, today):
     a, b = cs[0], cs[1]
     o = ORIGIN[a["ap"]]
-    return (f"{label} from {o}: {a['city']} from €{a['price']} return per person, {fmt_range(a['dep'], a['ret'])}. "
+    return (f"✈️ {label}, return flights from {o}: {a['city']} from €{a['price']} per person, {fmt_range(a['dep'], a['ret'])}. "
             f"Or {b['city']} from €{b['price']} ({fmt_range(b['dep'], b['ret'])}). "
-            f"Fares change, so check the live deal: {link(a)}")
+            f"Flights only. Fares change, so check the live deal: {link(a)}")
 
 
 # ── posters ─────────────────────────────────────────────────────────────────
@@ -126,14 +177,25 @@ body{width:1080px;height:1080px;background:#0A1B2E;font-family:Inter,sans-serif;
 .card .c{font:700 58px/1.1 Fraunces,serif}.card .c div{font:400 30px Inter;color:#E4D2A0;margin-top:8px}
 .card .p{font:700 120px/1 Fraunces,serif;color:#E4D2A0;text-align:right}.card .p div{font:400 24px Inter;color:#FBF8F1;margin-top:4px}
 .h{font:700 78px/1.08 Fraunces,serif;margin-top:20px}
+.photo{position:absolute;left:0;right:0;top:210px;bottom:0;background-size:cover;background-position:center}
+.shade{position:absolute;left:0;right:0;top:210px;bottom:0;background:linear-gradient(180deg,rgba(10,27,46,.55) 0%,rgba(10,27,46,.35) 35%,rgba(10,27,46,.88) 78%,rgba(10,27,46,.96) 100%)}
+.main,.foot{z-index:2}
+.pill i{font-style:normal;color:#C9A24B}
+.badge{display:inline-block;align-self:flex-start;margin-top:22px;font:600 28px Inter;letter-spacing:.1em;text-transform:uppercase;background:#C9A24B;color:#0A1B2E;border-radius:50px;padding:12px 28px}
+.card{position:relative;overflow:hidden;background-size:cover;background-position:center}
+.card:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,27,46,.94) 0%,rgba(10,27,46,.7) 55%,rgba(10,27,46,.5) 100%)}
+.card>*{position:relative}
+.credit{font:400 17px Inter;color:#E4D2A0;opacity:.75;position:absolute;right:64px;bottom:12px;z-index:2}
 """
 
 
-def page(note, ctx, body):
+def page(note, ctx, body, bg=None):
+    photo = f"<div class=photo style=\"background-image:url('{bg}')\"></div><div class=shade></div>" if bg else ""
+    credit = "<div class=credit>Photo: Wikimedia Commons</div>" if bg else ""
     return (f"<!doctype html><meta charset=utf-8><style>{CSS}</style><body>"
-            f"<div class=top><img src=../assets/logo.png><div class=pill>{html.escape(ctx)}</div></div>"
-            f"<div class=main>{body}</div>"
-            f"<div class=foot><b>{SITE}</b><span>{html.escape(note)}</span></div></body>")
+            f"<div class=top><img src=../assets/logo.png><div class=pill><i>✈</i> Flights from {html.escape(ctx)}</div></div>"
+            f"{photo}<div class=main>{body}</div>"
+            f"<div class=foot><b>{SITE}</b><span>{html.escape(note)}</span></div>{credit}</body>")
 
 
 def e(s):
@@ -144,19 +206,25 @@ def poster_hero(c, note):
     o = ORIGIN[c["ap"]]
     how = "direct" if c["stops"] == 0 else f"{c['stops']} stop"
     airline = f" · {c['airline']} {how}" if c["airline"] else f" · {how}"
-    body = (f"<div class=eyebrow>{e(o)} to {e(c['city'])}{e(airline)}</div>"
+    body = (f"<div class=eyebrow>Return flight{e(airline)}</div>"
             f"<div class=route>{e(o)} <span>→</span> {e(c['city'])}</div>"
-            f"<div class=price>€{c['price']}<small>per person<br>return</small></div>"
-            f"<div class=dates>{e(fmt_range(c['dep'], c['ret']))}</div>")
-    return page(note, o, body)
+            f"<div class=price>€{c['price']}<small>per person<br>return flight</small></div>"
+            f"<div class=dates>{e(fmt_range(c['dep'], c['ret']))}</div>"
+            f"<div class=badge>✈ Flights only</div>")
+    return page(note, o, body, bg_url(c["code"], c["city"]))
 
 
 def poster_cards(eyebrow, headline_a, headline_b, cs, note):
-    cards = "".join(
-        f"<div class=card><div class=c>{e(c['city'])}<div>{e(fmt_range(c['dep'], c['ret']))}</div></div>"
-        f"<div class=p>€{c['price']}<div>per person return</div></div></div>" for c in cs)
-    body = f"<div class=eyebrow>{e(eyebrow)}</div><div class=h>{e(headline_a)}<br><span>from €{cs[0]['price']}</span></div>{cards}"
-    return page(note, ORIGIN[cs[0]["ap"]], body)
+    cards, any_photo = "", False
+    for c in cs:
+        u = bg_url(c["code"], c["city"]); any_photo |= bool(u)
+        st = f" style=\"background-image:url('{u}')\"" if u else ""
+        cards += (f"<div class=card{st}><div class=c>{e(c['city'])}<div>{e(fmt_range(c['dep'], c['ret']))}</div></div>"
+                  f"<div class=p>€{c['price']}<div>per person · return flight</div></div></div>")
+    body = (f"<div class=eyebrow>{e(eyebrow)}</div><div class=h>{e(headline_a)}<br><span>flights from €{cs[0]['price']}</span></div>"
+            f"{cards}<div class=badge>✈ Flights only · no hotel</div>")
+    html_ = page(note, ORIGIN[cs[0]["ap"]], body)
+    return html_.replace("</body>", "<div class=credit>Photos: Wikimedia Commons</div></body>") if any_photo else html_
 
 
 # ── main ────────────────────────────────────────────────────────────────────
@@ -164,7 +232,7 @@ def build(today=None):
     cache = json.load(open(CACHE, encoding="utf-8"))
     today = today or dt.date.today()
     scanned = cache.get("updated_utc", "")[:10]
-    note = "Direct · return · per person · scanned " + (d(scanned).strftime("%-d %b") if scanned else "recently")
+    note = "Return flights only · per person · scanned " + (d(scanned).strftime("%-d %b") if scanned else "recently")
     cands = candidates(cache, today)
 
     posts, pages = [], {}
