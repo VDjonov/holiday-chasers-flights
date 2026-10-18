@@ -95,7 +95,7 @@ def wiki_titles():
 
 
 # Wikipedia's lead image for an island/region is often a satellite shot. Use a nicer article for these.
-PHOTO_TITLE = {"ACE": ["Timanfaya_National_Park"], "FUE": ["Corralejo", "Corralejo_Natural_Park", "Playa_de_Sotavento"],
+PHOTO_TITLE = {"ACE": ["Timanfaya_National_Park"], "FUE": ["Corralejo", "Fuerteventura", "Corralejo_Natural_Park", "Playa_de_Sotavento", "La_Oliva", "Puerto_del_Rosario", "Betancuria", "Cotillo", "Jandía_Peninsula", "Costa_Calma", "Morro_Jable"],
                "TFS": ["Teide_National_Park", "Mount_Teide"]}
 
 
