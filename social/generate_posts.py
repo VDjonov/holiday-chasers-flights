@@ -92,6 +92,10 @@ def wiki_titles():
         return {}
 
 
+# Wikipedia's lead image for an island/region is often a satellite shot. Use a nicer article for these.
+PHOTO_TITLE = {"ACE": "Timanfaya_National_Park", "FUE": "Corralejo", "TFS": "Teide_National_Park"}
+
+
 def city_photo(code, city):
     """Path to a cached photo for this destination, downloading from Wikipedia once. None if unavailable."""
     path = os.path.join(CITIES, f"{code}.jpg")
@@ -100,7 +104,7 @@ def city_photo(code, city):
     try:
         import requests
         from PIL import Image
-        title = wiki_titles().get(code) or city.replace(" ", "_")
+        title = PHOTO_TITLE.get(code) or wiki_titles().get(code) or city.replace(" ", "_")
         hdr = {"User-Agent": "HolidayChasersBot/1.0 (https://holidaychasers.ie; info@holidaychasers.ie)"}
         r = requests.get("https://en.wikipedia.org/api/rest_v1/page/summary/" + requests.utils.quote(title, safe="_,()"),
                          headers=hdr, timeout=20)
@@ -175,15 +179,15 @@ body{width:1080px;height:1080px;background:#0A1B2E;font-family:Inter,sans-serif;
 .foot b{font:700 34px Fraunces,serif;color:#FBF8F1}
 .card{background:#1C3148;border-radius:26px;padding:26px 40px;display:flex;justify-content:space-between;align-items:center;margin-top:22px}
 .card .c{font:700 58px/1.1 Fraunces,serif}.card .c div{font:400 30px Inter;color:#E4D2A0;margin-top:8px}
-.card .p{font:700 120px/1 Fraunces,serif;color:#E4D2A0;text-align:right}.card .p div{font:400 24px Inter;color:#FBF8F1;margin-top:4px}
+.card .p{font:700 120px/1 Fraunces,serif;color:#E4D2A0;text-align:right;text-shadow:0 2px 14px rgba(10,27,46,.85)}.card .p div{font:400 24px Inter;color:#FBF8F1;margin-top:4px}
 .h{font:700 78px/1.08 Fraunces,serif;margin-top:20px}
 .photo{position:absolute;left:0;right:0;top:210px;bottom:0;background-size:cover;background-position:center}
 .shade{position:absolute;left:0;right:0;top:210px;bottom:0;background:linear-gradient(180deg,rgba(10,27,46,.55) 0%,rgba(10,27,46,.35) 35%,rgba(10,27,46,.88) 78%,rgba(10,27,46,.96) 100%)}
 .main,.foot{z-index:2}
 .pill i{font-style:normal;color:#C9A24B}
 .badge{display:inline-block;align-self:flex-start;margin-top:22px;font:600 28px Inter;letter-spacing:.1em;text-transform:uppercase;background:#C9A24B;color:#0A1B2E;border-radius:50px;padding:12px 28px}
-.card{position:relative;overflow:hidden;background-size:cover;background-position:center}
-.card:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,27,46,.94) 0%,rgba(10,27,46,.7) 55%,rgba(10,27,46,.5) 100%)}
+.card{position:relative;overflow:hidden;background-size:cover;background-position:center;min-height:200px}
+.card:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,27,46,.92) 0%,rgba(10,27,46,.72) 38%,rgba(10,27,46,.18) 78%,rgba(10,27,46,.3) 100%)}
 .card>*{position:relative}
 .credit{font:400 17px Inter;color:#E4D2A0;opacity:.75;position:absolute;right:64px;bottom:12px;z-index:2}
 """
