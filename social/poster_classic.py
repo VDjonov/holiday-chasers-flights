@@ -73,7 +73,7 @@ def hero(fmt, theme, c, origin, photo, note, dates, how, slogan):
         return hero_ivory(fmt, c, origin, photo, note, dates, airline, slogan)
     body = (f"<div class=eyebrow>Return flight{e(airline)}</div><div class=route>{e(origin)} <span>→</span> {e(c['city'])}</div>"
             f"<div class=price>€{c['price']}<small>per person<br>return flight</small></div><div class=dates>{e(dates)}</div>")
-    return _shell(fmt, theme, origin, body, note, slogan, photo, "Photo: Wikimedia Commons" if photo else "")
+    return _shell(fmt, theme, origin, body, note, slogan, photo, "Book your trip easy")
 
 
 def cards(fmt, theme, cs, origin, photos, note, sub, slogan):
@@ -83,7 +83,7 @@ def cards(fmt, theme, cs, origin, photos, note, sub, slogan):
         out += (f"<div class=card{st}><div class=c>{e(c['city'])}<div>{e(c['dates'])}</div></div>"
                 f"<div class=p>€{c['price']}<div>per person · return flight</div></div></div>")
     body = f"<div class=h>{e(sub)}<br><span>flights from €{cs[0]['price']}</span></div>{out}"
-    credit = "Photos: Wikimedia Commons" if any(photos) else ""
+    credit = "Book your trip easy"
     h = _shell(fmt, theme, origin, body, note, slogan, None, credit)
     if theme == "ivory":
         h = h.replace("</style>", ".main{color:#0A1B2E}.main .card{color:#FBF8F1}</style>", 1)

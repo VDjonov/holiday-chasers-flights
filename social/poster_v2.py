@@ -121,7 +121,7 @@ def hero(fmt, c, origin, photo, note, dates, how, kind_label, slogan):
             f'<div class=in><div class=eb>{e(eb)}</div><div class=city>{e(c["city"])}</div>'
             f'<div class=pr><span class=f>from</span><span class=n>€{c["price"]}</span><span class=r>return<br>per person</span></div></div></div>')
     date = f'<div class=date style="top:{L["card_y"]+L["card_h"]-34}px"><span>{ICON["cal"]}{e(dates)}</span></div>'
-    n = note + (" · Photo: Wikimedia Commons" if photo else "")
+    n = note + " · Book your trip easy"
     html_, _ = _shell(fmt, photo, _banner(fmt, origin) + _slogan_pill(fmt, slogan, L["ban_y"] + L["ban_h"] + 12) + card + date +
                       _panel(fmt, True, n, ""), n)
     return html_
@@ -161,7 +161,7 @@ def cards(fmt, cs, origin, photos, note, sub, slogan):
     extra = (f".panel{{top:{panel_y}px!important}}.cta{{top:{cta_y}px!important;height:{104 if story else 76}px!important}}"
              f".small{{top:{cta_y+(130 if story else 90)}px!important}}.feats{{display:none}}")
     photo = photos[0]
-    n = note + (" · Photos: Wikimedia Commons" if any(photos) else "")
+    n = note + " · Book your trip easy"
     inner = _banner(fmt, origin) + subhtml + out + _panel(fmt, False, n, "")
     # sky backdrop (no full-bleed photo for the two-card layout)
     h, credit = _shell(fmt, None, inner, note)

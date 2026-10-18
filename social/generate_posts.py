@@ -160,7 +160,7 @@ def caption_hero(c, today):
         "Book with the airline in a couple of clicks.",
     ])
     return (f"✈️ Return flights from {o} to {c['city']} from €{c['price']} per person, {fmt_range(c['dep'], c['ret'])}. "
-            f"The price is for the flight. {tag} Plan the rest on {SITE}: {link(c)}")
+            f"The price is for the flight. {tag} Plan the rest on {SITE}: {link(c)} (Photo: Wikimedia Commons)")
 
 
 def caption_cards(label, cs, today):
@@ -168,7 +168,7 @@ def caption_cards(label, cs, today):
     o = ORIGIN[a["ap"]]
     return (f"✈️ {label}, return flights from {o}: {a['city']} from €{a['price']} per person, {fmt_range(a['dep'], a['ret'])}. "
             f"Or {b['city']} from €{b['price']} ({fmt_range(b['dep'], b['ret'])}). "
-            f"Prices are for the flights. Fares change, so check the live deal and plan the rest: {link(a)}")
+            f"Prices are for the flights. Fares change, so check the live deal and plan the rest: {link(a)} (Photos: Wikimedia Commons)")
 
 
 # ── posters ─────────────────────────────────────────────────────────────────
