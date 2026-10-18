@@ -113,7 +113,7 @@ jobs:
         run: |
           git config user.name "deal-bot"
           git config user.email "deal-bot@users.noreply.github.com"
-          git add deals_cache.json price_history.json destinations sitemap.xml social/posts.json social/out social/assets/cities
+          git add deals_cache.json price_history.json destinations sitemap.xml social/posts.json social/out social/card social/p social/assets/cities
           git commit -m "Refresh flight deals (FlightAPI, per-person)" || echo "No changes to commit"
           git fetch origin main
           git merge -X ours --no-edit origin/main

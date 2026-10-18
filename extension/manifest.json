@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Holiday Chasers Post Helper",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Pick a deal post from holidaychasers.ie and drop its caption and poster into the Facebook composer. You press Post.",
   "permissions": ["storage", "clipboardWrite", "downloads"],
   "host_permissions": ["https://holidaychasers.ie/*", "https://www.facebook.com/*"],

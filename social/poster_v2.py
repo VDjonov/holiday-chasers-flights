@@ -1,6 +1,7 @@
 """Poster layouts v2: bright full-bleed photo, brush banner, torn white price card, navy footer panel.
 Two formats: feed (1080x1080) and story (1080x1920, key content kept clear of the top/bottom UI zones)."""
 import html
+from parts import plan_row, BTN, slogan_fs
 
 NAVY, GOLD, GOLD2, IVORY = "#0A1B2E", "#C9A24B", "#E4D2A0", "#FBF8F1"
 SITE = "holidaychasers.ie"
@@ -102,12 +103,18 @@ def _banner(fmt, origin):
 
 def _panel(fmt, feats, note, credit):
     L = LAY[fmt]
-    fs = "".join(f"<div class=feat><i>{ICON[i]}</i>{e(t)}</div>" for i, t in feats)
-    return (f'<div class=panel></div><div class=feats>{fs}</div>'
-            f'<div class=cta>Visit {SITE} <span>→</span></div><div class=small>{e(note)}{credit}</div>')
+    fs = plan_row("#fff", 27 if fmt == "feed" else 32, 56 if fmt == "feed" else 72) if feats else ""
+    return (f'<div class=panel></div><div class=feats style="gap:26px">{fs}</div>'
+            f'<div class=cta>{BTN}</div><div class=small>{e(note)}{credit}</div>')
 
 
-def hero(fmt, c, origin, photo, note, dates, how, kind_label):
+def _slogan_pill(fmt, text, top):
+    fs = slogan_fs(text, 40 if fmt == "feed" else 56, 820 if fmt == "feed" else 900)
+    return (f'<div style="position:absolute;left:0;right:0;top:{top}px;text-align:center;z-index:6"><span style="display:inline-block;'
+            f'background:#fff;color:{NAVY};font:900 italic {fs}px Fraunces,serif;padding:10px 30px;border-radius:40px;box-shadow:0 4px 14px rgba(10,27,46,.3)">{e(text)}</span></div>')
+
+
+def hero(fmt, c, origin, photo, note, dates, how, kind_label, slogan):
     L = LAY[fmt]
     eb = f"Return flight · {c['airline']} {how}" if c.get("airline") else f"Return flight · {how}"
     card = (f'<div class=card>{torn(L["card_w"], L["card_h"], "#fff", "c"+fmt, scale=14, freq=.03, seed=11)}'
@@ -115,12 +122,12 @@ def hero(fmt, c, origin, photo, note, dates, how, kind_label):
             f'<div class=pr><span class=f>from</span><span class=n>€{c["price"]}</span><span class=r>return<br>per person</span></div></div></div>')
     date = f'<div class=date style="top:{L["card_y"]+L["card_h"]-34}px"><span>{ICON["cal"]}{e(dates)}</span></div>'
     n = note + (" · Photo: Wikimedia Commons" if photo else "")
-    html_, _ = _shell(fmt, photo, _banner(fmt, origin) + card + date +
-                      _panel(fmt, [("plane", "Flights only"), ("cal", kind_label), ("tag", f"More {origin} deals")], n, ""), n)
+    html_, _ = _shell(fmt, photo, _banner(fmt, origin) + _slogan_pill(fmt, slogan, L["ban_y"] + L["ban_h"] + 12) + card + date +
+                      _panel(fmt, True, n, ""), n)
     return html_
 
 
-def cards(fmt, cs, origin, photos, note, sub):
+def cards(fmt, cs, origin, photos, note, sub, slogan):
     L = LAY[fmt]
     story = fmt == "story"
     ch = 380 if story else 250
@@ -144,7 +151,9 @@ def cards(fmt, cs, origin, photos, note, sub):
                 f'<div style="font:900 {120 if story else 88}px/.95 Fraunces,serif;color:#F2B722;-webkit-text-stroke:{5 if story else 4}px {NAVY};paint-order:stroke fill">€{c["price"]}</div>'
                 f'<div style="font:800 {24 if story else 19}px Inter;color:{NAVY}">return · per person</div></div></div>')
     subpos = (650 if story else 345)
-    subhtml = f'<div class=sub style="top:{subpos}px"><span>{e(sub)} · Flights only</span></div>'
+    sfs = slogan_fs(slogan, 34 if not story else 46, 640 if not story else 700)
+    subhtml = (f'<div class=sub style="top:{subpos}px"><span style="text-transform:none;letter-spacing:0;font:900 italic {sfs}px Fraunces,serif;padding:10px 26px">'
+               f'<b style="font:800 {19 if not story else 26}px Inter;letter-spacing:.12em;text-transform:uppercase;font-style:normal;color:#7a5d18;margin-right:14px">{e(sub)}</b>{e(slogan)}</span></div>')
     if story:
         panel_y, cta_y = 1560, 1620
     else:
@@ -153,7 +162,7 @@ def cards(fmt, cs, origin, photos, note, sub):
              f".small{{top:{cta_y+(130 if story else 90)}px!important}}.feats{{display:none}}")
     photo = photos[0]
     n = note + (" · Photos: Wikimedia Commons" if any(photos) else "")
-    inner = _banner(fmt, origin) + subhtml + out + _panel(fmt, [], n, "")
+    inner = _banner(fmt, origin) + subhtml + out + _panel(fmt, False, n, "")
     # sky backdrop (no full-bleed photo for the two-card layout)
     h, credit = _shell(fmt, None, inner, note)
     h = h.replace("</style>", extra + ".logo img{filter:drop-shadow(0 0 10px #fff) drop-shadow(0 0 26px #fff)}</style>")

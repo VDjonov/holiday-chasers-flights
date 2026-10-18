@@ -28,6 +28,7 @@
     document.execCommand("selectAll");
     document.execCommand("insertText", false, pending.caption);
     let done = "Caption filled. ";
+    if (pending.mode === "link") return msg(done + "Wait a few seconds for the preview card with the poster to appear, check it, then press Post. (Download the Story image from the extension if you want a Story.)");
     try {
       const r = await chrome.runtime.sendMessage({ type: "poster", path: pending.poster });
       if (!r.ok) throw new Error(r.error);
