@@ -9,9 +9,11 @@ Run after refresh_deals.py. Needs Playwright + Chromium to render posters
 (pip install playwright && playwright install chromium).
 Nothing is posted automatically: the Chrome extension (or you) posts.
 """
+import sys
 import json, os, re, datetime as dt, html, shutil, hashlib, io
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, ROOT)
 REPO = os.path.dirname(ROOT)
 CACHE = os.path.join(REPO, "deals_cache.json")
 OUT = os.path.join(ROOT, "out")
@@ -216,29 +218,20 @@ def e(s):
     return html.escape(str(s))
 
 
-def poster_hero(c, note):
+def posters_hero(c, note):
+    import poster_v2 as P
     o = ORIGIN[c["ap"]]
     how = "direct" if c["stops"] == 0 else f"{c['stops']} stop"
-    airline = f" · {c['airline']} {how}" if c["airline"] else f" · {how}"
-    body = (f"<div class=eyebrow>Return flight{e(airline)}</div>"
-            f"<div class=route>{e(o)} <span>→</span> {e(c['city'])}</div>"
-            f"<div class=price>€{c['price']}<small>per person<br>return flight</small></div>"
-            f"<div class=dates>{e(fmt_range(c['dep'], c['ret']))}</div>"
-            f"<div class=badge>✈ Flights only</div>")
-    return page(note, o, body, bg_url(c["code"], c["city"]))
+    label = "Weekend break" if c["kind"] == "weekend" else "A week away"
+    ph = bg_url(c["code"], c["city"])
+    return {f: P.hero(f, c, o, ph, note, fmt_range(c["dep"], c["ret"]), how, label) for f in ("feed", "story")}
 
 
-def poster_cards(eyebrow, headline_a, headline_b, cs, note):
-    cards, any_photo = "", False
-    for c in cs:
-        u = bg_url(c["code"], c["city"]); any_photo |= bool(u)
-        st = f" style=\"background-image:url('{u}')\"" if u else ""
-        cards += (f"<div class=card{st}><div class=c>{e(c['city'])}<div>{e(fmt_range(c['dep'], c['ret']))}</div></div>"
-                  f"<div class=p>€{c['price']}<div>per person · return flight</div></div></div>")
-    body = (f"<div class=eyebrow>{e(eyebrow)}</div><div class=h>{e(headline_a)}<br><span>flights from €{cs[0]['price']}</span></div>"
-            f"{cards}<div class=badge>✈ Flights only · no hotel</div>")
-    html_ = page(note, ORIGIN[cs[0]["ap"]], body)
-    return html_.replace("</body>", "<div class=credit>Photos: Wikimedia Commons</div></body>") if any_photo else html_
+def posters_cards(sub, cs, note):
+    import poster_v2 as P
+    cs2 = [dict(c, dates=fmt_range(c["dep"], c["ret"])) for c in cs]
+    photos = [bg_url(c["code"], c["city"]) for c in cs]
+    return {f: P.cards(f, cs2, ORIGIN[cs[0]["ap"]], photos, note, sub) for f in ("feed", "story")}
 
 
 # ── main ────────────────────────────────────────────────────────────────────
@@ -252,9 +245,9 @@ def build(today=None):
     posts, pages = [], {}
 
     def add(slot, kind, cs, caption, html_):
-        pages[slot] = html_
+        pages[slot] = html_["feed"]; pages[slot + "_story"] = html_["story"]
         posts.append(dict(id=slot, type=kind, airport=cs[0]["ap"], caption=caption, link=link(cs[0]),
-                          poster=f"social/out/{slot}.png", deals=cs,
+                          poster=f"social/out/{slot}.png", story=f"social/out/{slot}_story.png", deals=cs,
                           expires=min(c["dep"] for c in cs)))
 
     used = set()
@@ -262,7 +255,7 @@ def build(today=None):
         h = pick(cands, ap, ("weekend", "week"), 1, no_uk=True, direct=True)
         if h:
             c = h[0]; used.add((ap, c["code"]))
-            add(f"hero_{ap.lower()}", "hero", h, caption_hero(c, today), poster_hero(c, note))
+            add(f"hero_{ap.lower()}", "hero", h, caption_hero(c, today), posters_hero(c, note))
 
     for ap, slot, kinds, sun, label, eyebrow, headline in (
         ("ORK", "sun_ork", ("weekend", "week"), True, "Winter sun", "Cork winter sun", "Warm escapes,"),
@@ -275,7 +268,7 @@ def build(today=None):
         if len(cs) < 2:
             cs = pick(cands, ap, kinds, 2, sun=sun, direct=True)
         if len(cs) == 2:
-            add(slot, "cards", cs, caption_cards(label, cs, today), poster_cards(eyebrow, headline, "", cs, note))
+            add(slot, "cards", cs, caption_cards(label, cs, today), posters_cards(label, cs, note))
 
     os.makedirs(OUT, exist_ok=True); shutil.rmtree(BUILD, ignore_errors=True); os.makedirs(BUILD)
     for slot, h in pages.items():
@@ -305,7 +298,7 @@ def render(slots):
     with sync_playwright() as p:
         b = p.chromium.launch(executable_path=exe) if exe else p.chromium.launch()
         for s in slots:
-            pg = b.new_page(viewport={"width": 1080, "height": 1080})
+            pg = b.new_page(viewport={"width": 1080, "height": 1920 if s.endswith("_story") else 1080})
             pg.goto("file://" + os.path.join(BUILD, s + ".html"))
             pg.wait_for_timeout(500)
             pg.screenshot(path=os.path.join(OUT, s + ".png"))

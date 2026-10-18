@@ -5,7 +5,7 @@ fetch(BASE + "social/posts.json?t=" + Date.now()).then(r => r.json()).then(d => 
   s.textContent = "Generated " + (d.generated || "") + ". Pick one, then press Post yourself.";
   for (const p of d.posts) {
     const el = document.createElement("div"); el.className = "p";
-    el.innerHTML = `<img src="${BASE + p.poster}"><div><div class="t"></div><div class="c"></div><button>Use this post</button></div>`;
+    el.innerHTML = `<img src="${BASE + p.poster}"><div><div class="t"></div><div class="c"></div><button>Use this post</button> ${p.story ? '<button class="st">Download Story image</button>' : ""}</div>`;
     el.querySelector(".t").textContent = (p.airport ? p.airport + " · " : "") + p.id.replace(/_/g, " ");
     el.querySelector(".c").textContent = p.caption;
     el.querySelector("button").onclick = async () => {
@@ -16,6 +16,8 @@ fetch(BASE + "social/posts.json?t=" + Date.now()).then(r => r.json()).then(d => 
       else await chrome.tabs.create({ url: PAGE });
       window.close();
     };
+    const sb = el.querySelector(".st");
+    if (sb) sb.onclick = () => chrome.downloads.download({ url: BASE + p.story, filename: "HolidayChasers_story_" + p.id + ".png" });
     list.appendChild(el);
   }
 }).catch(e => s.textContent = "Could not load posts: " + e);
