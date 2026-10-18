@@ -395,8 +395,11 @@ function openDeepLink() {
     const q = new URLSearchParams(location.search).get("dest");
     if (!q) return;
     const want = q.trim().toUpperCase();
+    // optional &from=ORK|DUB limits the match to one departure airport
+    const from = (new URLSearchParams(location.search).get("from") || "").trim().toUpperCase();
     let best = null, bestAp = null;
     for (const [apCode, ap] of Object.entries(cachedDeals.airports || {})) {
+      if (from && apCode.toUpperCase() !== from) continue;
       for (const b of [...(ap.weekend_boards || []), ...(ap.week_boards || [])]) {
         for (const dl of (b.deals || [])) {
           const code = (dl.code || "").toUpperCase();
