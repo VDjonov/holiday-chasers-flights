@@ -13,8 +13,15 @@ on:
   workflow_dispatch:
 
 jobs:
-  refresh:
+  # One job per departure airport, in parallel: each takes ~half the time of the old
+  # single job, and a failure in one can no longer throw away the other's fresh fares.
+  scan:
     runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        airport: [ORK, DUB]
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -27,8 +34,10 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Run the deal scan
+      - name: Scan ${{ matrix.airport }}
         env:
+          SCAN_AIRPORTS: ${{ matrix.airport }}
+          PART_OUT: part_${{ matrix.airport }}.json
           FLIGHTAPI_KEY: ${{ secrets.FLIGHTAPI_KEY }}
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
           SERPAPI_KEY2: ${{ secrets.SERPAPI_KEY2 }}
@@ -36,6 +45,37 @@ jobs:
           SERPAPI_KEY4: ${{ secrets.SERPAPI_KEY4 }}
           SERPAPI_KEY5: ${{ secrets.SERPAPI_KEY5 }}
         run: python refresh_deals.py
+
+      - name: Upload scan part
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: part-${{ matrix.airport }}
+          path: part_${{ matrix.airport }}.json
+          if-no-files-found: warn
+
+  finalize:
+    needs: scan
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Download scan parts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: part-*
+          path: parts
+          merge-multiple: true
+
+      - name: Merge parts into deals_cache.json
+        run: pip install requests && python merge_parts.py parts
 
       - name: Generate SEO destination pages + sitemap
         run: python generate_pages.py

@@ -639,7 +639,13 @@ def main():
     hist = load_history()
     airport_data = {}
 
-    for ap in AIRPORTS:
+    # Parallel/staged mode: SCAN_AIRPORTS=ORK scans only Cork; PART_OUT=<file> writes a
+    # part file instead of touching deals_cache.json (merge_parts.py combines the parts).
+    only = [a.strip().upper() for a in os.environ.get("SCAN_AIRPORTS", "").split(",") if a.strip()]
+    part_out = os.environ.get("PART_OUT")
+    airports_to_scan = [a for a in AIRPORTS if not only or a["code"] in only]
+
+    for ap in airports_to_scan:
         origin, name = ap["code"], ap["name"]
         print(f"\n{'='*60}\nSCANNING {name} ({origin})\n{'='*60}")
 
@@ -667,6 +673,22 @@ def main():
         airport_data[origin] = {"name": name,
                                 "weekend_boards": weekend_boards,
                                 "week_boards": week_boards}
+
+    if part_out:
+        origins = tuple(o + "_" for o in airport_data)
+        part = {
+            "scanned_utc": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "airports": airport_data,
+            "history": {code: {k: v for k, v in h.items() if k.startswith(origins)}
+                        for code, h in hist.items()},
+        }
+        with open(part_out, "w", encoding="utf-8") as f:
+            json.dump(part, f, ensure_ascii=False)
+        print(f"\nPart written: {part_out} ({count_deals(airport_data)} deals, "
+              f"{', '.join(airport_data)})")
+        if FLIGHTAPI_DOWN:
+            print("\n⚠ FlightAPI quota ran out during this run — check plan credits.")
+        return
 
     new_count = count_deals(airport_data)
     prev_count = previous_deal_count()
