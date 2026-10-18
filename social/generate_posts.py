@@ -184,8 +184,11 @@ def load_slogans():
         return ["Your whole trip, at a glance."]
 
 
+THEME = {"classic": "navy", "ivory": "ivory", "bright": "bright"}
+
+
 def posters_hero(c, note, slogan):
-    import poster_v2 as P, poster_classic as C
+    import poster_v2 as P, poster_classic as C, poster_card as K
     o = ORIGIN[c["ap"]]
     how = "direct" if c["stops"] == 0 else f"{c['stops']} stop"
     label = "Weekend break" if c["kind"] == "weekend" else "A week away"
@@ -195,11 +198,13 @@ def posters_hero(c, note, slogan):
         out[("classic", f)] = C.hero(f, "navy", c, o, ph, note, dates, how, slogan)
         out[("ivory", f)] = C.hero(f, "ivory", c, o, ph, note, dates, how, slogan)
         out[("bright", f)] = P.hero(f, c, o, ph, note, dates, how, label, slogan)
+    for des, th in THEME.items():
+        out[(des, "card")] = K.hero(th, c, o, ph, dates, slogan)
     return out
 
 
 def posters_cards(sub, cs, note, slogan):
-    import poster_v2 as P, poster_classic as C
+    import poster_v2 as P, poster_classic as C, poster_card as K
     cs2 = [dict(c, dates=fmt_range(c["dep"], c["ret"])) for c in cs]
     photos = [bg_url(c["code"], c["city"]) for c in cs]
     o = ORIGIN[cs[0]["ap"]]
@@ -208,6 +213,8 @@ def posters_cards(sub, cs, note, slogan):
         out[("classic", f)] = C.cards(f, "navy", cs2, o, photos, note, sub, slogan)
         out[("ivory", f)] = C.cards(f, "ivory", cs2, o, photos, note, sub, slogan)
         out[("bright", f)] = P.cards(f, cs2, o, photos, note, sub, slogan)
+    for des, th in THEME.items():
+        out[(des, "card")] = K.cards(th, cs2, o, photos, sub, slogan)
     return out
 
 
@@ -222,12 +229,14 @@ FEATURES = {
 
 
 def posters_feature(key, note, slogan):
-    import poster_classic as C
+    import poster_classic as C, poster_card as K
     F = FEATURES[key]
     out = {}
     for f in ("feed", "story"):
         for des, theme in (("classic", "navy"), ("ivory", "ivory"), ("bright", "bright")):
             out[(des, f)] = C.feature(f, theme, F["items"], note, slogan, F["title"])
+    for des, th in THEME.items():
+        out[(des, "card")] = K.feature(th, F["items"], slogan, F["title"])
     return out
 
 
@@ -273,12 +282,13 @@ def build(today=None):
     def add(slot, kind, cs, caption, html_, link_url, title, desc):
         posters = {}
         for (des, f), h in html_.items():
-            name = f"{slot}_{des}" + ("_story" if f == "story" else "")
+            name = f"{slot}_{des}" + {"story": "_story", "card": "_card", "feed": ""}[f]
             pages[name] = h
-            posters.setdefault(des, {})[f] = f"social/out/{name}.png"
+            if f != "card":
+                posters.setdefault(des, {})[f] = f"social/out/{name}.png"
         for des in posters:
             posters[des]["card"] = f"social/card/{slot}_{des}.jpg"
-            posters[des]["share"] = f"{SHARE_BASE}p/{slot}_{des}.html"
+            posters[des]["share"] = f"{SHARE_BASE}p/{slot}_{des}.html?v={today.strftime('%m%d')}"
             SHARES.append((slot, des, title, desc, link_url))
         posts.append(dict(id=slot, type=kind, airport=cs[0]["ap"] if cs else None, caption=caption, link=link_url.replace("https://", ""),
                           poster=posters["classic"]["feed"], story=posters["classic"]["story"], posters=posters, deals=cs,
@@ -314,17 +324,16 @@ def build(today=None):
     os.makedirs(OUT, exist_ok=True); shutil.rmtree(BUILD, ignore_errors=True); os.makedirs(BUILD)
     for f in glob.glob(os.path.join(OUT, "*.png")):
         os.remove(f)
+    shutil.rmtree(os.path.join(ROOT, "card"), ignore_errors=True)
     for slot, h in pages.items():
         open(os.path.join(BUILD, slot + ".html"), "w", encoding="utf-8").write(h)
     render(list(pages))
     shutil.rmtree(BUILD, ignore_errors=True)
 
     # link-preview cards + share pages (clickable poster when posted as a link)
-    cdir, pdir = os.path.join(ROOT, "card"), os.path.join(ROOT, "p")
-    for dd in (cdir, pdir):
-        shutil.rmtree(dd, ignore_errors=True); os.makedirs(dd)
+    pdir = os.path.join(ROOT, "p")
+    shutil.rmtree(pdir, ignore_errors=True); os.makedirs(pdir)
     for slot, des, title, desc, target in SHARES:
-        make_card(os.path.join(OUT, f"{slot}_{des}.png"), os.path.join(cdir, f"{slot}_{des}.jpg"))
         share_page(os.path.join(pdir, f"{slot}_{des}.html"), title, desc, f"{SHARE_BASE}card/{slot}_{des}.jpg", target)
 
     # evergreen posts (no prices, never go stale)
@@ -348,11 +357,16 @@ def render(slots):
     exe = os.environ.get("PW_CHROMIUM")
     with sync_playwright() as p:
         b = p.chromium.launch(executable_path=exe) if exe else p.chromium.launch()
+        os.makedirs(os.path.join(ROOT, "card"), exist_ok=True)
         for s in slots:
-            pg = b.new_page(viewport={"width": 1080, "height": 1920 if s.endswith("_story") else 1080})
+            card = s.endswith("_card")
+            pg = b.new_page(viewport={"width": 1200, "height": 630} if card else {"width": 1080, "height": 1920 if s.endswith("_story") else 1080})
             pg.goto("file://" + os.path.join(BUILD, s + ".html"))
             pg.wait_for_timeout(500)
-            pg.screenshot(path=os.path.join(OUT, s + ".png"))
+            if card:
+                pg.screenshot(path=os.path.join(ROOT, "card", s[:-5] + ".jpg"), type="jpeg", quality=90)
+            else:
+                pg.screenshot(path=os.path.join(OUT, s + ".png"))
             pg.close()
         b.close()
 
