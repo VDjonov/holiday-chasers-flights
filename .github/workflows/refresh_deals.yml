@@ -13,9 +13,30 @@ on:
   workflow_dispatch:
 
 jobs:
+  # Skip a SCHEDULED run if the deals were already refreshed in the last 36 hours
+  # (e.g. after a manual run). Manual runs (workflow_dispatch) always go ahead.
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      skip: ${{ steps.check.outputs.skip }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: check
+        run: |
+          skip=false
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            upd=$(python3 -c "import json;print(json.load(open('deals_cache.json'))['updated_utc'])")
+            age=$(( $(date +%s) - $(date -d "$upd" +%s) ))
+            echo "deals_cache.json updated $upd (${age}s ago)"
+            if [ "$age" -lt 129600 ]; then skip=true; echo "Fresh enough: skipping this scheduled scan"; fi
+          fi
+          echo "skip=$skip" >> "$GITHUB_OUTPUT"
+
   # One job per departure airport, in parallel: each takes ~half the time of the old
   # single job, and a failure in one can no longer throw away the other's fresh fares.
   scan:
+    needs: gate
+    if: ${{ needs.gate.outputs.skip != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 350
     strategy:
@@ -55,8 +76,8 @@ jobs:
           if-no-files-found: warn
 
   finalize:
-    needs: scan
-    if: ${{ !cancelled() }}
+    needs: [gate, scan]
+    if: ${{ !cancelled() && needs.gate.outputs.skip != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
