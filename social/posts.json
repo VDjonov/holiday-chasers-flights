@@ -1,0 +1,202 @@
+{
+  "generated": "2026-10-18",
+  "fares_scanned": "2026-10-17",
+  "posts": [
+    {
+      "id": "hero_ork",
+      "type": "hero",
+      "airport": "ORK",
+      "caption": "From Cork: Faro from €37 return per person, Fri 4 – Fri 11 Dec. Book with the airline in a couple of clicks. holidaychasers.ie/?dest=FAO&from=ORK&utm_source=facebook&utm_medium=social",
+      "link": "holidaychasers.ie/?dest=FAO&from=ORK&utm_source=facebook&utm_medium=social",
+      "poster": "social/out/hero_ork.png",
+      "deals": [
+        {
+          "ap": "ORK",
+          "kind": "week",
+          "code": "FAO",
+          "city": "Faro",
+          "price": 37,
+          "dep": "2026-12-04",
+          "ret": "2026-12-11",
+          "stops": 0,
+          "airline": "Ryanair"
+        }
+      ],
+      "expires": "2026-12-04"
+    },
+    {
+      "id": "hero_dub",
+      "type": "hero",
+      "airport": "DUB",
+      "caption": "From Dublin: Faro from €38 return per person, Sat 5 – Sat 12 Dec. Book with the airline in a couple of clicks. holidaychasers.ie/?dest=FAO&from=DUB&utm_source=facebook&utm_medium=social",
+      "link": "holidaychasers.ie/?dest=FAO&from=DUB&utm_source=facebook&utm_medium=social",
+      "poster": "social/out/hero_dub.png",
+      "deals": [
+        {
+          "ap": "DUB",
+          "kind": "week",
+          "code": "FAO",
+          "city": "Faro",
+          "price": 38,
+          "dep": "2026-12-05",
+          "ret": "2026-12-12",
+          "stops": 0,
+          "airline": "Ryanair"
+        }
+      ],
+      "expires": "2026-12-05"
+    },
+    {
+      "id": "sun_ork",
+      "type": "cards",
+      "airport": "ORK",
+      "caption": "Winter sun from Cork: Fuerteventura from €53 return per person, Sun 22 – Sun 29 Nov. Or Lanzarote from €59 (Sat 12 – Sat 19 Dec). Fares change, so check the live deal: holidaychasers.ie/?dest=FUE&from=ORK&utm_source=facebook&utm_medium=social",
+      "link": "holidaychasers.ie/?dest=FUE&from=ORK&utm_source=facebook&utm_medium=social",
+      "poster": "social/out/sun_ork.png",
+      "deals": [
+        {
+          "ap": "ORK",
+          "kind": "week",
+          "code": "FUE",
+          "city": "Fuerteventura",
+          "price": 53,
+          "dep": "2026-11-22",
+          "ret": "2026-11-29",
+          "stops": 0,
+          "airline": "Ryanair"
+        },
+        {
+          "ap": "ORK",
+          "kind": "week",
+          "code": "ACE",
+          "city": "Lanzarote",
+          "price": 59,
+          "dep": "2026-12-12",
+          "ret": "2026-12-19",
+          "stops": 0,
+          "airline": "Ryanair"
+        }
+      ],
+      "expires": "2026-11-22"
+    },
+    {
+      "id": "week_ork",
+      "type": "cards",
+      "airport": "ORK",
+      "caption": "A week away from Cork: Edinburgh from €30 return per person, Sat 31 Oct – Sat 7 Nov. Or Manchester from €30 (Tue 3 – Tue 10 Nov). Fares change, so check the live deal: holidaychasers.ie/?dest=EDI&from=ORK&utm_source=facebook&utm_medium=social",
+      "link": "holidaychasers.ie/?dest=EDI&from=ORK&utm_source=facebook&utm_medium=social",
+      "poster": "social/out/week_ork.png",
+      "deals": [
+        {
+          "ap": "ORK",
+          "kind": "week",
+          "code": "EDI",
+          "city": "Edinburgh",
+          "price": 30,
+          "dep": "2026-10-31",
+          "ret": "2026-11-07",
+          "stops": 0,
+          "airline": "Ryanair"
+        },
+        {
+          "ap": "ORK",
+          "kind": "week",
+          "code": "MAN",
+          "city": "Manchester",
+          "price": 30,
+          "dep": "2026-11-03",
+          "ret": "2026-11-10",
+          "stops": 0,
+          "airline": "Ryanair"
+        }
+      ],
+      "expires": "2026-10-31"
+    },
+    {
+      "id": "sun_dub",
+      "type": "cards",
+      "airport": "DUB",
+      "caption": "Winter sun from Dublin: Malaga from €48 return per person, Sat 5 – Sat 12 Dec. Or Lanzarote from €49 (Sat 21 – Sat 28 Nov). Fares change, so check the live deal: holidaychasers.ie/?dest=AGP&from=DUB&utm_source=facebook&utm_medium=social",
+      "link": "holidaychasers.ie/?dest=AGP&from=DUB&utm_source=facebook&utm_medium=social",
+      "poster": "social/out/sun_dub.png",
+      "deals": [
+        {
+          "ap": "DUB",
+          "kind": "week",
+          "code": "AGP",
+          "city": "Malaga",
+          "price": 48,
+          "dep": "2026-12-05",
+          "ret": "2026-12-12",
+          "stops": 0,
+          "airline": "Ryanair"
+        },
+        {
+          "ap": "DUB",
+          "kind": "week",
+          "code": "ACE",
+          "city": "Lanzarote",
+          "price": 49,
+          "dep": "2026-11-21",
+          "ret": "2026-11-28",
+          "stops": 0,
+          "airline": "Ryanair"
+        }
+      ],
+      "expires": "2026-11-21"
+    },
+    {
+      "id": "week_dub",
+      "type": "cards",
+      "airport": "DUB",
+      "caption": "A week away from Dublin: Manchester from €33 return per person, Sat 7 – Sat 14 Nov. Or London from €33 (Sat 28 Nov – Sat 5 Dec). Fares change, so check the live deal: holidaychasers.ie/?dest=MAN&from=DUB&utm_source=facebook&utm_medium=social",
+      "link": "holidaychasers.ie/?dest=MAN&from=DUB&utm_source=facebook&utm_medium=social",
+      "poster": "social/out/week_dub.png",
+      "deals": [
+        {
+          "ap": "DUB",
+          "kind": "week",
+          "code": "MAN",
+          "city": "Manchester",
+          "price": 33,
+          "dep": "2026-11-07",
+          "ret": "2026-11-14",
+          "stops": 0,
+          "airline": "Ryanair"
+        },
+        {
+          "ap": "DUB",
+          "kind": "week",
+          "code": "STN",
+          "city": "London",
+          "price": 33,
+          "dep": "2026-11-28",
+          "ret": "2026-12-05",
+          "stops": 0,
+          "airline": "Ryanair"
+        }
+      ],
+      "expires": "2026-11-07"
+    },
+    {
+      "id": "how_it_works",
+      "type": "evergreen",
+      "airport": null,
+      "poster": "social/evergreen/how_it_works.png",
+      "caption": "We check real fares every few days for Cork and Dublin. We show per-person return prices and send you to the airline to book. No sign-up. Prices are indicative and confirmed when you book. holidaychasers.ie",
+      "link": "holidaychasers.ie",
+      "deals": [],
+      "expires": null
+    },
+    {
+      "id": "question",
+      "type": "evergreen",
+      "airport": null,
+      "poster": "social/evergreen/question.png",
+      "caption": "Where would you fly this winter: sun or a city break? Tell us and we will check the fares.",
+      "link": null,
+      "deals": [],
+      "expires": null
+    }
+  ]
+}

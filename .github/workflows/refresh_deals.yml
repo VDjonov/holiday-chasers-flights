@@ -40,11 +40,19 @@ jobs:
       - name: Generate SEO destination pages + sitemap
         run: python generate_pages.py
 
+      - name: Build Facebook posts (posters + captions) from the fresh deals
+        # Best-effort: a poster-rendering problem must never block the deal refresh.
+        continue-on-error: true
+        run: |
+          pip install playwright
+          playwright install --with-deps chromium
+          python social/generate_posts.py
+
       - name: Commit the updated cache
         run: |
           git config user.name "deal-bot"
           git config user.email "deal-bot@users.noreply.github.com"
-          git add deals_cache.json price_history.json destinations sitemap.xml
+          git add deals_cache.json price_history.json destinations sitemap.xml social/posts.json social/out
           git commit -m "Refresh flight deals (FlightAPI, per-person)" || echo "No changes to commit"
           git fetch origin main
           git merge -X ours --no-edit origin/main
