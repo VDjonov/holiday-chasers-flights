@@ -8,8 +8,22 @@
       "airport": "ORK",
       "caption": "✈️ Return flights from Cork to Birmingham from €30 per person, Sat 28 Nov – Sat 5 Dec. Flights only. Book with the airline in a couple of clicks. holidaychasers.ie/?dest=BHX&from=ORK&utm_source=facebook&utm_medium=social",
       "link": "holidaychasers.ie/?dest=BHX&from=ORK&utm_source=facebook&utm_medium=social",
-      "poster": "social/out/hero_ork.png",
-      "story": "social/out/hero_ork_story.png",
+      "poster": "social/out/hero_ork_classic.png",
+      "story": "social/out/hero_ork_classic_story.png",
+      "posters": {
+        "classic": {
+          "feed": "social/out/hero_ork_classic.png",
+          "story": "social/out/hero_ork_classic_story.png"
+        },
+        "ivory": {
+          "feed": "social/out/hero_ork_ivory.png",
+          "story": "social/out/hero_ork_ivory_story.png"
+        },
+        "bright": {
+          "feed": "social/out/hero_ork_bright.png",
+          "story": "social/out/hero_ork_bright_story.png"
+        }
+      },
       "deals": [
         {
           "ap": "ORK",
@@ -31,8 +45,22 @@
       "airport": "DUB",
       "caption": "✈️ Return flights from Dublin to Faro from €38 per person, Sat 5 – Sat 12 Dec. Flights only. Book with the airline in a couple of clicks. holidaychasers.ie/?dest=FAO&from=DUB&utm_source=facebook&utm_medium=social",
       "link": "holidaychasers.ie/?dest=FAO&from=DUB&utm_source=facebook&utm_medium=social",
-      "poster": "social/out/hero_dub.png",
-      "story": "social/out/hero_dub_story.png",
+      "poster": "social/out/hero_dub_classic.png",
+      "story": "social/out/hero_dub_classic_story.png",
+      "posters": {
+        "classic": {
+          "feed": "social/out/hero_dub_classic.png",
+          "story": "social/out/hero_dub_classic_story.png"
+        },
+        "ivory": {
+          "feed": "social/out/hero_dub_ivory.png",
+          "story": "social/out/hero_dub_ivory_story.png"
+        },
+        "bright": {
+          "feed": "social/out/hero_dub_bright.png",
+          "story": "social/out/hero_dub_bright_story.png"
+        }
+      },
       "deals": [
         {
           "ap": "DUB",
@@ -54,8 +82,22 @@
       "airport": "ORK",
       "caption": "✈️ Winter sun, return flights from Cork: Faro from €35 per person, Fri 4 – Fri 11 Dec. Or Fuerteventura from €51 (Sun 13 – Sun 20 Dec). Flights only. Fares change, so check the live deal: holidaychasers.ie/?dest=FAO&from=ORK&utm_source=facebook&utm_medium=social",
       "link": "holidaychasers.ie/?dest=FAO&from=ORK&utm_source=facebook&utm_medium=social",
-      "poster": "social/out/sun_ork.png",
-      "story": "social/out/sun_ork_story.png",
+      "poster": "social/out/sun_ork_classic.png",
+      "story": "social/out/sun_ork_classic_story.png",
+      "posters": {
+        "classic": {
+          "feed": "social/out/sun_ork_classic.png",
+          "story": "social/out/sun_ork_classic_story.png"
+        },
+        "ivory": {
+          "feed": "social/out/sun_ork_ivory.png",
+          "story": "social/out/sun_ork_ivory_story.png"
+        },
+        "bright": {
+          "feed": "social/out/sun_ork_bright.png",
+          "story": "social/out/sun_ork_bright_story.png"
+        }
+      },
       "deals": [
         {
           "ap": "ORK",
@@ -88,8 +130,22 @@
       "airport": "ORK",
       "caption": "✈️ A week away, return flights from Cork: Manchester from €30 per person, Tue 3 – Tue 10 Nov. Or Edinburgh from €30 (Sat 28 Nov – Sat 5 Dec). Flights only. Fares change, so check the live deal: holidaychasers.ie/?dest=MAN&from=ORK&utm_source=facebook&utm_medium=social",
       "link": "holidaychasers.ie/?dest=MAN&from=ORK&utm_source=facebook&utm_medium=social",
-      "poster": "social/out/week_ork.png",
-      "story": "social/out/week_ork_story.png",
+      "poster": "social/out/week_ork_classic.png",
+      "story": "social/out/week_ork_classic_story.png",
+      "posters": {
+        "classic": {
+          "feed": "social/out/week_ork_classic.png",
+          "story": "social/out/week_ork_classic_story.png"
+        },
+        "ivory": {
+          "feed": "social/out/week_ork_ivory.png",
+          "story": "social/out/week_ork_ivory_story.png"
+        },
+        "bright": {
+          "feed": "social/out/week_ork_bright.png",
+          "story": "social/out/week_ork_bright_story.png"
+        }
+      },
       "deals": [
         {
           "ap": "ORK",
@@ -122,8 +178,22 @@
       "airport": "DUB",
       "caption": "✈️ Winter sun, return flights from Dublin: Lanzarote from €49 per person, Sat 14 – Sat 21 Nov. Or Las Palmas from €50 (Tue 10 – Tue 17 Nov). Flights only. Fares change, so check the live deal: holidaychasers.ie/?dest=ACE&from=DUB&utm_source=facebook&utm_medium=social",
       "link": "holidaychasers.ie/?dest=ACE&from=DUB&utm_source=facebook&utm_medium=social",
-      "poster": "social/out/sun_dub.png",
-      "story": "social/out/sun_dub_story.png",
+      "poster": "social/out/sun_dub_classic.png",
+      "story": "social/out/sun_dub_classic_story.png",
+      "posters": {
+        "classic": {
+          "feed": "social/out/sun_dub_classic.png",
+          "story": "social/out/sun_dub_classic_story.png"
+        },
+        "ivory": {
+          "feed": "social/out/sun_dub_ivory.png",
+          "story": "social/out/sun_dub_ivory_story.png"
+        },
+        "bright": {
+          "feed": "social/out/sun_dub_bright.png",
+          "story": "social/out/sun_dub_bright_story.png"
+        }
+      },
       "deals": [
         {
           "ap": "DUB",
@@ -156,8 +226,22 @@
       "airport": "DUB",
       "caption": "✈️ A week away, return flights from Dublin: London from €33 per person, Sat 28 Nov – Sat 5 Dec. Or Manchester from €35 (Tue 24 Nov – Tue 1 Dec). Flights only. Fares change, so check the live deal: holidaychasers.ie/?dest=STN&from=DUB&utm_source=facebook&utm_medium=social",
       "link": "holidaychasers.ie/?dest=STN&from=DUB&utm_source=facebook&utm_medium=social",
-      "poster": "social/out/week_dub.png",
-      "story": "social/out/week_dub_story.png",
+      "poster": "social/out/week_dub_classic.png",
+      "story": "social/out/week_dub_classic_story.png",
+      "posters": {
+        "classic": {
+          "feed": "social/out/week_dub_classic.png",
+          "story": "social/out/week_dub_classic_story.png"
+        },
+        "ivory": {
+          "feed": "social/out/week_dub_ivory.png",
+          "story": "social/out/week_dub_ivory_story.png"
+        },
+        "bright": {
+          "feed": "social/out/week_dub_bright.png",
+          "story": "social/out/week_dub_bright_story.png"
+        }
+      },
       "deals": [
         {
           "ap": "DUB",

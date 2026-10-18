@@ -1,15 +1,21 @@
 const BASE = "https://holidaychasers.ie/";
 const PAGE = "https://www.facebook.com/holidaychasersie";
-const s = document.getElementById("s"), list = document.getElementById("list");
-fetch(BASE + "social/posts.json?t=" + Date.now()).then(r => r.json()).then(d => {
-  s.textContent = "Generated " + (d.generated || "") + ". Pick one, then press Post yourself.";
+const s = document.getElementById("s"), list = document.getElementById("list"), bar = document.getElementById("designs");
+const DESIGNS = [["classic", "Classic navy"], ["ivory", "Ivory"], ["bright", "Bright photo"]];
+let design = "classic";
+const paths = (p, kind) => (p.posters && p.posters[design] ? p.posters[design][kind] : (kind === "story" ? p.story : p.poster));
+
+function render(d) {
+  list.innerHTML = "";
   for (const p of d.posts) {
     const el = document.createElement("div"); el.className = "p";
-    el.innerHTML = `<img src="${BASE + p.poster}"><div><div class="t"></div><div class="c"></div><button>Use this post</button> ${p.story ? '<button class="st">Download Story image</button>' : ""}</div>`;
+    const story = paths(p, "story");
+    el.innerHTML = `<img src="${BASE + paths(p, "feed")}"><div><div class="t"></div><div class="c"></div>
+      <button class="use">Use for post</button>${story ? ' <button class="st">Download Story</button>' : ""}</div>`;
     el.querySelector(".t").textContent = (p.airport ? p.airport + " · " : "") + p.id.replace(/_/g, " ");
     el.querySelector(".c").textContent = p.caption;
-    el.querySelector("button").onclick = async () => {
-      await chrome.storage.local.set({ pending: p });
+    el.querySelector(".use").onclick = async () => {
+      await chrome.storage.local.set({ pending: { ...p, poster: paths(p, "feed") } });
       const tabs = await chrome.tabs.query({ url: "https://www.facebook.com/*" });
       const t = tabs.find(x => x.url.includes("holidaychasersie")) || null;
       if (t) { await chrome.tabs.update(t.id, { active: true }); await chrome.tabs.reload(t.id); }
@@ -17,7 +23,23 @@ fetch(BASE + "social/posts.json?t=" + Date.now()).then(r => r.json()).then(d => 
       window.close();
     };
     const sb = el.querySelector(".st");
-    if (sb) sb.onclick = () => chrome.downloads.download({ url: BASE + p.story, filename: "HolidayChasers_story_" + p.id + ".png" });
+    if (sb) sb.onclick = () => chrome.downloads.download({ url: BASE + story, filename: "HolidayChasers_story_" + p.id + "_" + design + ".png" });
     list.appendChild(el);
   }
+}
+
+fetch(BASE + "social/posts.json?t=" + Date.now()).then(r => r.json()).then(async d => {
+  const saved = await chrome.storage.local.get("design");
+  if (saved.design) design = saved.design;
+  s.textContent = "Generated " + (d.generated || "") + ". Pick a design, then a post. You press Post yourself.";
+  for (const [k, label] of DESIGNS) {
+    const b = document.createElement("button"); b.textContent = label; b.className = "d" + (k === design ? " on" : "");
+    b.onclick = async () => {
+      design = k; await chrome.storage.local.set({ design });
+      bar.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
+      render(d);
+    };
+    bar.appendChild(b);
+  }
+  render(d);
 }).catch(e => s.textContent = "Could not load posts: " + e);

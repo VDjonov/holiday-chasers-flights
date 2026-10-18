@@ -218,20 +218,35 @@ def e(s):
     return html.escape(str(s))
 
 
+DESIGNS = ("classic", "ivory", "bright")
+DESIGN_LABEL = {"classic": "Classic navy", "ivory": "Ivory", "bright": "Bright photo"}
+
+
 def posters_hero(c, note):
-    import poster_v2 as P
+    import poster_v2 as P, poster_classic as C
     o = ORIGIN[c["ap"]]
     how = "direct" if c["stops"] == 0 else f"{c['stops']} stop"
     label = "Weekend break" if c["kind"] == "weekend" else "A week away"
-    ph = bg_url(c["code"], c["city"])
-    return {f: P.hero(f, c, o, ph, note, fmt_range(c["dep"], c["ret"]), how, label) for f in ("feed", "story")}
+    ph = bg_url(c["code"], c["city"]); dates = fmt_range(c["dep"], c["ret"])
+    out = {}
+    for f in ("feed", "story"):
+        out[("classic", f)] = C.hero(f, "navy", c, o, ph, note, dates, how)
+        out[("ivory", f)] = C.hero(f, "ivory", c, o, ph, note, dates, how)
+        out[("bright", f)] = P.hero(f, c, o, ph, note, dates, how, label)
+    return out
 
 
 def posters_cards(sub, cs, note):
-    import poster_v2 as P
+    import poster_v2 as P, poster_classic as C
     cs2 = [dict(c, dates=fmt_range(c["dep"], c["ret"])) for c in cs]
     photos = [bg_url(c["code"], c["city"]) for c in cs]
-    return {f: P.cards(f, cs2, ORIGIN[cs[0]["ap"]], photos, note, sub) for f in ("feed", "story")}
+    o = ORIGIN[cs[0]["ap"]]
+    out = {}
+    for f in ("feed", "story"):
+        out[("classic", f)] = C.cards(f, "navy", cs2, o, photos, note, sub)
+        out[("ivory", f)] = C.cards(f, "ivory", cs2, o, photos, note, sub)
+        out[("bright", f)] = P.cards(f, cs2, o, photos, note, sub)
+    return out
 
 
 # ── main ────────────────────────────────────────────────────────────────────
@@ -245,9 +260,13 @@ def build(today=None):
     posts, pages = [], {}
 
     def add(slot, kind, cs, caption, html_):
-        pages[slot] = html_["feed"]; pages[slot + "_story"] = html_["story"]
+        posters = {}
+        for (des, f), h in html_.items():
+            name = f"{slot}_{des}" + ("_story" if f == "story" else "")
+            pages[name] = h
+            posters.setdefault(des, {})[f] = f"social/out/{name}.png"
         posts.append(dict(id=slot, type=kind, airport=cs[0]["ap"], caption=caption, link=link(cs[0]),
-                          poster=f"social/out/{slot}.png", story=f"social/out/{slot}_story.png", deals=cs,
+                          poster=posters["classic"]["feed"], story=posters["classic"]["story"], posters=posters, deals=cs,
                           expires=min(c["dep"] for c in cs)))
 
     used = set()

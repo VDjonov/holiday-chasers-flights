@@ -77,7 +77,7 @@ body{{width:1080px;height:{L['H']}px;position:relative;overflow:hidden;font-fami
 .feat i{{width:{84 if fmt=='story' else 74}px;height:{84 if fmt=='story' else 74}px;border:3px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none}}
 .feat i svg{{width:52%;height:52%}}
 .cta{{position:absolute;left:150px;right:150px;top:{L['cta_y']}px;height:{L['cta_h']}px;border-radius:60px;background:linear-gradient(180deg,#FFD84D,#F5B800);
-  display:flex;align-items:center;justify-content:center;gap:16px;font:900 {54 if fmt=='story' else 46}px Fraunces,serif;color:{NAVY};box-shadow:0 6px 0 #b98700,0 10px 22px rgba(0,0,0,.35)}}
+  display:flex;align-items:center;justify-content:center;gap:16px;font:900 {50 if fmt=='story' else 40}px Fraunces,serif;color:{NAVY};box-shadow:0 6px 0 #b98700,0 10px 22px rgba(0,0,0,.35)}}
 .small{{position:absolute;left:40px;right:40px;top:{L['small_y']}px;text-align:center;font:400 {22 if fmt=='story' else 19}px Inter;color:#cfe0f3}}
 """
 
@@ -104,7 +104,7 @@ def _panel(fmt, feats, note, credit):
     L = LAY[fmt]
     fs = "".join(f"<div class=feat><i>{ICON[i]}</i>{e(t)}</div>" for i, t in feats)
     return (f'<div class=panel></div><div class=feats>{fs}</div>'
-            f'<div class=cta>{SITE} <span>→</span></div><div class=small>{e(note)}{credit}</div>')
+            f'<div class=cta>Visit {SITE} <span>→</span></div><div class=small>{e(note)}{credit}</div>')
 
 
 def hero(fmt, c, origin, photo, note, dates, how, kind_label):
