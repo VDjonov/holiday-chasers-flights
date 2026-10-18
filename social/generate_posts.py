@@ -93,7 +93,8 @@ def wiki_titles():
 
 
 # Wikipedia's lead image for an island/region is often a satellite shot. Use a nicer article for these.
-PHOTO_TITLE = {"ACE": "Timanfaya_National_Park", "FUE": "Corralejo", "TFS": "Teide_National_Park"}
+PHOTO_TITLE = {"ACE": ["Timanfaya_National_Park"], "FUE": ["Corralejo", "Corralejo_Natural_Park", "Playa_de_Sotavento"],
+               "TFS": ["Teide_National_Park", "Mount_Teide"]}
 
 
 def city_photo(code, city):
@@ -104,20 +105,29 @@ def city_photo(code, city):
     try:
         import requests
         from PIL import Image
-        title = PHOTO_TITLE.get(code) or wiki_titles().get(code) or city.replace(" ", "_")
+        titles = PHOTO_TITLE.get(code) or [wiki_titles().get(code) or city.replace(" ", "_")]
         hdr = {"User-Agent": "HolidayChasersBot/1.0 (https://holidaychasers.ie; info@holidaychasers.ie)"}
-        r = requests.get("https://en.wikipedia.org/api/rest_v1/page/summary/" + requests.utils.quote(title, safe="_,()"),
-                         headers=hdr, timeout=20)
-        r.raise_for_status()
-        j = r.json()
-        src = (j.get("thumbnail") or {}).get("source") or (j.get("originalimage") or {}).get("source")
-        if not src:
+        img = None
+        for title in titles:
+            try:
+                r = requests.get("https://en.wikipedia.org/api/rest_v1/page/summary/" + requests.utils.quote(title, safe="_,()"),
+                                 headers=hdr, timeout=20)
+                r.raise_for_status()
+                j = r.json()
+                src = (j.get("thumbnail") or {}).get("source") or (j.get("originalimage") or {}).get("source")
+                if not src:
+                    continue
+                src = re.sub(r"/\d+px-", "/1280px-", src)
+                img = requests.get(src, headers=hdr, timeout=30)
+                img.raise_for_status()
+                break
+            except Exception as ex:
+                print("  photo try failed:", code, title, "-", ex)
+                img = None
+        if img is None:
             return None
-        src = re.sub(r"/\d+px-", "/1280px-", src)
-        img = requests.get(src, headers=hdr, timeout=30)
-        img.raise_for_status()
         im = Image.open(io.BytesIO(img.content)).convert("RGB")
-        if im.width < 700:                       # too small to look good full-bleed
+        if im.width < 500:                       # too small to look good full-bleed
             return None
         im.thumbnail((1280, 1280))
         os.makedirs(CITIES, exist_ok=True)
@@ -177,16 +187,16 @@ body{width:1080px;height:1080px;background:#0A1B2E;font-family:Inter,sans-serif;
 .dates{font:600 52px Inter;margin-top:26px}
 .foot{position:absolute;left:64px;right:64px;bottom:44px;border-top:3px solid #C9A24B;padding-top:22px;display:flex;justify-content:space-between;align-items:center;font:400 25px Inter;color:#E4D2A0}
 .foot b{font:700 34px Fraunces,serif;color:#FBF8F1}
-.card{background:#1C3148;border-radius:26px;padding:26px 40px;display:flex;justify-content:space-between;align-items:center;margin-top:22px}
+.card{background:#1C3148;border-radius:26px;padding:18px 40px;display:flex;justify-content:space-between;align-items:center;margin-top:22px}
 .card .c{font:700 58px/1.1 Fraunces,serif}.card .c div{font:400 30px Inter;color:#E4D2A0;margin-top:8px}
 .card .p{font:700 120px/1 Fraunces,serif;color:#E4D2A0;text-align:right;text-shadow:0 2px 14px rgba(10,27,46,.85)}.card .p div{font:400 24px Inter;color:#FBF8F1;margin-top:4px}
-.h{font:700 78px/1.08 Fraunces,serif;margin-top:20px}
+.h{font:700 70px/1.08 Fraunces,serif;margin-top:16px}
 .photo{position:absolute;left:0;right:0;top:210px;bottom:0;background-size:cover;background-position:center}
 .shade{position:absolute;left:0;right:0;top:210px;bottom:0;background:linear-gradient(180deg,rgba(10,27,46,.55) 0%,rgba(10,27,46,.35) 35%,rgba(10,27,46,.88) 78%,rgba(10,27,46,.96) 100%)}
 .main,.foot{z-index:2}
 .pill i{font-style:normal;color:#C9A24B}
-.badge{display:inline-block;align-self:flex-start;margin-top:22px;font:600 28px Inter;letter-spacing:.1em;text-transform:uppercase;background:#C9A24B;color:#0A1B2E;border-radius:50px;padding:12px 28px}
-.card{position:relative;overflow:hidden;background-size:cover;background-position:center;min-height:200px}
+.badge{display:inline-block;align-self:flex-start;margin-top:18px;font:600 28px Inter;letter-spacing:.1em;text-transform:uppercase;background:#C9A24B;color:#0A1B2E;border-radius:50px;padding:12px 28px}
+.card{position:relative;overflow:hidden;background-size:cover;background-position:center;min-height:150px}
 .card:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,27,46,.92) 0%,rgba(10,27,46,.72) 38%,rgba(10,27,46,.18) 78%,rgba(10,27,46,.3) 100%)}
 .card>*{position:relative}
 .credit{font:400 17px Inter;color:#E4D2A0;opacity:.75;position:absolute;right:64px;bottom:12px;z-index:2}
