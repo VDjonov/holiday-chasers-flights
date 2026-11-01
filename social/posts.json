@@ -1,6 +1,6 @@
 {
-  "generated": "2026-10-28",
-  "fares_scanned": "2026-10-28",
+  "generated": "2026-11-01",
+  "fares_scanned": "2026-11-01",
   "designs": {
     "classic": "Classic navy",
     "ivory": "Ivory",
@@ -11,7 +11,7 @@
       "id": "hero_ork",
       "type": "hero",
       "airport": "ORK",
-      "caption": "✈️ Return flights from Cork to Birmingham from €33 per person, Sat 14 – Sat 21 Nov. The price is for the flight. Direct flights, per-person fares. Plan the rest on holidaychasers.ie: holidaychasers.ie/?dest=BHX&from=ORK&utm_source=facebook&utm_medium=social (Photo: Wikimedia Commons)",
+      "caption": "✈️ Return flights from Cork to Birmingham from €34 per person, Sat 14 – Sat 21 Nov. The price is for the flight. Real fare, checked this week. Plan the rest on holidaychasers.ie: holidaychasers.ie/?dest=BHX&from=ORK&utm_source=facebook&utm_medium=social (Photo: Wikimedia Commons)",
       "link": "holidaychasers.ie/?dest=BHX&from=ORK&utm_source=facebook&utm_medium=social",
       "poster": "social/out/hero_ork_classic.png",
       "story": "social/out/hero_ork_classic_story.png",
@@ -20,19 +20,19 @@
           "feed": "social/out/hero_ork_classic.png",
           "story": "social/out/hero_ork_classic_story.png",
           "card": "social/card/hero_ork_classic.jpg",
-          "share": "https://holidaychasers.ie/social/p/hero_ork_classic.html?v=1028"
+          "share": "https://holidaychasers.ie/social/p/hero_ork_classic.html?v=1101"
         },
         "ivory": {
           "feed": "social/out/hero_ork_ivory.png",
           "story": "social/out/hero_ork_ivory_story.png",
           "card": "social/card/hero_ork_ivory.jpg",
-          "share": "https://holidaychasers.ie/social/p/hero_ork_ivory.html?v=1028"
+          "share": "https://holidaychasers.ie/social/p/hero_ork_ivory.html?v=1101"
         },
         "bright": {
           "feed": "social/out/hero_ork_bright.png",
           "story": "social/out/hero_ork_bright_story.png",
           "card": "social/card/hero_ork_bright.jpg",
-          "share": "https://holidaychasers.ie/social/p/hero_ork_bright.html?v=1028"
+          "share": "https://holidaychasers.ie/social/p/hero_ork_bright.html?v=1101"
         }
       },
       "deals": [
@@ -41,7 +41,7 @@
           "kind": "week",
           "code": "BHX",
           "city": "Birmingham",
-          "price": 33,
+          "price": 34,
           "dep": "2026-11-14",
           "ret": "2026-11-21",
           "stops": 0,
@@ -54,7 +54,7 @@
       "id": "hero_dub",
       "type": "hero",
       "airport": "DUB",
-      "caption": "✈️ Return flights from Dublin to Barcelona from €33 per person, Fri 4 – Sun 6 Dec. The price is for the flight. Real fare, checked this week. Plan the rest on holidaychasers.ie: holidaychasers.ie/?dest=BCN&from=DUB&utm_source=facebook&utm_medium=social (Photo: Wikimedia Commons)",
+      "caption": "✈️ Return flights from Dublin to Barcelona from €32 per person, Sat 5 – Sat 12 Dec. The price is for the flight. Real fare, checked this week. Plan the rest on holidaychasers.ie: holidaychasers.ie/?dest=BCN&from=DUB&utm_source=facebook&utm_medium=social (Photo: Wikimedia Commons)",
       "link": "holidaychasers.ie/?dest=BCN&from=DUB&utm_source=facebook&utm_medium=social",
       "poster": "social/out/hero_dub_classic.png",
       "story": "social/out/hero_dub_classic_story.png",
@@ -63,41 +63,41 @@
           "feed": "social/out/hero_dub_classic.png",
           "story": "social/out/hero_dub_classic_story.png",
           "card": "social/card/hero_dub_classic.jpg",
-          "share": "https://holidaychasers.ie/social/p/hero_dub_classic.html?v=1028"
+          "share": "https://holidaychasers.ie/social/p/hero_dub_classic.html?v=1101"
         },
         "ivory": {
           "feed": "social/out/hero_dub_ivory.png",
           "story": "social/out/hero_dub_ivory_story.png",
           "card": "social/card/hero_dub_ivory.jpg",
-          "share": "https://holidaychasers.ie/social/p/hero_dub_ivory.html?v=1028"
+          "share": "https://holidaychasers.ie/social/p/hero_dub_ivory.html?v=1101"
         },
         "bright": {
           "feed": "social/out/hero_dub_bright.png",
           "story": "social/out/hero_dub_bright_story.png",
           "card": "social/card/hero_dub_bright.jpg",
-          "share": "https://holidaychasers.ie/social/p/hero_dub_bright.html?v=1028"
+          "share": "https://holidaychasers.ie/social/p/hero_dub_bright.html?v=1101"
         }
       },
       "deals": [
         {
           "ap": "DUB",
-          "kind": "weekend",
+          "kind": "week",
           "code": "BCN",
           "city": "Barcelona",
-          "price": 33,
-          "dep": "2026-12-04",
-          "ret": "2026-12-06",
+          "price": 32,
+          "dep": "2026-12-05",
+          "ret": "2026-12-12",
           "stops": 0,
           "airline": "Ryanair"
         }
       ],
-      "expires": "2026-12-04"
+      "expires": "2026-12-05"
     },
     {
       "id": "sun_ork",
       "type": "cards",
       "airport": "ORK",
-      "caption": "✈️ Winter sun, return flights from Cork: Faro from €35 per person, Fri 4 – Fri 11 Dec. Or Fuerteventura from €49 (Sun 13 – Sun 20 Dec). Prices are for the flights. Fares change, so check the live deal and plan the rest: holidaychasers.ie/?dest=FAO&from=ORK&utm_source=facebook&utm_medium=social (Photos: Wikimedia Commons)",
+      "caption": "✈️ Winter sun, return flights from Cork: Faro from €36 per person, Fri 4 – Sun 6 Dec. Or Lanzarote from €47 (Sat 12 – Mon 14 Dec). Prices are for the flights. Fares change, so check the live deal and plan the rest: holidaychasers.ie/?dest=FAO&from=ORK&utm_source=facebook&utm_medium=social (Photos: Wikimedia Commons)",
       "link": "holidaychasers.ie/?dest=FAO&from=ORK&utm_source=facebook&utm_medium=social",
       "poster": "social/out/sun_ork_classic.png",
       "story": "social/out/sun_ork_classic_story.png",
@@ -106,41 +106,41 @@
           "feed": "social/out/sun_ork_classic.png",
           "story": "social/out/sun_ork_classic_story.png",
           "card": "social/card/sun_ork_classic.jpg",
-          "share": "https://holidaychasers.ie/social/p/sun_ork_classic.html?v=1028"
+          "share": "https://holidaychasers.ie/social/p/sun_ork_classic.html?v=1101"
         },
         "ivory": {
           "feed": "social/out/sun_ork_ivory.png",
           "story": "social/out/sun_ork_ivory_story.png",
           "card": "social/card/sun_ork_ivory.jpg",
-          "share": "https://holidaychasers.ie/social/p/sun_ork_ivory.html?v=1028"
+          "share": "https://holidaychasers.ie/social/p/sun_ork_ivory.html?v=1101"
         },
         "bright": {
           "feed": "social/out/sun_ork_bright.png",
           "story": "social/out/sun_ork_bright_story.png",
           "card": "social/card/sun_ork_bright.jpg",
-          "share": "https://holidaychasers.ie/social/p/sun_ork_bright.html?v=1028"
+          "share": "https://holidaychasers.ie/social/p/sun_ork_bright.html?v=1101"
         }
       },
       "deals": [
         {
           "ap": "ORK",
-          "kind": "week",
+          "kind": "weekend",
           "code": "FAO",
           "city": "Faro",
-          "price": 35,
+          "price": 36,
           "dep": "2026-12-04",
-          "ret": "2026-12-11",
+          "ret": "2026-12-06",
           "stops": 0,
           "airline": "Ryanair"
         },
         {
           "ap": "ORK",
-          "kind": "week",
-          "code": "FUE",
-          "city": "Fuerteventura",
-          "price": 49,
-          "dep": "2026-12-13",
-          "ret": "2026-12-20",
+          "kind": "weekend",
+          "code": "ACE",
+          "city": "Lanzarote",
+          "price": 47,
+          "dep": "2026-12-12",
+          "ret": "2026-12-14",
           "stops": 0,
           "airline": "Ryanair"
         }
@@ -151,8 +151,8 @@
       "id": "week_ork",
       "type": "cards",
       "airport": "ORK",
-      "caption": "✈️ A week away, return flights from Cork: Manchester from €30 per person, Sat 14 – Sat 21 Nov. Or Edinburgh from €30 (Sat 14 – Sat 21 Nov). Prices are for the flights. Fares change, so check the live deal and plan the rest: holidaychasers.ie/?dest=MAN&from=ORK&utm_source=facebook&utm_medium=social (Photos: Wikimedia Commons)",
-      "link": "holidaychasers.ie/?dest=MAN&from=ORK&utm_source=facebook&utm_medium=social",
+      "caption": "✈️ A week away, return flights from Cork: Edinburgh from €30 per person, Sat 5 – Sat 12 Dec. Or London from €32 (Sat 28 Nov – Sat 5 Dec). Prices are for the flights. Fares change, so check the live deal and plan the rest: holidaychasers.ie/?dest=EDI&from=ORK&utm_source=facebook&utm_medium=social (Photos: Wikimedia Commons)",
+      "link": "holidaychasers.ie/?dest=EDI&from=ORK&utm_source=facebook&utm_medium=social",
       "poster": "social/out/week_ork_classic.png",
       "story": "social/out/week_ork_classic_story.png",
       "posters": {
@@ -160,52 +160,52 @@
           "feed": "social/out/week_ork_classic.png",
           "story": "social/out/week_ork_classic_story.png",
           "card": "social/card/week_ork_classic.jpg",
-          "share": "https://holidaychasers.ie/social/p/week_ork_classic.html?v=1028"
+          "share": "https://holidaychasers.ie/social/p/week_ork_classic.html?v=1101"
         },
         "ivory": {
           "feed": "social/out/week_ork_ivory.png",
           "story": "social/out/week_ork_ivory_story.png",
           "card": "social/card/week_ork_ivory.jpg",
-          "share": "https://holidaychasers.ie/social/p/week_ork_ivory.html?v=1028"
+          "share": "https://holidaychasers.ie/social/p/week_ork_ivory.html?v=1101"
         },
         "bright": {
           "feed": "social/out/week_ork_bright.png",
           "story": "social/out/week_ork_bright_story.png",
           "card": "social/card/week_ork_bright.jpg",
-          "share": "https://holidaychasers.ie/social/p/week_ork_bright.html?v=1028"
+          "share": "https://holidaychasers.ie/social/p/week_ork_bright.html?v=1101"
         }
       },
       "deals": [
         {
           "ap": "ORK",
           "kind": "week",
-          "code": "MAN",
-          "city": "Manchester",
+          "code": "EDI",
+          "city": "Edinburgh",
           "price": 30,
-          "dep": "2026-11-14",
-          "ret": "2026-11-21",
+          "dep": "2026-12-05",
+          "ret": "2026-12-12",
           "stops": 0,
           "airline": "Ryanair"
         },
         {
           "ap": "ORK",
           "kind": "week",
-          "code": "EDI",
-          "city": "Edinburgh",
-          "price": 30,
-          "dep": "2026-11-14",
-          "ret": "2026-11-21",
+          "code": "STN",
+          "city": "London",
+          "price": 32,
+          "dep": "2026-11-28",
+          "ret": "2026-12-05",
           "stops": 0,
           "airline": "Ryanair"
         }
       ],
-      "expires": "2026-11-14"
+      "expires": "2026-11-28"
     },
     {
       "id": "sun_dub",
       "type": "cards",
       "airport": "DUB",
-      "caption": "✈️ Winter sun, return flights from Dublin: Faro from €42 per person, Sat 5 – Sat 12 Dec. Or Malaga from €45 (Sat 5 – Sat 12 Dec). Prices are for the flights. Fares change, so check the live deal and plan the rest: holidaychasers.ie/?dest=FAO&from=DUB&utm_source=facebook&utm_medium=social (Photos: Wikimedia Commons)",
+      "caption": "✈️ Winter sun, return flights from Dublin: Faro from €35 per person, Sat 12 – Sat 19 Dec. Or Lanzarote from €43 (Sat 5 – Sat 12 Dec). Prices are for the flights. Fares change, so check the live deal and plan the rest: holidaychasers.ie/?dest=FAO&from=DUB&utm_source=facebook&utm_medium=social (Photos: Wikimedia Commons)",
       "link": "holidaychasers.ie/?dest=FAO&from=DUB&utm_source=facebook&utm_medium=social",
       "poster": "social/out/sun_dub_classic.png",
       "story": "social/out/sun_dub_classic_story.png",
@@ -214,19 +214,19 @@
           "feed": "social/out/sun_dub_classic.png",
           "story": "social/out/sun_dub_classic_story.png",
           "card": "social/card/sun_dub_classic.jpg",
-          "share": "https://holidaychasers.ie/social/p/sun_dub_classic.html?v=1028"
+          "share": "https://holidaychasers.ie/social/p/sun_dub_classic.html?v=1101"
         },
         "ivory": {
           "feed": "social/out/sun_dub_ivory.png",
           "story": "social/out/sun_dub_ivory_story.png",
           "card": "social/card/sun_dub_ivory.jpg",
-          "share": "https://holidaychasers.ie/social/p/sun_dub_ivory.html?v=1028"
+          "share": "https://holidaychasers.ie/social/p/sun_dub_ivory.html?v=1101"
         },
         "bright": {
           "feed": "social/out/sun_dub_bright.png",
           "story": "social/out/sun_dub_bright_story.png",
           "card": "social/card/sun_dub_bright.jpg",
-          "share": "https://holidaychasers.ie/social/p/sun_dub_bright.html?v=1028"
+          "share": "https://holidaychasers.ie/social/p/sun_dub_bright.html?v=1101"
         }
       },
       "deals": [
@@ -235,18 +235,18 @@
           "kind": "week",
           "code": "FAO",
           "city": "Faro",
-          "price": 42,
-          "dep": "2026-12-05",
-          "ret": "2026-12-12",
+          "price": 35,
+          "dep": "2026-12-12",
+          "ret": "2026-12-19",
           "stops": 0,
           "airline": "Ryanair"
         },
         {
           "ap": "DUB",
           "kind": "week",
-          "code": "AGP",
-          "city": "Malaga",
-          "price": 45,
+          "code": "ACE",
+          "city": "Lanzarote",
+          "price": 43,
           "dep": "2026-12-05",
           "ret": "2026-12-12",
           "stops": 0,
@@ -259,7 +259,7 @@
       "id": "week_dub",
       "type": "cards",
       "airport": "DUB",
-      "caption": "✈️ A week away, return flights from Dublin: Manchester from €33 per person, Sat 7 – Sat 14 Nov. Or London from €35 (Tue 17 – Tue 24 Nov). Prices are for the flights. Fares change, so check the live deal and plan the rest: holidaychasers.ie/?dest=MAN&from=DUB&utm_source=facebook&utm_medium=social (Photos: Wikimedia Commons)",
+      "caption": "✈️ A week away, return flights from Dublin: Manchester from €33 per person, Tue 10 – Tue 17 Nov. Or London from €34 (Tue 17 – Tue 24 Nov). Prices are for the flights. Fares change, so check the live deal and plan the rest: holidaychasers.ie/?dest=MAN&from=DUB&utm_source=facebook&utm_medium=social (Photos: Wikimedia Commons)",
       "link": "holidaychasers.ie/?dest=MAN&from=DUB&utm_source=facebook&utm_medium=social",
       "poster": "social/out/week_dub_classic.png",
       "story": "social/out/week_dub_classic_story.png",
@@ -268,19 +268,19 @@
           "feed": "social/out/week_dub_classic.png",
           "story": "social/out/week_dub_classic_story.png",
           "card": "social/card/week_dub_classic.jpg",
-          "share": "https://holidaychasers.ie/social/p/week_dub_classic.html?v=1028"
+          "share": "https://holidaychasers.ie/social/p/week_dub_classic.html?v=1101"
         },
         "ivory": {
           "feed": "social/out/week_dub_ivory.png",
           "story": "social/out/week_dub_ivory_story.png",
           "card": "social/card/week_dub_ivory.jpg",
-          "share": "https://holidaychasers.ie/social/p/week_dub_ivory.html?v=1028"
+          "share": "https://holidaychasers.ie/social/p/week_dub_ivory.html?v=1101"
         },
         "bright": {
           "feed": "social/out/week_dub_bright.png",
           "story": "social/out/week_dub_bright_story.png",
           "card": "social/card/week_dub_bright.jpg",
-          "share": "https://holidaychasers.ie/social/p/week_dub_bright.html?v=1028"
+          "share": "https://holidaychasers.ie/social/p/week_dub_bright.html?v=1101"
         }
       },
       "deals": [
@@ -290,8 +290,8 @@
           "code": "MAN",
           "city": "Manchester",
           "price": 33,
-          "dep": "2026-11-07",
-          "ret": "2026-11-14",
+          "dep": "2026-11-10",
+          "ret": "2026-11-17",
           "stops": 0,
           "airline": "Ryanair"
         },
@@ -300,14 +300,14 @@
           "kind": "week",
           "code": "STN",
           "city": "London",
-          "price": 35,
+          "price": 34,
           "dep": "2026-11-17",
           "ret": "2026-11-24",
           "stops": 0,
           "airline": "Ryanair"
         }
       ],
-      "expires": "2026-11-07"
+      "expires": "2026-11-10"
     },
     {
       "id": "trip_glance",
@@ -322,19 +322,19 @@
           "feed": "social/out/trip_glance_classic.png",
           "story": "social/out/trip_glance_classic_story.png",
           "card": "social/card/trip_glance_classic.jpg",
-          "share": "https://holidaychasers.ie/social/p/trip_glance_classic.html?v=1028"
+          "share": "https://holidaychasers.ie/social/p/trip_glance_classic.html?v=1101"
         },
         "ivory": {
           "feed": "social/out/trip_glance_ivory.png",
           "story": "social/out/trip_glance_ivory_story.png",
           "card": "social/card/trip_glance_ivory.jpg",
-          "share": "https://holidaychasers.ie/social/p/trip_glance_ivory.html?v=1028"
+          "share": "https://holidaychasers.ie/social/p/trip_glance_ivory.html?v=1101"
         },
         "bright": {
           "feed": "social/out/trip_glance_bright.png",
           "story": "social/out/trip_glance_bright_story.png",
           "card": "social/card/trip_glance_bright.jpg",
-          "share": "https://holidaychasers.ie/social/p/trip_glance_bright.html?v=1028"
+          "share": "https://holidaychasers.ie/social/p/trip_glance_bright.html?v=1101"
         }
       },
       "deals": [],
