@@ -7,12 +7,15 @@ deals_cache.json and writes:
 
   destinations/<slug>.html   one static, indexable page per destination
   sitemap.xml                homepage + all destination pages, real lastmod
+  index.html footer          destination links, same cities as these pages
+  404.html                   branded not-found page; trailing-slash redirects
 
 Pages are rebuilt on every scan, so Google sees fresh fares every few days.
 Zero API credits — everything renders from data already paid for.
 """
 
-import json, os, datetime as dt
+import html as html_lib
+import json, os, re, datetime as dt
 
 SITE = "https://holidaychasers.ie"
 OUT_DIR = "destinations"
@@ -156,6 +159,8 @@ def page_html(code, slug, city, country, blurb, rows, updated, all_slugs):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 <title>{title}</title>
 <meta name="description" content="{desc}">
 <link rel="canonical" href="{SITE}/destinations/{slug}.html">
@@ -181,8 +186,17 @@ details{{background:#fff;border:1px solid var(--line);border-radius:10px;padding
 summary{{font-weight:700;cursor:pointer}}
 details p{{margin-top:8px;color:var(--muted);font-size:14px}}
 footer{{text-align:center;color:var(--muted);font-size:12px;padding:24px}}
+footer a.ext{{color:var(--ink);font-weight:600;border-bottom:1px solid var(--gold);text-decoration:none}}
 .rel{{font-size:14px}}.rel a{{color:var(--gold);font-weight:700;text-decoration:none}}
 .note{{font-size:12px;color:var(--muted);margin-top:8px}}
+.consent-bar{{position:fixed;left:0;right:0;bottom:0;z-index:900;background:var(--ink);color:var(--ivory);padding:14px 20px;display:none;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:0 -8px 30px rgba(10,27,46,.35);font-family:system-ui,sans-serif}}
+.consent-bar.show{{display:flex}}
+.consent-txt{{flex:1;font-size:13px;line-height:1.5;min-width:220px}}
+.consent-txt b{{color:#E4D2A0}}
+.consent-btns{{display:flex;gap:10px}}
+.consent-btn{{padding:9px 18px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:inherit}}
+.consent-accept{{background:var(--gold);color:var(--ink)}}
+.consent-decline{{background:transparent;color:var(--ivory);border:1px solid rgba(251,248,241,.35)}}
 </style>
 </head>
 <body>
@@ -208,9 +222,120 @@ footer{{text-align:center;color:var(--muted);font-size:12px;padding:24px}}
 <h2>More destinations</h2>
 <p class="rel">{related_html} · <a href="/">all deals →</a></p>
 </main>
-<footer>© Holiday Chasers Ireland · <a href="/" style="color:var(--muted)">holidaychasers.ie</a></footer>
+<footer>© Holiday Chasers Ireland · <a href="/" style="color:var(--muted)">holidaychasers.ie</a> · <a class="ext" href="https://www.facebook.com/holidaychasersie" rel="noopener" target="_blank">Facebook</a> · <a class="ext" href="https://www.instagram.com/holidaychasers.ie/" rel="noopener" target="_blank">Instagram</a></footer>
+<div class="consent-bar" id="consentBar">
+  <div class="consent-txt"><b>Quick one:</b> we use anonymous analytics to see which deals people love, so we can find better ones. No ads, no selling data.</div>
+  <div class="consent-btns">
+    <button class="consent-btn consent-decline" onclick="hcConsent(false)">No thanks</button>
+    <button class="consent-btn consent-accept" onclick="hcConsent(true)">That's fine</button>
+  </div>
+</div>
+<script src="/consent.js" defer></script>
 </body>
 </html>"""
+
+
+FOOTER_START = "<!-- hc-footer-cities -->"
+FOOTER_END = "<!-- /hc-footer-cities -->"
+
+
+def city_links():
+    """Alphabetical homepage/404 links for every destination page."""
+    rows = sorted(CITIES.values(), key=lambda item: item[1].casefold())
+    return " · ".join(
+        '<a href="/destinations/{slug}.html">{name}</a>'.format(
+            slug=html_lib.escape(slug, quote=True),
+            name=html_lib.escape(name),
+        )
+        for slug, name, _country, _blurb in rows
+    )
+
+
+def update_homepage_footer():
+    """Rewrite the marked city list in index.html from CITIES."""
+    path = "index.html"
+    if not os.path.exists(path):
+        print("  skip homepage footer: index.html missing")
+        return
+    with open(path, encoding="utf-8") as f:
+        doc = f.read()
+    if FOOTER_START not in doc or FOOTER_END not in doc:
+        print("  skip homepage footer: city-list markers missing")
+        return
+    pattern = re.compile(re.escape(FOOTER_START) + r".*?" + re.escape(FOOTER_END), re.DOTALL)
+    replacement = FOOTER_START + "\n    " + city_links() + "\n    " + FOOTER_END
+    new, count = pattern.subn(replacement, doc, count=1)
+    if count != 1:
+        print("  skip homepage footer: could not replace city list")
+        return
+    if new != doc:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(new)
+        print(f"  updated homepage footer ({len(CITIES)} cities)")
+    else:
+        print("  homepage footer already current")
+
+
+def write_404():
+    """Branded 404. Known /destinations/{slug}/ URLs redirect to the real page."""
+    slugs = json.dumps(sorted(item[0] for item in CITIES.values()))
+    links = city_links()
+    page = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Page not found | Holiday Chasers</title>
+<meta name="robots" content="noindex">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+<script>
+(function () {
+  var slugs = __SLUGS__;
+  var path = location.pathname || "";
+  var match = path.match(/^\\/destinations\\/([a-z0-9-]+)(?:\\.html)?\\/+$/);
+  if (!match) return;
+  var slug = match[1];
+  for (var i = 0; i < slugs.length; i++) {
+    if (slugs[i] === slug) {
+      location.replace("/destinations/" + slug + ".html" + location.search + location.hash);
+      return;
+    }
+  }
+})();
+</script>
+<style>
+:root{--ink:#0A1B2E;--ivory:#FBF7EF;--gold:#C9A24B;--muted:#6B7280;--line:#E7E2D6;--cream:#F4EFE3}
+*{box-sizing:border-box;margin:0}body{font-family:Georgia,'Times New Roman',serif;background:var(--ivory);color:var(--ink);line-height:1.6}
+header{background:var(--ink);color:var(--ivory);padding:14px 20px;display:flex;justify-content:space-between;align-items:center}
+header a{color:var(--ivory);text-decoration:none;font-weight:700}
+main{max-width:820px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:30px;line-height:1.2;margin-bottom:10px}
+.sub{color:var(--muted);font-size:15px;margin-bottom:22px}
+.cta{display:inline-block;background:var(--ink);color:var(--ivory);padding:13px 22px;border-radius:10px;text-decoration:none;font-weight:700;margin:8px 0 26px}
+h2{font-size:20px;margin:34px 0 10px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:24px}
+footer a.ext{color:var(--ink);font-weight:600;border-bottom:1px solid var(--gold);text-decoration:none}
+.rel{font-size:14px;line-height:2}.rel a{color:var(--gold);font-weight:700;text-decoration:none}
+</style>
+</head>
+<body>
+<header><a href="/">Holiday Chasers</a><span style="font-size:12px;color:#c8d0da">Cork &amp; Dublin flight deals</span></header>
+<main>
+<h1>Page not found</h1>
+<p class="sub">That address isn't on Holiday Chasers. The link may be out of date, or the page never existed.</p>
+<a class="cta" href="/">Back to today's deals</a>
+<h2>All destinations</h2>
+<p class="rel">__LINKS__</p>
+</main>
+<footer>© Holiday Chasers Ireland · <a href="/" style="color:var(--muted)">holidaychasers.ie</a> · <a class="ext" href="https://www.facebook.com/holidaychasersie" rel="noopener" target="_blank">Facebook</a> · <a class="ext" href="https://www.instagram.com/holidaychasers.ie/" rel="noopener" target="_blank">Instagram</a></footer>
+</body>
+</html>
+"""
+    page = page.replace("__SLUGS__", slugs).replace("__LINKS__", links)
+    with open("404.html", "w", encoding="utf-8") as f:
+        f.write(page)
+    print(f"wrote 404.html ({len(CITIES)} destination redirects)")
 
 
 def main():
@@ -242,6 +367,8 @@ def main():
                 '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
                 + "\n".join(entries) + "\n</urlset>\n")
     print(f"wrote sitemap.xml ({1 + len(urls)} urls)")
+    update_homepage_footer()
+    write_404()
 
 
 if __name__ == "__main__":

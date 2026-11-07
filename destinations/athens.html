@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 <title>Cheap Flights to Athens from Cork & Dublin (2026) | Holiday Chasers</title>
 <meta name="description" content="Live direct-flight deals to Athens from Cork and Dublin — Scanned automatically every few days, with weekend and one-week trips.">
 <link rel="canonical" href="https://holidaychasers.ie/destinations/athens.html">
@@ -28,8 +30,17 @@ details{background:#fff;border:1px solid var(--line);border-radius:10px;padding:
 summary{font-weight:700;cursor:pointer}
 details p{margin-top:8px;color:var(--muted);font-size:14px}
 footer{text-align:center;color:var(--muted);font-size:12px;padding:24px}
+footer a.ext{color:var(--ink);font-weight:600;border-bottom:1px solid var(--gold);text-decoration:none}
 .rel{font-size:14px}.rel a{color:var(--gold);font-weight:700;text-decoration:none}
 .note{font-size:12px;color:var(--muted);margin-top:8px}
+.consent-bar{position:fixed;left:0;right:0;bottom:0;z-index:900;background:var(--ink);color:var(--ivory);padding:14px 20px;display:none;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:0 -8px 30px rgba(10,27,46,.35);font-family:system-ui,sans-serif}
+.consent-bar.show{display:flex}
+.consent-txt{flex:1;font-size:13px;line-height:1.5;min-width:220px}
+.consent-txt b{color:#E4D2A0}
+.consent-btns{display:flex;gap:10px}
+.consent-btn{padding:9px 18px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:inherit}
+.consent-accept{background:var(--gold);color:var(--ink)}
+.consent-decline{background:transparent;color:var(--ivory);border:1px solid rgba(251,248,241,.35)}
 </style>
 </head>
 <body>
@@ -57,6 +68,14 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px}
 <h2>More destinations</h2>
 <p class="rel"><a href="/destinations/rhodes.html">Rhodes</a> · <a href="/destinations/alicante.html">Alicante</a> · <a href="/destinations/barcelona.html">Barcelona</a> · <a href="/">all deals →</a></p>
 </main>
-<footer>© Holiday Chasers Ireland · <a href="/" style="color:var(--muted)">holidaychasers.ie</a></footer>
+<footer>© Holiday Chasers Ireland · <a href="/" style="color:var(--muted)">holidaychasers.ie</a> · <a class="ext" href="https://www.facebook.com/holidaychasersie" rel="noopener" target="_blank">Facebook</a> · <a class="ext" href="https://www.instagram.com/holidaychasers.ie/" rel="noopener" target="_blank">Instagram</a></footer>
+<div class="consent-bar" id="consentBar">
+  <div class="consent-txt"><b>Quick one:</b> we use anonymous analytics to see which deals people love, so we can find better ones. No ads, no selling data.</div>
+  <div class="consent-btns">
+    <button class="consent-btn consent-decline" onclick="hcConsent(false)">No thanks</button>
+    <button class="consent-btn consent-accept" onclick="hcConsent(true)">That's fine</button>
+  </div>
+</div>
+<script src="/consent.js" defer></script>
 </body>
 </html>
