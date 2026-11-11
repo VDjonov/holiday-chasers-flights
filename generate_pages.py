@@ -153,6 +153,20 @@ def page_html(code, slug, city, country, blurb, rows, updated, all_slugs):
                        for q, a in faq]})
     # NOTE: the CTA uses /?dest=<code>, which the app resolves to the city's
     # best current deal and opens its guide directly.
+    # data-hc-* is read by consent.js after consent. This is the page's only
+    # booking-funnel link; stay / trip-calc / restaurant links are not on
+    # these pages, so those events are not emitted. Visible copy is unchanged.
+    cta_html = (
+        '<a class="cta" href="/?dest={code}"'
+        ' data-hc-event="flight_click"'
+        ' data-hc-destination="{city}"'
+        ' data-hc-dest="{code}"'
+        ' data-hc-source="destination_page">'
+        "Open the {city} deal — live prices, hotels &amp; costs →</a>"
+    ).format(
+        code=html_lib.escape(code, quote=True),
+        city=html_lib.escape(city, quote=True),
+    )
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -205,7 +219,7 @@ footer a.ext{{color:var(--ink);font-weight:600;border-bottom:1px solid var(--gol
 <h1>Cheap flights to {city} from Cork &amp; Dublin</h1>
 <p class="sub">{blurb}</p>
 <p>{('Direct returns from <b>€' + str(min_p) + ' per person</b> on our latest scan. ') if min_p else ''}We automatically scan real fares for weekend breaks and one-week holidays to {city}, so you don't have to keep checking.</p>
-<a class="cta" href="/?dest={code}">Open the {city} deal — live prices, hotels &amp; costs →</a>
+{cta_html}
 
 <h2>Every scanned date for {city}</h2>
 <table>
