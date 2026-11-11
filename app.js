@@ -3,7 +3,7 @@
 
 // Bump this on every deploy so staging shows what's actually live.
 // Only ever displayed on non-production domains — see showDevBadge() below.
-const APP_VERSION = "v1.12 — reduced flight-search concurrency + 429 retry (2026-07-26)";
+const APP_VERSION = "v1.13 — homepage 1-2-3 flow, date strip, price on photo (2026-11-11)";
 
 // --- Back-to-top button behaviour ---
   (function(){
@@ -427,14 +427,7 @@ function switchAirport(code) {
   document.querySelectorAll(".ap-btn").forEach(b => {
     b.classList.toggle("active", b.dataset.ap === code);
   });
-  const labels = {ORK:"Cork Airport (ORK)", DUB:"Dublin Airport (DUB)", BEST:"Best deal — both airports"};
-  const sub = {
-    ORK: "Return fares from Cork — shown per person. Group totals are estimated from the per-person fare.",
-    DUB: "Return fares from Dublin — shown per person. Group totals are estimated from the per-person fare.",
-    BEST: "The cheapest fare per destination across Cork and Dublin — we pick the best for you."
-  };
-  document.getElementById("boardHeading").textContent = "Cheapest escapes · " + labels[code];
-  document.getElementById("boardSubtitle").textContent = sub[code];
+  try { localStorage.setItem("hc_airport", code); } catch(e) {}
   applyBestBoardDefaults();
   populateBoardPicker();
   renderDeals();
@@ -465,7 +458,25 @@ function changeTravellers(kind, delta){
   setTxt("planAdults", selAdults);
   setTxt("planChildren", selChildren);
   setTxt("planTvSummary", travellerLabel());
+  refreshOptsSummary();
   renderDeals();
+}
+// ── Options panel (travellers + budget) — folded away until asked for ───────
+function optsSummaryText(){
+  return travellerLabel() + (budgetMax > 0 ? ` · under €${budgetMax}` : "");
+}
+function refreshOptsSummary(){
+  const el = document.getElementById("optsSummary");
+  if (el) el.textContent = optsSummaryText();
+}
+function toggleOpts(){
+  const panel = document.getElementById("optsPanel");
+  const btn = document.getElementById("optsToggle");
+  if (!panel || !btn) return;
+  const open = panel.hasAttribute("hidden");
+  if (open) panel.removeAttribute("hidden"); else panel.setAttribute("hidden", "");
+  btn.setAttribute("aria-expanded", open ? "true" : "false");
+  btn.classList.toggle("open", open);
 }
 let backendOnline = false;
 
@@ -801,7 +812,9 @@ function populateBoardPicker() {
   // Hide the picker entirely if there's only one (or zero) option
   if (list.length <= 1) { row.style.display = "none"; return; }
   row.style.display = "block";
-  if (label) label.textContent = currentBoard === "weekend" ? "Choose your weekend:" : "Choose your week:";
+  const unit = currentBoard === "weekend" ? "weekend" : "week";
+  if (label) label.textContent = `Which ${unit} — next ${list.length} ${unit}s`;
+  const fmtShort = ds => new Date(ds + "T12:00:00").toLocaleDateString("en-IE", {weekday:"short", day:"numeric", month:"short"}).replace(/,/g, "");
   const activeIdx = currentBoard === "weekend" ? selectedWeekendIdx : selectedWeekIdx;
   const trav = cachedDeals.travellers || 4;
   picker.innerHTML = "";
@@ -813,10 +826,23 @@ function populateBoardPicker() {
       ? Math.round([...b.deals].sort((a,c)=>a.price-c.price)[0].price / trav) : null;
     const fallback = currentBoard === "weekend" ? `Weekend ${i+1}` : `Week ${i+1}`;
     const isBest = i === bestBoardIdx(list);
-    btn.innerHTML = `<span class="wb-label">${b.label || fallback}${isBest ? " ⭐" : ""}</span>` +
-      (cheapest != null ? `<span class="wb-price">from €${cheapest}pp${isBest ? " · best" : ""}</span>` : "");
+    const dates = (b.depart_date && b.return_date)
+      ? `${fmtShort(b.depart_date)} – ${fmtShort(b.return_date)}`
+      : (b.label || fallback);
+    btn.innerHTML = `<span class="wb-label">${dates}</span>` +
+      (cheapest != null ? `<span class="wb-price">from €${cheapest}${isBest ? " ⭐ best" : ""}</span>` : "");
     picker.appendChild(btn);
   });
+  scrollPickerToActive();
+}
+// Keep the chosen week/weekend visible in the swipeable strip. Only scrolls the
+// strip sideways — never moves the page.
+function scrollPickerToActive(){
+  const picker = document.getElementById("weekendPicker");
+  const act = picker && picker.querySelector(".weekend-btn.active");
+  if (!act) return;
+  const target = act.offsetLeft - 44;   // leave the previous date peeking in
+  if (picker.scrollWidth > picker.clientWidth) picker.scrollLeft = Math.max(0, target);
 }
 // Back-compat alias (called from loadDeals)
 function populateWeekendPicker(){ populateBoardPicker(); }
@@ -827,6 +853,7 @@ document.querySelectorAll(".filter-btn").forEach(btn => {
     document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     budgetMax = parseInt(btn.dataset.max) || 0;
+    refreshOptsSummary();
     renderDeals();
   });
 });
@@ -876,6 +903,13 @@ async function loadDeals() {
           (list || []).forEach(b => { b.deals = (b.deals || []).filter(x => x.stops === 0); });
         }
       }
+      try {
+        const savedAp = localStorage.getItem("hc_airport");
+        if (savedAp && ["ORK","DUB","BEST"].includes(savedAp)) {
+          selectedAirport = savedAp;
+          document.querySelectorAll(".ap-btn").forEach(b => b.classList.toggle("active", b.dataset.ap === savedAp));
+        }
+      } catch(e) {}
       applyBestBoardDefaults();     // default to the best-priced week/weekend
       populateWeekendPicker();
       renderDeals();
@@ -987,9 +1021,6 @@ function renderDeals() {
       else { updated.textContent = "Updated " + d.toLocaleDateString("en-IE",{day:"numeric",month:"short",year:"numeric"}); updated.classList.remove("fresh"); }
     } catch(e) { updated.textContent = ""; }
 
-  // Default each view to its best-priced board
-  applyBestBoardDefaults();
-
   // Airport pill deal counts + "who wins today" summary
   updateAirportCounts();
   }
@@ -1036,6 +1067,18 @@ function renderDeals() {
       <div class="hero-stat hero-stat-dates"><div class="val" style="font-size:16px">${depFmt} → ${retFmt}</div><div class="lbl">Travel dates</div></div>`;
   }
 
+  // Results heading — names the exact trip on screen, so it is always clear
+  // every card below is for the same dates.
+  {
+    const apName = {ORK:"from Cork", DUB:"from Dublin", BEST:"from Cork or Dublin"}[selectedAirport] || "";
+    const hEl = document.getElementById("boardHeading");
+    const sEl = document.getElementById("boardSubtitle");
+    if (hEl) hEl.textContent = `${depFmt} – ${retFmt} ${apName}`.replace(/,/g, "");
+    if (sEl) sEl.textContent = `${deals.length} direct deal${deals.length===1?"":"s"} · return fares per person, cheapest first`
+      + (selectedAirport === "BEST" ? " · we pick the cheaper airport for each city" : "");
+    refreshOptsSummary();
+  }
+
   if (!deals.length) {
     empty.style.display = "block";
     empty.textContent = budgetMax ? `No deals under €${budgetMax} per person. Try a higher budget.` : "No deals available.";
@@ -1051,6 +1094,7 @@ function renderDeals() {
            <span class="deal-route-on-photo">${flightOrigin} → ${d.code}</span>
            ${showOrigin && d.origin_airport ? `<span class="origin-badge">${d.origin_airport}</span>` : ''}
            <span class="photo-city"><span class="pc-name">${d.city}</span><span class="pc-country" style="display:block">${d.country}</span></span>
+           <span class="photo-price"><b>€${perPerson(d)}</b><small>return, per person</small></span>
          </div>`;
 
     // Comparison mini-card: the other airport's price for this same destination —
@@ -1087,38 +1131,23 @@ function renderDeals() {
           <div class="deal-city">${d.city}</div>
           <div class="deal-country">${d.country}</div>
         </div>
-        <div class="deal-perf"></div>
-        ${EDITOR_NOTES[d.code] ? `<div class="ed-note">"${EDITOR_NOTES[d.code]}"</div>` : '<div class="ed-note empty"></div>'}
-        <div class="deal-card-bottom">
-          <div class="deal-price-block">
-            <div class="deal-dates">${fmtD(d.depart_date || dep)} — ${fmtD(d.return_date || ret)}${d.nights && d.nights !== board.nights ? ` · ${d.nights}n` : ""}</div>
-            <div class="deal-price"><sup>€</sup>${perPerson(d)}<small>per person</small></div>
-          </div>
-          ${groupSize > 1 ? `<div class="deal-perperson">
-            <div class="pp-amount">€${groupTotal(d)}</div>
-            <div class="pp-label">${travellerLabel()}</div>
-          </div>` : ''}
-        </div>
         <div class="deal-meta">
           <span class="${d.stops === 0 ? 'tag-direct' : ''}">${d.stops === 0 ? '✦ Direct' : d.stops + ' stop' + (d.stops>1?'s':'')}</span>
           <span>${d.total_time || '—'}</span>
           <span>${d.airlines || '—'}</span>
         </div>
+        <div class="deal-dates-line">${fmtD(d.depart_date || dep).replace(",","")} – ${fmtD(d.return_date || ret).replace(",","")} · ${d.nights || board.nights} night${(d.nights || board.nights)>1?'s':''}</div>
+        ${groupSize > 1 ? `<div class="deal-group-line"><b>€${groupTotal(d)}</b> for ${travellerLabel()}</div>` : ''}
+        ${EDITOR_NOTES[d.code] ? `<div class="ed-note">"${EDITOR_NOTES[d.code]}"</div>` : ''}
         <div class="deal-weather" id="weather-${d.code}-${i}"><span class="wx-loading">Checking weather…</span></div>
-        <div class="deal-viewmore">View full details &amp; guide →</div>
       </button>
       <div class="deal-actions">
-        <a class="deal-book primary" href="${flightUrl(d.airlines, flightOrigin, d.code, d.depart_date || dep, d.return_date || ret, selAdults, selChildren)}" target="_blank" rel="noopener noreferrer">${flightBtnLabel(d.airlines)}</a>
-        <a class="deal-book secondary" href="${carUrl(d.city, d.depart_date || dep, d.return_date || ret)}" target="_blank" rel="noopener">🚗 ${BRAND.discovercars}</a>
+        <button type="button" class="deal-book primary deal-open" onclick='openDetail(${JSON.stringify(d).replace(/'/g,"&#39;")}, "${d.depart_date || dep}", "${d.return_date || ret}", ${groupSize}, ${cacheTravellers})'>See the full trip →</button>
+        <a class="deal-book secondary" href="${flightUrl(d.airlines, flightOrigin, d.code, d.depart_date || dep, d.return_date || ret, selAdults, selChildren)}" target="_blank" rel="noopener noreferrer">${flightBtnLabel(d.airlines)}</a>
       </div>
-      <div class="deal-stays">
-        <span class="stay-label">Where to stay</span>
-        <a class="stay-btn" href="${hotelUrl(d.city, d.depart_date || dep, d.return_date || ret)}" target="_blank" rel="noopener">${BRAND.booking}</a>
-        <a class="stay-btn" href="${airbnbUrl(d.city, d.depart_date || dep, d.return_date || ret)}" target="_blank" rel="noopener">${BRAND.airbnb}</a>
-      </div>
-      <div class="stay-nudge">🏨 ${d.nights || board.nights} night${(d.nights || board.nights)>1?'s':''} in ${d.city} from <b>~€${cityCosts(d.code).airbnb * (d.nights || board.nights)}</b> — tap to compare</div>
       ${altCard}
-    </div>`;
+    </div>${i === 3 && deals.length > 5 ? `
+    <a class="deal-promo" href="#signup"><span>✉ Get the cheapest Cork &amp; Dublin fares by email</span><b>Sign up →</b></a>` : ''}`;
   }).join("");
 
   refreshFavUI();  // sync star states with saved favourites

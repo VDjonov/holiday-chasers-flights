@@ -653,3 +653,119 @@ img{max-width:100%}
   .pd-month2{display:none}
   .pd-labels{justify-content:center}
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v4 — "1-2-3" homepage flow (staging)
+   Pick airport → pick week/weekend → pick which one → big cards for that trip.
+   Appended as one block so it can be removed cleanly if the layout is rejected.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Nav shortcut to the email signup */
+.nav-alerts{font-family:var(--font-body);font-size:12px;font-weight:600;color:var(--gold-soft);border:1px solid rgba(201,162,75,.5);padding:7px 13px;border-radius:100px;text-decoration:none;white-space:nowrap;transition:.18s}
+.nav-alerts:hover{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+
+/* Numbered step labels */
+.step-label{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+.step-n{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--ink);color:var(--ivory);font-size:11px;font-weight:700;letter-spacing:0;flex:none}
+.step-row{margin-bottom:18px}
+.step-row .airport-toggle,.step-row .trip-toggle{margin-bottom:0}
+#weekendPickerRow{margin-bottom:22px}
+
+/* Step 3 — one swipeable strip instead of a two-column grid */
+.strip-wrap{position:relative}
+.weekend-buttons{scroll-padding-left:44px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;scrollbar-width:none;padding:2px 2px 6px;width:auto}
+.weekend-buttons::-webkit-scrollbar{display:none}
+.weekend-btn{flex:0 0 auto;min-width:0;scroll-snap-align:start;padding:9px 14px}
+.weekend-btn .wb-label{font-size:13.5px;line-height:1.25}
+.weekend-btn .wb-price{color:var(--green);font-size:11.5px;margin-top:2px}
+.weekend-btn.active .wb-price{color:var(--gold-soft)}
+.strip-wrap::after{content:"";position:absolute;top:0;right:0;bottom:6px;width:36px;background:linear-gradient(90deg,rgba(251,248,241,0),var(--ivory));pointer-events:none}
+
+/* Results heading + fold-away options */
+.results-hdr{margin-bottom:14px}
+.results-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.results-hdr h2{font-size:24px}
+.opts-toggle{flex:none;display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border:1px solid var(--line);border-radius:100px;background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;box-shadow:var(--shadow-sm)}
+.opts-toggle .opts-caret{color:var(--gold);transition:transform .2s}
+.opts-toggle.open{border-color:var(--ink)}
+.opts-toggle.open .opts-caret{transform:rotate(180deg)}
+.opts-panel{margin-bottom:16px}
+.opts-panel[hidden]{display:none}
+.opts-panel .filter-bar{margin-bottom:4px}
+.trust-line{margin:22px 0 0}
+
+/* Card — price on the photo, one main action */
+.deal-photo .photo-price{position:absolute;right:12px;bottom:12px;z-index:2;background:rgba(10,27,46,.84);border-radius:12px;padding:6px 11px 7px;text-align:right;line-height:1}
+.deal-photo .photo-price b{display:block;font-family:var(--font-display);font-size:26px;font-weight:600;color:#FFE7A6;letter-spacing:-.01em}
+.deal-photo .photo-price small{display:block;font-size:9.5px;color:rgba(251,248,241,.85);margin-top:3px;letter-spacing:.02em}
+.deal-card.cheapest .deal-photo .photo-price{background:var(--gold)}
+.deal-card.cheapest .deal-photo .photo-price b{color:var(--ink)}
+.deal-card.cheapest .deal-photo .photo-price small{color:rgba(10,27,46,.8)}
+.deal-photo .photo-city{right:128px}
+.deal-card-top{padding:0;min-height:0}
+.deal-card .deal-badge{position:static;display:inline-block;margin:14px 18px -4px}
+.deal-meta{padding:14px 18px 0;gap:12px;font-size:13px}
+.deal-dates-line{padding:5px 18px 0;font-size:13px;color:var(--muted)}
+.deal-group-line{padding:6px 18px 0;font-size:13px;color:var(--ink-70)}
+.deal-group-line b{font-family:var(--font-display);font-size:17px;color:var(--ink)}
+.deal-card .ed-note{margin:12px 18px 0;min-height:0;display:block}
+.deal-card .deal-weather{margin:12px 18px 0;padding:10px 0 0;min-height:0}
+.deal-actions{padding:14px 18px 16px;gap:9px;margin-top:auto}
+.deal-book{font-size:13.5px;padding:13px 8px;border:none;font-family:var(--font-body);cursor:pointer;min-height:46px}
+.deal-book.primary{flex:1.25}
+.deal-book.secondary{flex:1;font-size:12.5px;border:1px solid var(--line)}
+
+/* Signup prompt between cards */
+.deal-promo{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--ink);color:var(--ivory);border-radius:14px;padding:14px 18px;font-size:14px;text-decoration:none}
+.deal-promo b{flex:none;background:var(--gold);color:var(--ink);font-size:12.5px;padding:8px 14px;border-radius:100px}
+
+@media(max-width:600px){
+  .nav-alerts{font-size:11.5px;padding:6px 11px}
+  /* Hero: headline + one instruction line; the stats row made way for deals */
+  .hero{padding:14px 16px 14px}
+  .hero h1{font-size:22px;margin-bottom:5px}
+  .hero h1 br{display:none}
+  .hero p{font-size:12.5px;margin-bottom:0;line-height:1.35}
+  .hero-stats{display:none}
+  .tabs-inner{padding:6px 12px}
+  .tab-seg{padding:3px}
+  .tab-btn{padding:7px 15px}
+  #tab-deals{padding-top:14px}
+
+  .step-label{font-size:10.5px;margin-bottom:6px}
+  .step-n{width:18px;height:18px;font-size:10px}
+  /* Steps 1 and 2 — label and control share one row */
+  .step-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .step-row .step-label{margin:0;flex:0 0 62px}
+  .step-row .airport-toggle,.step-row .trip-toggle{flex:1;min-width:0}
+  /* Step 1 — one compact segmented row */
+  .airport-toggle{gap:0;background:var(--cream);border:1px solid var(--line);border-radius:13px;padding:3px}
+  .ap-btn{flex-direction:row;justify-content:center;gap:5px;padding:4px;border:none;background:transparent;box-shadow:none;border-radius:10px;min-height:42px}
+  .ap-btn.active{background:var(--ink)}
+  .ap-ic,.ap-code,.ap-count{display:none}
+  .ap-name{font-size:14px;white-space:nowrap}
+  .wins-line{margin-bottom:12px;font-size:12.5px;padding:8px 12px}
+  /* Step 2 — full-width two-way switch */
+  .trip-toggle{display:flex;border-radius:13px;padding:3px}
+  .trip-toggle button{flex:1;border-radius:10px;padding:4px 6px;font-size:14px;min-height:42px;white-space:nowrap}
+  /* Step 3 — strip bleeds to the screen edge so the next date peeks in */
+  #weekendPickerRow{margin-bottom:14px}
+  .weekend-buttons{gap:8px;margin-right:-16px;padding-right:40px}
+  .strip-wrap::after{right:-16px;width:44px}
+  .weekend-btn{flex:0 0 auto;min-width:0;padding:8px 12px;min-height:48px}
+
+  .results-hdr{margin-bottom:10px}
+  .results-hdr h2{font-size:18px;line-height:1.2}
+  .results-hdr p{font-size:12px;margin-top:3px}
+  .opts-toggle{padding:7px 11px;font-size:12px}
+  .opts-panel .traveller-bar{margin-bottom:8px}
+
+  .deal-photo{height:156px}
+  .deal-photo .photo-price b{font-size:25px}
+
+  /* Cookie bar: one compact block instead of a fifth of the screen */
+  .consent-bar{padding:10px 14px;gap:10px}
+  .consent-txt{font-size:12px;line-height:1.35;min-width:0;flex:1 1 100%}
+  .consent-btns{width:100%}
+  .consent-btn{flex:1;padding:9px 10px;font-size:13px}
+}

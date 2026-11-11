@@ -132,13 +132,14 @@
 <!-- ═══ NAV ═══ -->
 <nav class="nav">
   <div class="nav-brand"><a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit"><img class="nav-logo" width="38" height="38" src="images/logo-mark.png" alt="Holiday Chasers Ireland"> Holiday Chasers</a></div>
+  <a class="nav-alerts" href="#signup">✉ Deal alerts</a>
 </nav>
 
 <!-- ═══ HERO ═══ -->
 <section class="hero">
   <div class="hero-eyebrow">Cork · ORK &nbsp;·&nbsp; Dublin · DUB &nbsp;·&nbsp; Ireland</div>
-  <h1>Escape the drizzle.<br><em>Chase the sun.</em></h1>
-  <p>Hand-picked return fares from Cork &amp; Dublin — checked every few days, free to browse.</p>
+  <h1>Escape the drizzle. <br><em>Chase the sun.</em></h1>
+  <p>Pick your airport and dates — see the cheapest flights.</p>
   <div class="hero-stats" id="heroStats"></div>
 </section>
 <div class="rainsun"></div>
@@ -155,15 +156,9 @@
 
 <!-- ═══ TAB: DEAL BOARD ═══ -->
 <section id="tab-deals" class="tab-content active">
-  <div class="section-hdr">
-    <h2 id="boardHeading">Cheapest escapes from Ireland</h2>
-    <p id="boardSubtitle">Per-person return fares — weekend or full week.</p>
-    <div class="trust-line">✦ We scan real fares from Cork &amp; Dublin every few days and show you the cheapest — we don't sell flights, we just help you find them.</div>
-    <div class="updated-tag" id="dealsUpdated"></div>
-    <a href="#signup" class="fav-chip" id="favChip" style="display:none">♥ <span class="fav-count">0</span> saved — <span class="fav-cta">get alerts by email</span></a>
-  </div>
-
-  <!-- Airport selector -->
+  <!-- Step 1 — airport -->
+  <div class="step-row">
+  <div class="step-label"><span class="step-n">1</span> From</div>
   <div class="airport-toggle">
     <button class="ap-btn active" data-ap="ORK" onclick="switchAirport('ORK')">
       <span class="ap-ic">🛫</span>
@@ -178,8 +173,39 @@
       <span class="ap-txt"><span class="ap-name">Best deal</span><span class="ap-code">Both</span><span class="ap-count" id="cntBEST"></span></span>
     </button>
   </div>
+  </div>
   <div class="wins-line" id="winsLine"></div>
 
+  <!-- Step 2 — trip length -->
+  <div class="step-row">
+  <div class="step-label"><span class="step-n">2</span> Trip</div>
+  <div class="trip-toggle" id="boardToggle">
+    <button data-board="weekend">🏖️ Weekend</button>
+    <button class="active" data-board="week">✈️ One week</button>
+  </div>
+  </div>
+
+  <!-- Step 3 — which week / weekend (swipeable strip, next ~10 weeks) -->
+  <div id="weekendPickerRow">
+    <div class="step-label"><span class="step-n">3</span> <span id="pickerLabel">Which week</span></div>
+    <div class="strip-wrap"><div id="weekendPicker" class="weekend-buttons"></div></div>
+  </div>
+
+  <!-- Results heading -->
+  <div class="section-hdr results-hdr">
+    <div class="results-row">
+      <h2 id="boardHeading">Cheapest escapes from Ireland</h2>
+      <button type="button" class="opts-toggle" id="optsToggle" aria-expanded="false" aria-controls="optsPanel" onclick="toggleOpts()">
+        <span id="optsSummary">1 traveller</span> <span class="opts-caret">▾</span>
+      </button>
+    </div>
+    <p id="boardSubtitle">Per-person return fares.</p>
+    <div class="updated-tag" id="dealsUpdated"></div>
+    <a href="#signup" class="fav-chip" id="favChip" style="display:none">♥ <span class="fav-count">0</span> saved — <span class="fav-cta">get alerts by email</span></a>
+  </div>
+
+  <!-- Travellers + budget: folded away until asked for -->
+  <div class="opts-panel" id="optsPanel" hidden>
   <div class="traveller-bar">
     <span class="tv-label">Who's travelling?</span>
     <div class="tv-group">
@@ -201,16 +227,6 @@
     <span class="tv-total" id="tvSummary">1 traveller</span>
   </div>
 
-  <div class="trip-toggle" id="boardToggle">
-    <button data-board="weekend">🏖️ Weekend</button>
-    <button class="active" data-board="week">✈️ One week</button>
-  </div>
-
-  <div id="weekendPickerRow" style="margin-bottom:16px">
-    <label id="pickerLabel" style="font-size:13px;font-weight:600;color:var(--gray);display:block;margin-bottom:8px">Choose your weekend:</label>
-    <div id="weekendPicker" class="weekend-buttons"></div>
-  </div>
-
   <div class="filter-bar">
     <label>Budget:</label>
     <button class="filter-btn active" data-max="0">All</button>
@@ -218,12 +234,14 @@
     <button class="filter-btn" data-max="150">Under €150pp</button>
     <button class="filter-btn" data-max="250">Under €250pp</button>
   </div>
+  </div>
 
   <div id="dealCards" class="deal-grid"></div>
   <div id="dealsLoading" class="loading"><div class="spinner"></div><br>Loading deals…</div>
   <div id="dealsEmpty" style="display:none;text-align:center;padding:40px;color:var(--gray)">
     No deals match this budget. Try a higher limit or switch trip type.
   </div>
+  <div class="trust-line">✦ We scan real fares from Cork &amp; Dublin every few days and show you the cheapest — we don't sell flights, we just help you find them.</div>
 
   <!-- ═══ NEWSLETTER SIGNUP ═══ -->
   <div class="signup-band" id="signup">
@@ -343,7 +361,7 @@
 <script src="app.js" defer></script>
 
 <div class="consent-bar" id="consentBar">
-  <div class="consent-txt"><b>Quick one:</b> we use anonymous analytics to see which deals people love, so we can find better ones. No ads, no selling data.</div>
+  <div class="consent-txt"><b>Cookies:</b> OK to use anonymous analytics to see which deals people love? No ads, no selling data.</div>
   <div class="consent-btns">
     <button class="consent-btn consent-decline" onclick="hcConsent(false)">No thanks</button>
     <button class="consent-btn consent-accept" onclick="hcConsent(true)">That's fine</button>
