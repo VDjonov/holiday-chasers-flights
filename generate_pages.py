@@ -6,7 +6,7 @@ Runs in the GitHub Action right after refresh_deals.py. Reads the fresh
 deals_cache.json and writes:
 
   destinations/<slug>.html   one static, indexable page per destination
-  sitemap.xml                homepage + all destination pages, real lastmod
+  sitemap.xml                homepage, info pages, and all destination pages
   index.html footer          destination links, same cities as these pages
   404.html                   branded not-found page; trailing-slash redirects
 
@@ -20,6 +20,15 @@ import json, os, re, datetime as dt
 SITE = "https://holidaychasers.ie"
 OUT_DIR = "destinations"
 CACHE = "deals_cache.json"
+
+# Static pages linked from the destination footer and listed in the sitemap.
+# Kept here so a deal refresh does not drop them.
+INFO_PAGES = (
+    "how-it-works.html",
+    "about.html",
+    "contact.html",
+    "privacy.html",
+)
 
 # slug + one-line intro per destination (kept short; the fares are the content)
 CITIES = {
@@ -236,7 +245,7 @@ footer a.ext{{color:var(--ink);font-weight:600;border-bottom:1px solid var(--gol
 <h2>More destinations</h2>
 <p class="rel">{related_html} · <a href="/">all deals →</a></p>
 </main>
-<footer>© Holiday Chasers Ireland · <a href="/" style="color:var(--muted)">holidaychasers.ie</a> · <a class="ext" href="https://www.facebook.com/holidaychasersie" rel="noopener" target="_blank">Facebook</a> · <a class="ext" href="https://www.instagram.com/holidaychasers.ie/" rel="noopener" target="_blank">Instagram</a></footer>
+<footer>© Holiday Chasers Ireland · <a href="/" style="color:var(--muted)">holidaychasers.ie</a> · <a href="/how-it-works.html" style="color:var(--muted)">How it works</a> · <a href="/about.html" style="color:var(--muted)">About</a> · <a href="/contact.html" style="color:var(--muted)">Contact</a> · <a href="/privacy.html" style="color:var(--muted)">Privacy</a> · <a class="ext" href="https://www.facebook.com/holidaychasersie" rel="noopener" target="_blank">Facebook</a> · <a class="ext" href="https://www.instagram.com/holidaychasers.ie/" rel="noopener" target="_blank">Instagram</a></footer>
 <div class="consent-bar" id="consentBar">
   <div class="consent-txt"><b>Quick one:</b> we use anonymous analytics to see which deals people love, so we can find better ones. No ads, no selling data.</div>
   <div class="consent-btns">
@@ -369,10 +378,13 @@ def main():
         urls.append(f"{SITE}/destinations/{slug}.html")
         print(f"  wrote {slug}.html ({len(rows)} fares)")
 
-    # sitemap: homepage + destination pages
+    # sitemap: homepage + info pages + destination pages
     lastmod = updated_iso
     entries = [f"  <url><loc>{SITE}/</loc><changefreq>daily</changefreq>"
                f"<priority>1.0</priority><lastmod>{lastmod}</lastmod></url>"]
+    entries += [f"  <url><loc>{SITE}/{name}</loc><changefreq>monthly</changefreq>"
+                f"<priority>0.4</priority><lastmod>{lastmod}</lastmod></url>"
+                for name in INFO_PAGES]
     entries += [f"  <url><loc>{u}</loc><changefreq>weekly</changefreq>"
                 f"<priority>0.8</priority><lastmod>{lastmod}</lastmod></url>"
                 for u in urls]
@@ -380,7 +392,7 @@ def main():
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n'
                 '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
                 + "\n".join(entries) + "\n</urlset>\n")
-    print(f"wrote sitemap.xml ({1 + len(urls)} urls)")
+    print(f"wrote sitemap.xml ({1 + len(INFO_PAGES) + len(urls)} urls)")
     update_homepage_footer()
     write_404()
 
