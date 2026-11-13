@@ -62,8 +62,8 @@
         "classic": {
           "feed": "social/out/hero_dub_classic.png",
           "story": "social/out/hero_dub_classic_story.png",
-          "card": "social/card/hero_dub_classic.jpg",
-          "share": "https://holidaychasers.ie/social/p/hero_dub_classic.html?v=1113"
+          "card": "social/card/dub-fao-20261212-20261219-38-classic.jpg",
+          "share": "https://holidaychasers.ie/social/p/dub-fao-20261212-20261219-38-classic.html"
         },
         "ivory": {
           "feed": "social/out/hero_dub_ivory.png",
@@ -105,8 +105,8 @@
         "classic": {
           "feed": "social/out/sun_ork_classic.png",
           "story": "social/out/sun_ork_classic_story.png",
-          "card": "social/card/sun_ork_classic.jpg",
-          "share": "https://holidaychasers.ie/social/p/sun_ork_classic.html?v=1113"
+          "card": "social/card/ork-fao-20261204-20261206-40-ork-lpa-20261203-20261206-48-classic.jpg",
+          "share": "https://holidaychasers.ie/social/p/ork-fao-20261204-20261206-40-ork-lpa-20261203-20261206-48-classic.html"
         },
         "ivory": {
           "feed": "social/out/sun_ork_ivory.png",
@@ -213,8 +213,8 @@
         "classic": {
           "feed": "social/out/sun_dub_classic.png",
           "story": "social/out/sun_dub_classic_story.png",
-          "card": "social/card/sun_dub_classic.jpg",
-          "share": "https://holidaychasers.ie/social/p/sun_dub_classic.html?v=1113"
+          "card": "social/card/dub-agp-20270109-20270116-40-dub-lpa-20261205-20261212-51-classic.jpg",
+          "share": "https://holidaychasers.ie/social/p/dub-agp-20270109-20270116-40-dub-lpa-20261205-20261212-51-classic.html"
         },
         "ivory": {
           "feed": "social/out/sun_dub_ivory.png",
