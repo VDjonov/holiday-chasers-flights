@@ -1,6 +1,13 @@
 /* Holiday Chasers Ireland — main stylesheet
    Extracted from index.html for maintainability (CSS/JS split) */
 
+/* Latin subsets, self-hosted so the first paint does not wait on fonts.googleapis.com.
+   swap: text uses the fallback immediately, then the real face. */
+@font-face{font-family:Inter;font-style:normal;font-weight:100 900;font-display:swap;src:url("/fonts/inter-latin.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Fraunces;font-style:normal;font-weight:600;font-display:swap;src:url("/fonts/fraunces-latin-600.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Fraunces;font-style:italic;font-weight:600;font-display:swap;src:url("/fonts/fraunces-latin-600-italic.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"JetBrains Mono";font-style:normal;font-weight:400 800;font-display:swap;src:url("/fonts/jetbrains-mono-latin.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+
 /* ═══ Premium design system — "Boarding pass meets boutique travel" ═══ */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -28,6 +35,7 @@ body{font-family:var(--font-body);color:var(--ink);background:var(--ivory);line-
 a{color:inherit;text-decoration:none}
 button{font-family:var(--font-body);cursor:pointer}
 img{max-width:100%}
+picture.hc-logo{display:contents}
 ::selection{background:var(--gold-soft);color:var(--ink)}
 
 /* ── Nav ── */
@@ -55,7 +63,7 @@ img{max-width:100%}
 .hero h1{font-family:var(--font-display);font-size:clamp(26px,4.6vw,44px);font-weight:600;line-height:1.04;letter-spacing:-.02em;margin-bottom:10px;position:relative;text-shadow:0 2px 26px rgba(10,27,46,.42)}
 .hero h1 em{font-style:italic;color:#FFE7A6}
 .hero p{font-size:clamp(13px,1.9vw,16px);color:rgba(251,248,241,.95);max-width:520px;margin:0 auto 18px;position:relative;text-shadow:0 1px 12px rgba(10,27,46,.4)}
-.hero-stats{display:flex;gap:0;justify-content:center;flex-wrap:wrap;position:relative;border-top:1px solid rgba(251,248,241,.32);padding-top:16px;max-width:680px;margin:0 auto}
+.hero-stats{display:flex;gap:0;justify-content:center;flex-wrap:wrap;position:relative;border-top:1px solid rgba(251,248,241,.32);padding-top:16px;max-width:680px;margin:0 auto;min-height:44px}
 .hero-stat{text-align:center;padding:0 28px;position:relative}
 .hero-stat:not(:last-child)::after{content:"";position:absolute;right:0;top:6px;bottom:6px;width:1px;background:rgba(251,248,241,.3)}
 .hero-stat .val{font-family:var(--font-display);font-size:30px;font-weight:600;color:#FFE7A6;line-height:1;text-shadow:0 1px 14px rgba(10,27,46,.45)}
@@ -86,6 +94,9 @@ img{max-width:100%}
 
 #weekendPickerRow label,.filter-bar label{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
 .weekend-buttons{display:flex;gap:10px;flex-wrap:wrap}
+/* The date buttons are filled in by app.js. Reserve the wrapped mobile height
+   so the row does not push the budget filters down when they arrive. */
+@media(max-width:640px){#weekendPickerRow{min-height:200px}}
 .weekend-btn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:11px 18px;border:1px solid var(--line);border-radius:12px;background:var(--paper);cursor:pointer;transition:.18s;box-shadow:var(--shadow-sm);text-align:left}
 .weekend-btn:hover{border-color:var(--gold)}
 .weekend-btn.active{border-color:var(--ink);background:var(--ink)}
@@ -652,4 +663,19 @@ img{max-width:100%}
   .pd-mo2{display:none}
   .pd-month2{display:none}
   .pd-labels{justify-content:center}
+}
+
+/* Popular routes — generated into index.html by generate_pages.py */
+.popular-routes{max-width:1120px;margin:0 auto;padding:28px 24px 8px}
+.popular-routes h2{font-family:var(--font-display);font-size:30px;font-weight:600;letter-spacing:-.02em;line-height:1.1}
+.popular-routes p{font-size:15px;color:var(--muted);margin-top:8px;max-width:640px}
+.popular-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:18px}
+.popular-grid a{display:block;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow-sm);transition:border-color .18s,transform .18s}
+.popular-grid a:hover{border-color:var(--gold);transform:translateY(-2px)}
+.popular-grid .pr-kicker{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.popular-grid strong{display:block;font-family:var(--font-display);font-size:18px;font-weight:600;line-height:1.25;margin-top:4px;color:var(--ink)}
+.popular-grid span{display:block;font-size:13px;color:var(--muted);margin-top:4px}
+@media(max-width:600px){
+  .popular-routes{padding:4px 16px 28px}
+  .popular-routes h2{font-size:24px}
 }
