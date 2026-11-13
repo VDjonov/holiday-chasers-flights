@@ -266,7 +266,8 @@ CORK_SCHEDULE = {
     "NCE": [({2,5},         "2026-05-01", "2026-09-30")],
     "PMI": [(ALL,           "2026-03-29", "2026-10-18"),           # Ryanair (earlier table)
             ({0,1,3,4,5,6}, "2026-03-29", "2026-10-18"),           # Aer Lingus
-            ({0,1,3,4,5},   "2026-10-19", "2026-10-24")],          # Ryanair, last week
+            ({0,1,3,4,5},   "2026-10-19", "2026-10-24"),           # Ryanair, last week
+            ({1},           "2027-05-18", "2027-08-31")],          # TUI Tue, both ways (Cork Airport, Jun 2026)
     "CDG": [(ALL,           "2026-03-29", "2026-10-26"),
             ({0,4,6},       "2026-10-25", "2026-12-21"),
             ({0,4,5,6},     "2026-12-26", "2027-01-10"),
@@ -294,7 +295,8 @@ CORK_SCHEDULE = {
             ({0,2,4},       "2027-03-28", "2027-07-31")],
     "VLC": [({0,4,6},       "2026-03-30", "2026-10-27")],
     "VCE": [({0,3},         "2026-04-02", "2026-09-28")],
-    "ZAD": [({1,5},         "2026-06-02", "2026-09-29")],
+    "ZAD": [({1,5},         "2026-06-02", "2026-09-29"),
+            ({0,4},         "2027-06-04", "2027-09-27")],          # Ryanair Mon/Fri, summer 2027
     "ZRH": [({1,4},         "2026-04-03", "2026-09-15")],
     # Winter-only Aer Lingus routes (ski season) — previously unscheduled,
     # so they were probed every run and found nothing.
@@ -303,12 +305,23 @@ CORK_SCHEDULE = {
             ({1,5},         "2026-12-01", "2026-12-22")],
 }
 
-# Dublin: only routes with a STABLE weekly pattern (flightsfrom.com, zoomed
-# captures Jul 2026). Dublin's other 35 routes are daily-or-aggregated —
-# fixed anchors + rescue probe are correct for them, so they're omitted.
+# Dublin routes whose weekday pattern is NOT daily. Fixed Fri/Sat anchors
+# miss these, and a schedule that stops in Oct 2026 would hide the next
+# season forever (snap_pair treats any uncovered date as not flying).
+# Other Dublin routes stay unscheduled: daily-or-aggregated, so the anchors
+# plus one rescue probe are enough.
 DUB_SCHEDULE = {
-    "RHO": [({1, 2, 5}, "2026-03-29", "2026-10-24")],      # Tue Wed Sat
-    "ZAD": [({1, 5}, "2026-03-29", "2026-10-24")],         # Tue Sat
+    # Winter 2026/27, both directions (flightsfrom, week of 23 Nov 2026):
+    # Ryanair Mon+Thu, Aegean Mon+Fri. No Cork route. Aer Lingus resumes
+    # 14 Mar 2027; Mon/Thu/Fri still operate, so a direct return stays findable.
+    "ATH": [({0, 3, 4}, "2026-10-26", "2027-10-30")],
+    "RHO": [({1, 2, 5}, "2026-03-29", "2026-10-24"),       # Tue Wed Sat, summer 2026
+            ({1, 3, 5}, "2027-03-30", "2027-10-30")],      # Tue Thu Sat, summer 2027
+    "ZAD": [({1, 5}, "2026-03-29", "2026-10-24"),          # Tue Sat, summer 2026
+            ({0, 4}, "2027-03-29", "2027-09-27")],         # Mon Fri, Ryanair summer 2027
+    # Nothing direct through the winter. Aer Lingus EI736 restarts Tue/Thu
+    # on 11 Mar 2027 (still those days in June). Ryanair restarts 28 Mar 2027.
+    "PMI": [({1, 3}, "2027-03-11", "2027-10-24")],
 }
 
 SCHEDULES = {"ORK": CORK_SCHEDULE, "DUB": DUB_SCHEDULE}
@@ -320,6 +333,85 @@ def route_operating(origin, code, date):
         return None
     iso = date.isoformat()
     return any(date.weekday() in days and f <= iso <= t for days, f, t in entries)
+
+
+_DAY_NAMES = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+_ORIGIN_NAME = {"ORK": "Cork", "DUB": "Dublin"}
+
+
+def _schedule_days(origin, code, on_date):
+    """Weekdays the schedule says this route flies on `on_date`'s season window."""
+    entries = SCHEDULES.get(origin, {}).get(code) or []
+    iso = on_date.isoformat()
+    days = set()
+    for weekday, start, end in entries:
+        if start <= iso <= end:
+            days |= set(weekday)
+    return tuple(sorted(days))
+
+
+def _day_phrase(days):
+    if not days:
+        return ""
+    if set(days) == set(range(7)):
+        return "every day"
+    names = [_DAY_NAMES[d] + "s" for d in days]
+    if len(names) == 1:
+        return names[0]
+    return ", ".join(names[:-1]) + " and " + names[-1]
+
+
+def next_operating(origin, code, start, horizon=450):
+    """First date on or after `start` that the schedule says is operating."""
+    if code not in SCHEDULES.get(origin, {}):
+        return None
+    entries = SCHEDULES[origin][code]
+    last = max(dt.date.fromisoformat(end) for _, _, end in entries)
+    day = start
+    limit = min(start + dt.timedelta(days=horizon), last)
+    while day <= limit:
+        if route_operating(origin, code, day) is True:
+            return day
+        day += dt.timedelta(days=1)
+    return None
+
+
+def served_origins(code):
+    for dest_code, _city, _country, airports in DESTINATIONS:
+        if dest_code == code:
+            return tuple(airports)
+    return ()
+
+
+def coverage(code, today=None):
+    """Whether the current scan window can query this destination, and when
+    each origin next has a scheduled direct flight. Used by the page generator
+    so an empty table can say why, without inventing a fare."""
+    today = today or dt.date.today()
+    window_end = max(
+        week_starts(NUM_WEEKS)[-1] + dt.timedelta(days=WEEK_NIGHTS),
+        weekend_starts(NUM_WEEKENDS)[-1] + dt.timedelta(days=WEEKEND_NIGHTS),
+    )
+    origins = []
+    for origin in served_origins(code):
+        scheduled = code in SCHEDULES.get(origin, {})
+        queryable = not scheduled
+        if scheduled:
+            for kind, starts in (("week", week_starts(NUM_WEEKS)),
+                                 ("weekend", weekend_starts(NUM_WEEKENDS))):
+                if any(snap_pair(origin, code, start, kind) for start in starts):
+                    queryable = True
+                    break
+        nxt = next_operating(origin, code, today)
+        days = _schedule_days(origin, code, nxt) if nxt else ()
+        origins.append({
+            "code": origin,
+            "name": _ORIGIN_NAME.get(origin, origin),
+            "queryable": queryable,
+            "next": nxt,
+            "days": _day_phrase(days),
+        })
+    return {"window_end": window_end, "origins": origins}
 
 # Trip-shape rules (agreed): weeks 6–8n prefer 7, any dep day nearest Saturday;
 # weekends 2–3n, departures Thu–Sat only.
