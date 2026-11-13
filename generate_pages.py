@@ -17,6 +17,8 @@ Zero API credits — everything renders from data already paid for.
 import html as html_lib
 import json, os, re, datetime as dt
 
+import refresh_deals
+
 SITE = "https://holidaychasers.ie"
 OUT_DIR = "destinations"
 CACHE = "deals_cache.json"
@@ -78,10 +80,83 @@ CITIES = {
     "ADB": ("izmir", "Izmir", "Turkey", "Aegean sunshine, bazaars and Ephesus within easy reach."),
 }
 
+# Distinctive half of each <title>, after "flights from Cork & Dublin | ".
+HOOKS = {
+    "ALC": "Costa Blanca sun",
+    "BCN": "city, beach and Gaudí",
+    "AGP": "Costa del Sol breaks",
+    "PMI": "Mallorca island breaks",
+    "MAD": "city breaks and tapas",
+    "TFS": "winter sun",
+    "ACE": "year-round volcanic sun",
+    "FAO": "Algarve beach holidays",
+    "LIS": "tram and hillside breaks",
+    "OPO": "riverside city breaks",
+    "FCO": "city breaks in Italy",
+    "BGY": "city and lakes breaks",
+    "CDG": "weekend city breaks",
+    "NCE": "French Riviera trips",
+    "AMS": "canal city breaks",
+    "BER": "neighbourhood city breaks",
+    "MUC": "Bavaria and the Alps",
+    "BUD": "Danube city breaks",
+    "KRK": "old-town city breaks",
+    "WMI": "old-town and museum breaks",
+    "PRG": "bridge and castle breaks",
+    "EDI": "short castle-city hops",
+    "STN": "Stansted city breaks",
+    "MAN": "northern weekend hops",
+    "GVA": "lake and ski-season trips",
+    "MLA": "harbour and sun breaks",
+    "VIE": "palace and concert breaks",
+    "ATH": "Acropolis city breaks",
+    "VLC": "beach and city breaks",
+    "CPH": "harbour city breaks",
+    "SVQ": "Andalusia city breaks",
+    "VCE": "canal city breaks",
+    "PSA": "Tuscany breaks",
+    "ZAD": "Adriatic summer trips",
+    "RHO": "Greek island breaks",
+    "FUE": "Canary dune beaches",
+    "LPA": "Gran Canaria city and beach",
+    "ZRH": "lake and Alpine trips",
+    "BHX": "short city hops from Cork",
+    "BRS": "harbourside city breaks",
+    "LPL": "waterfront weekend hops",
+    "GLA": "city and Highland hops",
+    "CRL": "Charleroi city breaks",
+    "LYS": "food-city breaks",
+    "ADB": "Aegean sun breaks",
+}
+
+# Same country, region, or a nearby city. Earlier groups win.
+REGIONS = (
+    ["ALC", "VLC", "AGP", "SVQ", "MAD", "BCN", "PMI"],
+    ["TFS", "ACE", "FUE", "LPA"],
+    ["FAO", "LIS", "OPO"],
+    ["FCO", "BGY", "VCE", "PSA"],
+    ["CDG", "NCE", "LYS"],
+    ["ATH", "RHO", "MLA", "ADB"],
+    ["ZAD", "VCE", "PSA", "FCO"],
+    ["AMS", "CRL", "CDG", "LYS"],
+    ["BER", "MUC", "VIE", "PRG", "BUD", "ZRH", "GVA"],
+    ["KRK", "WMI", "PRG", "BUD", "BER"],
+    ["EDI", "GLA", "MAN", "LPL", "BHX", "BRS", "STN"],
+    ["GVA", "ZRH", "MUC", "LYS"],
+    ["FAO", "AGP", "ALC", "SVQ", "TFS", "ACE", "FUE", "LPA", "MLA"],
+)
+
 
 def fmt_date(iso):
     try:
         return dt.date.fromisoformat(iso).strftime("%a %-d %b")
+    except Exception:
+        return iso or ""
+
+
+def fmt_date_year(iso):
+    try:
+        return dt.date.fromisoformat(iso).strftime("%-d %b %Y")
     except Exception:
         return iso or ""
 
@@ -95,7 +170,7 @@ def collect_fares(cache, code):
                              ("Week", ap.get("week_boards") or [])):
             for b in boards:
                 deal = next((d for d in (b.get("deals") or [])
-                             if code in (d.get("code") or "")), None)
+                             if (d.get("code") or "").upper() == code), None)
                 if not deal:
                     continue
                 rows.append({
@@ -112,46 +187,188 @@ def collect_fares(cache, code):
     return rows
 
 
-def page_html(code, slug, city, country, blurb, rows, updated, all_slugs):
-    year = dt.date.today().year
+def _clip(text, limit=158):
+    text = " ".join(text.split())
+    if len(text) <= limit:
+        return text
+    cut = text[:limit - 1].rsplit(" ", 1)[0].rstrip(".,; ")
+    return cut + "…"
+
+
+def related_destinations(code, fare_counts, limit=4):
+    """Same country or a nearby city. Empty pages only link to places with fares."""
+    country = CITIES[code][2]
+    chosen = []
+
+    def add(other, need_fare):
+        if other == code or other not in CITIES or other in chosen:
+            return
+        if need_fare and not fare_counts.get(other):
+            return
+        chosen.append(other)
+
+    for group in REGIONS:
+        if code not in group:
+            continue
+        for other in group:
+            add(other, True)
+            if len(chosen) >= limit:
+                return chosen
+    for other, (_slug, _name, other_country, _blurb) in CITIES.items():
+        if other_country == country:
+            add(other, True)
+            if len(chosen) >= limit:
+                return chosen
+    if fare_counts.get(code) and len(chosen) < 3:
+        for group in REGIONS:
+            if code not in group:
+                continue
+            for other in group:
+                add(other, False)
+                if len(chosen) >= limit:
+                    return chosen
+    # An empty page should not dead-end on one neighbour. These all have
+    # fares on a normal scan; add() still skips any that are empty today.
+    if not fare_counts.get(code):
+        for other in ("AGP", "FAO", "ALC", "TFS", "BCN", "LIS", "FCO", "MLA"):
+            add(other, True)
+            if len(chosen) >= limit:
+                break
+    return chosen
+
+
+def empty_copy(code, city, updated):
+    """Honest explanation when the cache has no fare. Never states a price."""
+    info = refresh_deals.coverage(code)
+    window = fmt_date_year(info["window_end"].isoformat())
+    flying = [o for o in info["origins"] if o["queryable"]]
+    if flying:
+        bits = []
+        for origin in flying:
+            if origin["days"]:
+                bits.append(f"{origin['name']} flies direct on {origin['days']}")
+            else:
+                bits.append(f"{origin['name']} is on the scan")
+        who = "; ".join(bits)
+        missing = [o["name"] for o in info["origins"] if not o["queryable"]]
+        only = ""
+        if not missing and len(info["origins"]) == 1:
+            other = "Cork" if info["origins"][0]["code"] == "DUB" else "Dublin"
+            only = f" There is no {other} route."
+        elif missing:
+            only = " No " + " or ".join(missing) + " departure in this window."
+        return (
+            f"No fare was stored on the latest scan ({updated}). {who}, and those "
+            f"days sit inside this scan, which runs through {window}.{only} "
+            f"A price is shown here only after a scan stores a real return."
+        )
+    bits = []
+    for origin in info["origins"]:
+        if origin["next"]:
+            when = fmt_date_year(origin["next"].isoformat())
+            days = f", {origin['days']}" if origin["days"] else ""
+            bits.append((origin["next"], f"{origin['name']} from {when}{days}"))
+        else:
+            bits.append((None, f"{origin['name']}: no restart date in the schedule we use"))
+    bits.sort(key=lambda item: (item[0] is None, item[0] or dt.date.max))
+    nxt = "; ".join(text for _when, text in bits) if bits else "no later direct service is in the schedule we scan"
+    return (
+        f"No direct flights from Cork or Dublin to {city} in the dates this scan "
+        f"covers, through {window}. Next on that schedule: {nxt}. "
+        f"We don't estimate a price for the gap."
+    )
+
+
+def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
     prices = [r["price"] for r in rows if r["price"]]
     min_p = min(prices) if prices else None
     airlines = sorted({r["airline"] for r in rows if r["airline"] != "—"})
-    title = f"Cheap Flights to {city} from Cork & Dublin ({year}) | Holiday Chasers"
-    desc = (f"Live direct-flight deals to {city} from Cork and Dublin — "
-            + (f"from €{min_p} return per person. " if min_p else "")
-            + "Scanned automatically every few days, with weekend and one-week trips.")
+    hook = HOOKS.get(code, country)
+    hook_sentence = hook[:1].upper() + hook[1:]
+    title = f"{city} flights from Cork & Dublin | {hook_sentence} | Holiday Chasers"
+    if min_p:
+        desc = (
+            f"Direct {city} flights from Cork and Dublin, from €{min_p} return "
+            f"per person. {hook_sentence}. Weekend and one-week trips from real scanned fares."
+        )
+    else:
+        info = refresh_deals.coverage(code)
+        flying = [o for o in info["origins"] if o["queryable"] and o["days"]]
+        nxts = sorted((o for o in info["origins"] if o["next"]), key=lambda o: o["next"])
+        if flying:
+            desc = (
+                f"{city} flights from Cork and Dublin. No fare in the latest scan. "
+                f"{flying[0]['name']} flies on {flying[0]['days']}. No price is estimated."
+            )
+        elif nxts:
+            origin = nxts[0]
+            desc = (
+                f"{city} flights from Cork and Dublin. No direct flights in this "
+                f"scan, through {fmt_date_year(info['window_end'].isoformat())}. "
+                f"Next scheduled: {origin['name']} {fmt_date_year(origin['next'].isoformat())}."
+            )
+        else:
+            desc = (
+                f"{city} flights from Cork and Dublin. No direct fare in the latest "
+                f"scan, and the schedule we use has no restart date."
+            )
+    desc = desc if len(desc) <= 160 else _clip(desc, 160)
 
     fare_rows = "\n".join(
         f"<tr><td>{r['from']}</td><td>{r['kind']}</td>"
         f"<td>{fmt_date(r['dep'])} → {fmt_date(r['ret'])}"
         + (f" · {r['nights']}n" if r["nights"] else "") + "</td>"
         f"<td class='p'>€{r['price']}" + (" 💡" if r["saver"] else "") + "</td>"
-        f"<td>{r['airline']}</td></tr>"
-        for r in rows) or "<tr><td colspan='5'>No direct fares on the current scan — check the live planner.</td></tr>"
+        f"<td>{html_lib.escape(r['airline'])}</td></tr>"
+        for r in rows) or (
+            "<tr><td colspan='5'>No direct fare in the latest scan.</td></tr>"
+        )
 
-    # related: same country first, then neighbours in the list
-    related = [(s, c) for k, (s, c, co, _) in CITIES.items() if co == country and k != code][:3]
-    if len(related) < 3:
-        for k, (s, c, co, _) in CITIES.items():
-            if k != code and (s, c) not in related:
-                related.append((s, c))
-            if len(related) == 3:
-                break
-    related_html = " · ".join(f'<a href="/destinations/{s}.html">{c}</a>' for s, c in related)
-
-    faq = [
-        (f"How much are flights to {city} from Ireland right now?",
-         (f"The cheapest direct return we found on our latest scan is €{min_p} per person. "
-          if min_p else "See the live table above for the latest scanned fares. ")
-         + "Prices refresh automatically every few days."),
-        (f"Which airlines fly direct to {city} from Cork or Dublin?",
-         (", ".join(airlines) if airlines else "See the fares table")
-         + " operate the direct routes we track."),
-        (f"What's the best way to find cheap dates for {city}?",
-         "Open the trip planner on our homepage — it checks live prices for every "
-         "date around your trip and builds the whole holiday: flights, hotels and costs."),
-    ]
+    related = related_destinations(code, fare_counts)
+    related_html = " · ".join(
+        '<a href="/destinations/{slug}.html">{name}</a>'.format(
+            slug=html_lib.escape(CITIES[k][0], quote=True),
+            name=html_lib.escape(CITIES[k][1]),
+        )
+        for k in related
+    )
+    gap = empty_copy(code, city, updated)
+    if min_p:
+        lead = (
+            f"Direct returns from <b>€{min_p} per person</b> on our latest scan. "
+            f"We scan real fares for weekend breaks and one-week holidays to {city}."
+        )
+        note = (
+            f"Direct flights only · prices per person, return · last scanned {updated} "
+            f"· 💡 = midweek saver"
+        )
+        related_heading = "More destinations"
+        cta_label = f"Open the {city} deal — live prices, hotels &amp; costs →"
+        faq = [
+            (f"How much are flights to {city} from Ireland right now?",
+             f"The cheapest direct return we found on our latest scan is €{min_p} per person. "
+             "Prices refresh automatically every few days."),
+            (f"Which airlines fly direct to {city} from Cork or Dublin?",
+             (", ".join(airlines) if airlines else "The airlines in the table")
+             + " operate the direct routes on this scan."),
+            (f"What's the best way to find cheap dates for {city}?",
+             "Open the trip planner on our homepage — it uses the same scanned fares "
+             "and builds the trip around the date you pick."),
+        ]
+    else:
+        lead = gap
+        note = f"Direct flights only · prices per person, return · last scanned {updated}"
+        related_heading = "Destinations with fares right now"
+        cta_label = "See Cork &amp; Dublin deals that are on the board →"
+        faq = [
+            (f"How much are flights to {city} from Ireland right now?",
+             gap),
+            (f"Which airlines fly direct to {city} from Cork or Dublin?",
+             "None are in the latest scan, so this page doesn't name a carrier or a price."),
+            (f"Where can I see a fare while {city} has none?",
+             "The destinations linked below have direct returns in the latest scan. "
+             "The homepage board is the same data."),
+        ]
     faq_html = "\n".join(
         f"<details><summary>{q}</summary><p>{a}</p></details>" for q, a in faq)
     faq_ld = json.dumps({
@@ -159,22 +376,25 @@ def page_html(code, slug, city, country, blurb, rows, updated, all_slugs):
         "mainEntity": [{"@type": "Question", "name": q,
                         "acceptedAnswer": {"@type": "Answer", "text": a}}
                        for q, a in faq]})
-    # NOTE: the CTA uses /?dest=<code>, which the app resolves to the city's
-    # best current deal and opens its guide directly.
     # data-hc-* is read by consent.js after consent. This is the page's only
-    # booking-funnel link; stay / trip-calc / restaurant links are not on
-    # these pages, so those events are not emitted. Visible copy is unchanged.
+    # booking-funnel link. With a stored fare, /?dest= opens that deal. With
+    # none, the same hook points at the homepage board instead of a deal that
+    # is not there.
+    cta_href = ("/?dest=" + html_lib.escape(code, quote=True)) if rows else "/"
     cta_html = (
-        '<a class="cta" href="/?dest={code}"'
+        '<a class="cta" href="{href}"'
         ' data-hc-event="flight_click"'
         ' data-hc-destination="{city}"'
         ' data-hc-dest="{code}"'
-        ' data-hc-source="destination_page">'
-        "Open the {city} deal — live prices, hotels &amp; costs →</a>"
+        ' data-hc-source="destination_page">{label}</a>'
     ).format(
+        href=cta_href,
         code=html_lib.escape(code, quote=True),
         city=html_lib.escape(city, quote=True),
+        label=cta_label,
     )
+    title = html_lib.escape(title)
+    desc = html_lib.escape(desc, quote=True)
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -226,7 +446,7 @@ footer a.ext{{color:var(--ink);font-weight:600;border-bottom:1px solid var(--gol
 <main>
 <h1>Cheap flights to {city} from Cork &amp; Dublin</h1>
 <p class="sub">{blurb}</p>
-<p>{('Direct returns from <b>€' + str(min_p) + ' per person</b> on our latest scan. ') if min_p else ''}We automatically scan real fares for weekend breaks and one-week holidays to {city}, so you don't have to keep checking.</p>
+<p>{lead}</p>
 {cta_html}
 
 <h2>Every scanned date for {city}</h2>
@@ -236,12 +456,12 @@ footer a.ext{{color:var(--ink);font-weight:600;border-bottom:1px solid var(--gol
 {fare_rows}
 </tbody>
 </table>
-<p class="note">Direct flights only · prices per person, return · last scanned {updated} · 💡 = midweek saver</p>
+<p class="note">{note}</p>
 
 <h2>Good to know</h2>
 {faq_html}
 
-<h2>More destinations</h2>
+<h2>{related_heading}</h2>
 <p class="rel">{related_html} · <a href="/">all deals →</a></p>
 </main>
 <footer>© Holiday Chasers Ireland · <a href="/" style="color:var(--muted)">holidaychasers.ie</a> · <a href="/how-it-works.html" style="color:var(--muted)">How it works</a> · <a href="/about.html" style="color:var(--muted)">About</a> · <a href="/contact.html" style="color:var(--muted)">Contact</a> · <a class="ext" href="https://www.facebook.com/holidaychasersie" rel="noopener" target="_blank">Facebook</a> · <a class="ext" href="https://www.instagram.com/holidaychasers.ie/" rel="noopener" target="_blank">Instagram</a></footer>
@@ -367,11 +587,13 @@ def main():
     updated = fmt_date(updated_iso)
 
     os.makedirs(OUT_DIR, exist_ok=True)
-    all_slugs = [v[0] for v in CITIES.values()]
-    urls = []
+    collected = []
     for code, (slug, city, country, blurb) in CITIES.items():
-        rows = collect_fares(cache, code)
-        html = page_html(code, slug, city, country, blurb, rows, updated, all_slugs)
+        collected.append((code, slug, city, country, blurb, collect_fares(cache, code)))
+    fare_counts = {code: len(rows) for code, _slug, _city, _country, _blurb, rows in collected}
+    urls = []
+    for code, slug, city, country, blurb, rows in collected:
+        html = page_html(code, slug, city, country, blurb, rows, updated, fare_counts)
         with open(os.path.join(OUT_DIR, f"{slug}.html"), "w", encoding="utf-8") as f:
             f.write(html)
         urls.append(f"{SITE}/destinations/{slug}.html")
