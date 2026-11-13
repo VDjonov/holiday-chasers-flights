@@ -10,13 +10,17 @@
 <script>
 (function () {
   var slugs = ["alicante", "amsterdam", "athens", "barcelona", "berlin", "birmingham", "bristol", "brussels", "budapest", "copenhagen", "edinburgh", "faro", "fuerteventura", "geneva", "glasgow", "izmir", "krakow", "lanzarote", "las-palmas", "lisbon", "liverpool", "london", "lyon", "madrid", "malaga", "malta", "manchester", "milan", "munich", "nice", "palma-mallorca", "paris", "pisa", "porto", "prague", "rhodes", "rome", "seville", "tenerife", "valencia", "venice", "vienna", "warsaw", "zadar", "zurich"];
+  var routeSlugs = ["cork-to-barcelona", "cork-to-edinburgh", "cork-to-fuerteventura", "dublin-to-barcelona", "dublin-to-edinburgh", "dublin-to-fuerteventura"];
   var path = location.pathname || "";
   var match = path.match(/^\/destinations\/([a-z0-9-]+)(?:\.html)?\/+$/);
-  if (!match) return;
-  var slug = match[1];
-  for (var i = 0; i < slugs.length; i++) {
-    if (slugs[i] === slug) {
-      location.replace("/destinations/" + slug + ".html" + location.search + location.hash);
+  var routeMatch = path.match(/^\/routes\/([a-z0-9-]+)(?:\.html)?\/+$/);
+  var list = match ? slugs : (routeMatch ? routeSlugs : null);
+  var slug = match ? match[1] : (routeMatch ? routeMatch[1] : "");
+  var folder = match ? "destinations" : "routes";
+  if (!list) return;
+  for (var i = 0; i < list.length; i++) {
+    if (list[i] === slug) {
+      location.replace("/" + folder + "/" + slug + ".html" + location.search + location.hash);
       return;
     }
   }
