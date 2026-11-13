@@ -16,6 +16,7 @@ Zero API credits — everything renders from data already paid for.
 
 import html as html_lib
 import json, os, re, subprocess, datetime as dt
+from urllib.parse import urlencode
 
 import refresh_deals
 
@@ -946,6 +947,35 @@ def empty_copy(code, city, updated):
     )
 
 
+def _iso(value):
+    if not isinstance(value, str):
+        return ""
+    try:
+        return value if dt.date.fromisoformat(value).isoformat() == value else ""
+    except ValueError:
+        return ""
+
+
+AP_CODE = {"Cork": "ORK", "Dublin": "DUB"}
+
+
+def featured_fare(rows):
+    """Cheapest scanned fare that has an airport and both dates. None if the
+    page has prices but no usable dates — the caller must not invent any."""
+    priced = []
+    for row in rows:
+        ap = AP_CODE.get(row.get("from") or "")
+        dep, ret = _iso(row.get("dep") or ""), _iso(row.get("ret") or "")
+        price = row.get("price")
+        if not ap or not dep or not ret or price in (None, ""):
+            continue
+        priced.append((price, dep, 0 if ap == "ORK" else 1, ap, ret))
+    if not priced:
+        return None
+    price, dep, _order, ap, ret = min(priced)
+    return {"from": ap, "dep": dep, "ret": ret, "price": price}
+
+
 def fare_tbody(rows):
     """The <tbody> inner HTML for one destination. Also the fare fingerprint.
 
@@ -1202,21 +1232,33 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
                         "acceptedAnswer": {"@type": "Answer", "text": a}}
                        for q, a in faq]}).replace("<", "\\u003c")
     # data-hc-* is read by consent.js after consent. This is the page's only
-    # booking-funnel link. With a stored fare, /?dest= opens that deal. With
-    # none, the same hook points at the homepage board instead of a deal that
-    # is not there.
-    cta_href = ("/?dest=" + html_lib.escape(code, quote=True)) if rows else "/"
+    # booking-funnel link. With a stored fare, /?dest=&from=&out=&ret= opens
+    # that exact trip. With none, the same hook points at the homepage board.
+    fare = featured_fare(rows)
+    if fare:
+        cta_href = "/?" + urlencode((
+            ("dest", code), ("from", fare["from"]), ("out", fare["dep"]), ("ret", fare["ret"]),
+        ))
+        date_attrs = (
+            f' data-hc-origin="{html_lib.escape(fare["from"], quote=True)}"'
+            f' data-hc-out="{html_lib.escape(fare["dep"], quote=True)}"'
+            f' data-hc-ret="{html_lib.escape(fare["ret"], quote=True)}"'
+        )
+    else:
+        cta_href = ("/?dest=" + html_lib.escape(code, quote=True)) if rows else "/"
+        date_attrs = ""
     cta_html = (
         '<a class="cta" href="{href}"'
         ' data-hc-event="flight_click"'
         ' data-hc-destination="{city}"'
         ' data-hc-dest="{code}"'
-        ' data-hc-source="destination_page">{label}</a>'
+        ' data-hc-source="destination_page"{dates}>{label}</a>'
     ).format(
-        href=cta_href,
+        href=html_lib.escape(cta_href, quote=True),
         code=html_lib.escape(code, quote=True),
         city=html_lib.escape(city, quote=True),
         label=cta_label,
+        dates=date_attrs,
     )
     routes_html = route_section(code, city, rows)
     routes_block = f'\n<div class="routes">\n{routes_html}\n</div>\n' if routes_html else ""
@@ -1697,16 +1739,31 @@ def route_page_html(route, city, dest_slug, rows, updated):
             f'<a href="/routes/{html_lib.escape(sib["slug"], quote=True)}.html">'
             f'{html_lib.escape(sib["link"])}</a>'
         ))
-    cta_href = ("/?dest=" + html_lib.escape(route["code"], quote=True)) if mine else "/"
+    fare = featured_fare(mine)
+    if fare:
+        cta_href = "/?" + urlencode((
+            ("dest", route["code"]), ("from", fare["from"]),
+            ("out", fare["dep"]), ("ret", fare["ret"]),
+        ))
+        date_attrs = (
+            f' data-hc-out="{html_lib.escape(fare["dep"], quote=True)}"'
+            f' data-hc-ret="{html_lib.escape(fare["ret"], quote=True)}"'
+        )
+        origin_code = fare["from"]
+    else:
+        cta_href = ("/?dest=" + route["code"]) if mine else "/"
+        date_attrs = ""
+        origin_code = "ORK" if origin == "Cork" else "DUB"
     cta = (
         '<a class="cta" href="{href}" data-hc-event="flight_click" '
         'data-hc-destination="{city}" data-hc-dest="{code}" '
-        'data-hc-origin="{origin}" data-hc-source="route_page">{label}</a>'
+        'data-hc-origin="{origin}" data-hc-source="route_page"{dates}>{label}</a>'
     ).format(
-        href=cta_href,
+        href=html_lib.escape(cta_href, quote=True),
         city=html_lib.escape(city, quote=True),
         code=html_lib.escape(route["code"], quote=True),
-        origin="ORK" if origin == "Cork" else "DUB",
+        origin=html_lib.escape(origin_code, quote=True),
+        dates=date_attrs,
         label=html_lib.escape(
             f"Open the {city} deal — live prices, hotels & costs →" if mine
             else "See Cork & Dublin deals that are on the board →"
