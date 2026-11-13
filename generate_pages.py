@@ -146,6 +146,276 @@ REGIONS = (
     ["FAO", "AGP", "ALC", "SVQ", "TFS", "ACE", "FUE", "LPA", "MLA"],
 )
 
+# Pages Search Console already shows. Titles and H1s follow the query, and
+# still carry the Cork & Dublin framing. Copy below is limited to the scan
+# schedule in refresh_deals.py, fares in deals_cache.json, or an airline page
+# checked for this change. Do not add a route, day or carrier that is not there.
+# "SCAN" is replaced with a sentence built from the latest cache.
+GUIDES = {
+    "PMI": {
+        "title": "Flights to Palma from Cork & Dublin | Mallorca | Holiday Chasers",
+        "h1": "Flights to Palma from Cork and Dublin",
+        "lead": "Flights to Palma from Cork and Dublin",
+        "airline_answer": (
+            "Ryanair lists both Cork to Mallorca and Dublin to Mallorca. "
+            "Aer Lingus's Dublin to Palma page shows no departures for November 2026 "
+            "through April 2027, and lists May 2027. The latest scan stored no fare, "
+            "so the table does not add a carrier from a booking."
+        ),
+        "sections": [
+            ("Cork", [
+                "Ryanair lists Cork to Mallorca. The schedule this scan uses has no Cork to Palma flights after 24 October 2026 until Tuesdays from 18 May 2027 through 31 August 2027.",
+                "A Tuesday departure can be priced as a week of 6, 7 or 8 nights. It cannot be priced as a weekend, because weekends on this scan leave Thursday, Friday or Saturday.",
+                "SCAN",
+            ]),
+            ("Dublin", [
+                "Ryanair lists Dublin to Mallorca. The schedule this scan uses starts Dublin to Palma on 11 March 2027, on Tuesdays and Thursdays, through 24 October 2027.",
+                "Aer Lingus's own Dublin to Palma page shows no departures for November 2026 through April 2027, and lists May 2027. A Thursday can be priced as a weekend of 2 or 3 nights, and either Tuesday or Thursday can be priced as a week of 6, 7 or 8 nights, once those dates sit inside the scan window.",
+                "SCAN",
+            ]),
+        ],
+        "faqs": [
+            ("When do Palma flights from Cork and Dublin start again?",
+             "On the schedule this scan uses, Dublin to Palma is Tuesdays and Thursdays from 11 March 2027 to 24 October 2027, and Cork to Palma is Tuesdays from 18 May 2027 to 31 August 2027. No price is shown until a scan stores a real return."),
+            ("Can I book a weekend to Palma from Cork?",
+             "Not on the next Cork dates in this scan's schedule. Those are Tuesdays only, and a weekend here has to leave on Thursday, Friday or Saturday. A Tuesday can still make a one-week trip of 6, 7 or 8 nights."),
+        ],
+    },
+    "TFS": {
+        "title": "Flights to Tenerife from Cork & Dublin | Holiday Chasers",
+        "h1": "Flights to Tenerife from Cork and Dublin",
+        "lead": "Flights to Tenerife from Cork and Dublin",
+        "sections": [
+            ("Cork", [
+                "Ryanair lists Cork to Tenerife. Aer Lingus describes a direct Cork to Tenerife flight of about 4 hours 10 minutes, shows a departure on Monday 23 November 2026, and also lists July 2027 and September 2027.",
+                "The schedule this scan uses from 26 October to 20 December 2026 is Mondays, Thursdays, Fridays, Saturdays and Sundays. From 28 March 2027 it is Mondays, Wednesdays and Fridays through 31 July 2027.",
+                "SCAN",
+            ]),
+            ("Dublin", [
+                "Ryanair lists Dublin to Tenerife. Dublin has no separate weekday schedule in this scan, so it is priced on the usual weekend and week boards.",
+                "SCAN",
+            ]),
+        ],
+        "faqs": [
+            ("Are there flights to Tenerife from Cork?",
+             "Yes. Ryanair lists Cork to Tenerife, and the latest scan stores Ryanair returns from Cork. Aer Lingus also publishes a direct Cork to Tenerife flight, including Monday 23 November 2026."),
+            ("Which days does this scan treat as Cork to Tenerife days?",
+             "From 26 October to 20 December 2026 the schedule is Mondays, Thursdays, Fridays, Saturdays and Sundays. From 28 March 2027 it is Mondays, Wednesdays and Fridays through 31 July 2027."),
+        ],
+    },
+    "ACE": {
+        "title": "Flights to Lanzarote from Cork & Dublin | Holiday Chasers",
+        "h1": "Flights to Lanzarote from Cork and Dublin",
+        "lead": "Flights to Lanzarote from Cork and Dublin",
+        "sections": [
+            ("Cork", [
+                "Ryanair lists Cork to Lanzarote. Aer Lingus's flights-from-Cork page says the Lanzarote service is nonstop, and lists departures on 31 January 2027 and 26 April 2027.",
+                "The schedule this scan uses through 13 December 2026 includes Mondays, Tuesdays, Wednesdays, Thursdays, Saturdays and Sundays. Friday is not in that overlap.",
+                "SCAN",
+            ]),
+            ("Dublin", [
+                "Ryanair lists Dublin to Lanzarote. Dublin has no separate weekday schedule in this scan, so it is priced on the usual weekend and week boards.",
+                "SCAN",
+            ]),
+        ],
+        "faqs": [
+            ("Which airlines fly to Lanzarote from Cork and Dublin?",
+             "Ryanair lists both Cork to Lanzarote and Dublin to Lanzarote. Aer Lingus says its Cork to Lanzarote flight is nonstop. The airlines in the table are the ones on the latest stored fares."),
+            ("Does Cork fly to Lanzarote on Fridays right now?",
+             "Not on the schedule this scan uses through 13 December 2026. That overlap is Mondays, Tuesdays, Wednesdays, Thursdays, Saturdays and Sundays."),
+        ],
+    },
+    "AGP": {
+        "title": "Flights to Malaga from Cork & Dublin | Costa del Sol | Holiday Chasers",
+        "h1": "Flights to Malaga from Cork and Dublin",
+        "lead": "Flights to Malaga from Cork and Dublin",
+        "sections": [
+            ("Cork", [
+                "Ryanair lists Cork to Malaga. Aer Lingus's Cork to Malaga page calls it a direct flight of about 2 hours 50 minutes, and shows November 2026, December 2026, January 2027, February 2027, March 2027 and June 2027.",
+                "The schedule this scan uses from 2 November to 20 December 2026 is Mondays, Tuesdays, Wednesdays, Fridays, Saturdays and Sundays. Thursday is not in that window.",
+                "SCAN",
+            ]),
+            ("Dublin", [
+                "Ryanair lists Dublin to Malaga. Dublin has no separate weekday schedule in this scan, so it is priced on the usual weekend and week boards.",
+                "SCAN",
+            ]),
+        ],
+        "faqs": [
+            ("Who flies direct to Malaga from Cork?",
+             "Ryanair lists Cork to Malaga, and Aer Lingus publishes it as a direct flight of about 2 hours 50 minutes. The table shows which of those airlines came back on the latest scan."),
+            ("Which days does Cork to Malaga run this winter?",
+             "From 2 November to 20 December 2026 the schedule this scan uses is Mondays, Tuesdays, Wednesdays, Fridays, Saturdays and Sundays."),
+        ],
+    },
+    "FAO": {
+        "title": "Flights to Faro from Cork & Dublin | Algarve | Holiday Chasers",
+        "h1": "Flights to Faro from Cork and Dublin",
+        "lead": "Flights to Faro from Cork and Dublin",
+        "sections": [
+            ("Cork", [
+                "Ryanair lists Cork to Faro and shows a fare in every month from November 2026 through October 2027. Dates on that page include Sunday 29 November 2026, Sunday 6 December 2026, Friday 8 January 2027, Friday 5 February 2027 and Thursday 15 April 2027.",
+                "The schedule this scan uses from 13 November to 13 December 2026 is Fridays and Sundays. From 28 March 2027 it is every day through 31 July 2027.",
+                "SCAN",
+            ]),
+            ("Dublin", [
+                "Ryanair lists Dublin to Faro. Dublin has no separate weekday schedule in this scan, so it is priced on the usual weekend and week boards.",
+                "SCAN",
+            ]),
+        ],
+        "faqs": [
+            ("Are there direct flights to Faro from Cork and Dublin?",
+             "Yes. Ryanair lists both Cork to Faro and Dublin to Faro, and the latest scan stores Ryanair returns from both airports."),
+            ("Which days is Cork to Faro on this scan's schedule?",
+             "From 13 November to 13 December 2026 it is Fridays and Sundays. From 28 March 2027 the same schedule is every day through 31 July 2027."),
+        ],
+    },
+    "RHO": {
+        "title": "Flights to Rhodes from Ireland | Cork & Dublin | Holiday Chasers",
+        "h1": "Flights to Rhodes from Ireland",
+        "lead": "Flights to Rhodes from Ireland",
+        "intro": (
+            "This scan stored no Rhodes fare from Cork or from Dublin. It only prices "
+            "through 30 January 2027. Ryanair lists Cork to Rhodes from May 2027 and "
+            "Dublin to Rhodes from March 2027. No price is estimated for the gap."
+        ),
+        "desc": (
+            "Flights to Rhodes from Ireland. No fare in this scan, through 30 Jan 2027. "
+            "Ryanair lists Cork from May 2027 and Dublin from March 2027."
+        ),
+        "fare_answer": (
+            "This scan stored no Rhodes fare from Cork or Dublin. It only prices through "
+            "30 January 2027. Ryanair lists Cork to Rhodes from May 2027 and Dublin to "
+            "Rhodes from March 2027. No price is estimated for the gap."
+        ),
+        "airline_answer": (
+            "Ryanair lists both Cork to Rhodes and Dublin to Rhodes. "
+            "Their Cork page has no fare from November 2026 through April 2027 and lists flights again from May 2027. "
+            "Their Dublin page has no fare from November 2026 through February 2027 and lists flights from March 2027. "
+            "The latest scan stored no fare, because those dates are outside the window it prices."
+        ),
+        "sections": [
+            ("Cork", [
+                "Ryanair's Cork to Rhodes page shows no fare from November 2026 through April 2027. From May 2027 it lists flights on several days each week. Dates on the page include Thursday 27 May 2027, Thursday 29 July 2027, Monday 23 August 2027, Monday 27 September 2027 and Monday 25 October 2027.",
+                "The schedule this scan uses is Mondays and Thursdays from 1 June 2026 to 22 October 2026, and it has no 2027 Cork dates. That is why no Cork fare is stored, even though Ryanair is selling summer 2027.",
+                "SCAN",
+            ]),
+            ("Dublin", [
+                "Ryanair's Dublin to Rhodes page shows no fare from November 2026 through February 2027. From March 2027 it lists flights on multiple days each week. Dates on the page include Tuesday 30 March 2027, Thursday 8 April 2027, Tuesday 24 August 2027, Thursday 16 September 2027 and Tuesday 26 October 2027.",
+                "The schedule this scan uses for summer 2027 is Tuesdays, Thursdays and Saturdays from 30 March 2027 to 30 October 2027. This scan only prices through 30 January 2027, so no Dublin fare is stored yet.",
+                "SCAN",
+            ]),
+        ],
+        "faqs": [
+            ("Are there flights to Rhodes from Ireland?",
+             "Ryanair lists Cork to Rhodes and Dublin to Rhodes. Neither is inside the dates this scan prices, which run through 30 January 2027, so there is no fare on this page."),
+            ("When is the next Dublin to Rhodes season on this scan?",
+             "Tuesdays, Thursdays and Saturdays from 30 March 2027 to 30 October 2027. Ryanair's own page also lists Tuesday 30 March 2027 and other Tuesdays and Thursdays through October 2027."),
+        ],
+    },
+    "KRK": {
+        "title": "Cork to Krakow flights | Fly direct from Dublin | Holiday Chasers",
+        "h1": "Cork to Krakow flights: fly direct from Dublin",
+        "lead": "Cork to Krakow flights: fly direct from Dublin",
+        "desc": (
+            "Cork to Krakow flights: no direct Cork route in this scan. "
+            "Dublin to Krakow with Ryanair, from €{price} return per person."
+        ),
+        "intro": (
+            "There is no direct flight from Cork to Krakow in this scan. Ryanair's "
+            "route list does not include Cork to Krakow. The direct route is Dublin "
+            "to Krakow with Ryanair, from €{price} per person on the latest scan."
+        ),
+        "price_answer": (
+            "There is no direct Cork to Krakow fare in this scan. The cheapest "
+            "Dublin to Krakow return it stored is €{price} per person, with Ryanair. "
+            "Prices refresh automatically every few days."
+        ),
+        "airline_answer": (
+            "Ryanair flies Dublin to Krakow, and that is the only direct route on "
+            "this scan. Ryanair's route list does not include Cork to Krakow, so "
+            "this page does not show a Cork fare."
+        ),
+        "sections": [
+            ("Cork", [
+                "Ryanair's city-to-city list includes Dublin to Krakow and does not include Cork to Krakow. This scan does not look for a Cork to Krakow flight, because that direct route is not on the list.",
+            ]),
+            ("Dublin", [
+                "Ryanair's Dublin to Krakow page lists a fare in every month from November 2026 through October 2027 and says the flight runs every day, typically once a day and sometimes twice. Dates on the page include Monday 23 November 2026, Saturday 5 December 2026, Saturday 30 January 2027, Saturday 27 February 2027 and Saturday 6 March 2027.",
+                "Dublin has no separate weekday schedule in this scan, so it is priced on the usual weekend and week boards.",
+                "SCAN",
+            ]),
+        ],
+        "faqs": [
+            ("Is there a direct flight from Cork to Krakow?",
+             "No. There is no direct flight from Cork to Krakow in this scan, and Ryanair's route list does not include Cork to Krakow. The direct route is Dublin to Krakow with Ryanair."),
+            ("Does Dublin fly to Krakow every day?",
+             "Ryanair says the Dublin to Krakow flight runs every day, typically once a day and sometimes twice. The table shows the weekend and one-week dates the latest scan actually stored."),
+        ],
+    },
+    "PSA": {
+        "title": "Dublin to Pisa flights | No Cork fare in this scan | Holiday Chasers",
+        "h1": "Dublin to Pisa flights",
+        "lead": "Dublin to Pisa flights",
+        "desc": (
+            "Dublin to Pisa flights with Ryanair, from €{price} return per person. "
+            "No Cork fare in this scan. Ryanair lists Cork to Pisa again from March 2027."
+        ),
+        "intro": (
+            "The fares on this page are Dublin to Pisa with Ryanair, from €{price} "
+            "per person on the latest scan. There is no direct Cork fare in this scan. "
+            "Ryanair shows no Cork to Pisa flight from November 2026 through February 2027, "
+            "and lists that route again from March 2027."
+        ),
+        "price_answer": (
+            "The cheapest fare in this scan is a Dublin to Pisa return at €{price} "
+            "per person, with Ryanair. There is no Cork fare stored."
+        ),
+        "airline_answer": (
+            "Ryanair flies Dublin to Pisa, and those are the fares in the table. "
+            "Ryanair also lists Cork to Pisa, but shows no fare from November 2026 "
+            "through February 2027, and this scan stored none."
+        ),
+        "sections": [
+            ("Cork", [
+                "Ryanair's Cork to Pisa page shows no fare for November 2026 through February 2027. From March 2027 it lists flights on multiple days each week. Dates on the page include Friday 23 April 2027, Friday 21 May 2027, Monday 9 August 2027 and Friday 3 September 2027.",
+                "The schedule this scan uses is Mondays and Fridays from 3 April 2026 to 23 October 2026, with nothing after that, so this run stored no Cork fare.",
+                "SCAN",
+            ]),
+            ("Dublin", [
+                "Ryanair's Dublin to Pisa page lists a fare in every month from November 2026 through October 2027 and says the flight runs on most days, at least once a day. Dates on the page include Thursday 10 December 2026, Monday 18 January 2027, Monday 1 February 2027 and Wednesday 5 May 2027.",
+                "Dublin has no separate weekday schedule in this scan, so it is priced on the usual weekend and week boards. A Saturday in the table is a date the scan stored, not the only day the route flies.",
+                "SCAN",
+            ]),
+        ],
+        "faqs": [
+            ("Does Dublin fly direct to Pisa?",
+             "Yes. Ryanair lists Dublin to Pisa in every month from November 2026 through October 2027, and says it runs on most days. The table is the returns the latest scan stored."),
+            ("Are there Cork to Pisa flights this winter?",
+             "Ryanair shows no Cork to Pisa fare for November 2026 through February 2027, then lists flights again from March 2027. This scan's Cork schedule ends on 23 October 2026, so no Cork fare is stored."),
+        ],
+    },
+}
+
+TRIP_PARAGRAPH = (
+    "This scan prices two trip lengths. A weekend is 2 or 3 nights and leaves on "
+    "Thursday, Friday or Saturday. A week is 6, 7 or 8 nights, and 7 nights is preferred. "
+    "The table only includes a date when a real return fare came back for one of those shapes."
+)
+
+# Homepage links to the pages above. Anchor text follows the search, not a price.
+POPULAR_ROUTES = (
+    ("faro.html", "Faro", "Flights to Faro", "Cork and Dublin"),
+    ("tenerife.html", "Tenerife", "Flights to Tenerife from Cork", "Cork and Dublin"),
+    ("rhodes.html", "Rhodes", "Flights to Rhodes from Ireland", "No fare in this scan"),
+    ("krakow.html", "Krakow", "Cork to Krakow", "Fly direct from Dublin"),
+    ("pisa.html", "Pisa", "Dublin to Pisa", "No Cork fare in this scan"),
+    ("palma-mallorca.html", "Palma", "Flights to Palma", "Cork and Dublin"),
+    ("lanzarote.html", "Lanzarote", "Flights to Lanzarote", "Cork and Dublin"),
+    ("malaga.html", "Malaga", "Flights to Malaga", "Cork and Dublin"),
+)
+POPULAR_START = "<!-- hc-popular-routes -->"
+POPULAR_END = "<!-- /hc-popular-routes -->"
+
 
 def fmt_date(iso):
     try:
@@ -279,6 +549,73 @@ def empty_copy(code, city, updated):
     )
 
 
+def _name_list(names):
+    names = [name for name in names if name]
+    if not names:
+        return ""
+    if len(names) == 1:
+        return names[0]
+    if len(names) == 2:
+        return f"{names[0]} and {names[1]}"
+    return ", ".join(names[:-1]) + " and " + names[-1]
+
+
+def _scan_paragraph(origin, rows):
+    """Airlines, weekdays and trip lengths actually stored for one airport."""
+    if not rows:
+        return f"The latest scan stored no {origin} fare."
+    airlines = _name_list(sorted({
+        r["airline"] for r in rows if r["airline"] and r["airline"] != "—"
+    }))
+    order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    days = sorted({
+        dt.date.fromisoformat(r["dep"]).strftime("%A")
+        for r in rows if r.get("dep")
+    }, key=order.index)
+    nights = sorted({
+        int(r["nights"]) for r in rows
+        if str(r.get("nights") or "").isdigit()
+    })
+    text = (
+        f"The latest scan stored {airlines} returns from {origin}"
+        if airlines else
+        f"The latest scan stored fares from {origin}"
+    )
+    if days:
+        text += ", departing on " + _name_list(days)
+    if nights:
+        text += ", on " + _name_list([f"{n}-night" for n in nights]) + " trips"
+    return text + "."
+
+
+def route_section(code, rows):
+    guide = GUIDES.get(code)
+    if not guide:
+        return ""
+    by_origin = {}
+    for row in rows:
+        by_origin.setdefault(row["from"], []).append(row)
+    parts = ["<h2>Routes from Cork and Dublin</h2>"]
+    for heading, paragraphs in guide["sections"]:
+        parts.append(f"<h3>{html_lib.escape(heading)}</h3>")
+        for para in paragraphs:
+            text = _scan_paragraph(heading, by_origin.get(heading, [])) if para == "SCAN" else para
+            parts.append(f"<p>{html_lib.escape(text, quote=False)}</p>")
+    parts.append("<h3>Weekend or one week</h3>")
+    parts.append(f"<p>{html_lib.escape(TRIP_PARAGRAPH)}</p>")
+    return "\n".join(parts)
+
+
+def _fill_price(text, min_p, bold=False):
+    """Swap €{price} for the scanned fare. Bold is only for the visible intro."""
+    if "{price}" not in text:
+        return text
+    if not min_p:
+        return text.replace("€{price}", "")
+    shown = f"<b>€{min_p}</b>" if bold else f"€{min_p}"
+    return text.replace("€{price}", shown)
+
+
 def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
     prices = [r["price"] for r in rows if r["price"]]
     min_p = min(prices) if prices else None
@@ -286,6 +623,11 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
     hook = HOOKS.get(code, country)
     hook_sentence = hook[:1].upper() + hook[1:]
     title = f"{city} flights from Cork & Dublin | {hook_sentence} | Holiday Chasers"
+    guide = GUIDES.get(code)
+    h1 = f"Cheap flights to {city} from Cork & Dublin"
+    if guide:
+        title = guide["title"]
+        h1 = guide["h1"]
     if min_p:
         desc = (
             f"Direct {city} flights from Cork and Dublin, from €{min_p} return "
@@ -312,6 +654,16 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
                 f"{city} flights from Cork and Dublin. No direct fare in the latest "
                 f"scan, and the schedule we use has no restart date."
             )
+    if guide:
+        if min_p:
+            desc = (
+                f"{guide['lead']}. From €{min_p} return per person. "
+                f"{hook_sentence}. Weekend and one-week trips from real scanned fares."
+            )
+        else:
+            desc = desc.replace(f"{city} flights from Cork and Dublin", guide["lead"], 1)
+        if guide.get("desc"):
+            desc = _fill_price(guide["desc"], min_p)
     desc = desc if len(desc) <= 160 else _clip(desc, 160)
 
     fare_rows = "\n".join(
@@ -369,6 +721,16 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
              "The destinations linked below have direct returns in the latest scan. "
              "The homepage board is the same data."),
         ]
+    if guide and guide.get("intro"):
+        lead = _fill_price(guide["intro"], min_p, bold=True)
+    if guide:
+        if guide.get("fare_answer"):
+            faq[0] = (faq[0][0], guide["fare_answer"])
+        elif guide.get("price_answer") and min_p:
+            faq[0] = (faq[0][0], guide["price_answer"].format(price=min_p))
+        if guide.get("airline_answer"):
+            faq[1] = (faq[1][0], guide["airline_answer"])
+        faq.extend(guide.get("faqs") or [])
     faq_html = "\n".join(
         f"<details><summary>{q}</summary><p>{a}</p></details>" for q, a in faq)
     faq_ld = json.dumps({
@@ -393,6 +755,9 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
         city=html_lib.escape(city, quote=True),
         label=cta_label,
     )
+    routes_html = route_section(code, rows)
+    routes_block = f'\n<div class="routes">\n{routes_html}\n</div>\n' if routes_html else ""
+    h1_html = html_lib.escape(h1)
     title = html_lib.escape(title)
     desc = html_lib.escape(desc, quote=True)
 
@@ -420,10 +785,13 @@ main{{max-width:820px;margin:0 auto;padding:28px 20px 60px}}
 h1{{font-size:30px;line-height:1.2;margin-bottom:10px}}
 .sub{{color:var(--muted);font-size:15px;margin-bottom:22px}}
 .cta{{display:inline-block;background:var(--ink);color:var(--ivory);padding:13px 22px;border-radius:10px;text-decoration:none;font-weight:700;margin:8px 0 26px}}
-table{{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:14px}}
+.table-wrap{{overflow-x:auto;-webkit-overflow-scrolling:touch}}
+table{{width:100%;min-width:640px;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:14px}}
 th{{text-align:left;background:var(--cream);padding:10px 12px;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}}
 td{{padding:10px 12px;border-top:1px solid var(--line)}}td.p{{font-weight:800}}
 h2{{font-size:20px;margin:34px 0 10px}}
+h3{{font-size:16px;margin:16px 0 4px}}
+.routes p{{margin:0 0 10px}}
 details{{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:8px 0}}
 summary{{font-weight:700;cursor:pointer}}
 details p{{margin-top:8px;color:var(--muted);font-size:14px}}
@@ -444,18 +812,20 @@ footer a.ext{{color:var(--ink);font-weight:600;border-bottom:1px solid var(--gol
 <body>
 <header><a href="/">Holiday Chasers</a><span style="font-size:12px;color:#c8d0da">Cork &amp; Dublin flight deals</span></header>
 <main>
-<h1>Cheap flights to {city} from Cork &amp; Dublin</h1>
+<h1>{h1_html}</h1>
 <p class="sub">{blurb}</p>
 <p>{lead}</p>
 {cta_html}
-
+{routes_block}
 <h2>Every scanned date for {city}</h2>
+<div class="table-wrap">
 <table>
 <thead><tr><th>From</th><th>Trip</th><th>Dates</th><th>Per person</th><th>Airline</th></tr></thead>
 <tbody>
 {fare_rows}
 </tbody>
 </table>
+</div>
 <p class="note">{note}</p>
 
 <h2>Good to know</h2>
@@ -516,6 +886,62 @@ def update_homepage_footer():
         print(f"  updated homepage footer ({len(CITIES)} cities)")
     else:
         print("  homepage footer already current")
+
+
+def popular_routes_html():
+    cards = []
+    for slug, name, label, note in POPULAR_ROUTES:
+        cards.append(
+            '<a href="/destinations/{slug}">'
+            '<span class="pr-kicker">{name}</span>'
+            '<strong>{label}</strong>'
+            '<span>{note}</span></a>'.format(
+                slug=html_lib.escape(slug, quote=True),
+                name=html_lib.escape(name),
+                label=html_lib.escape(label),
+                note=html_lib.escape(note),
+            )
+        )
+    inner = (
+        '<section class="popular-routes" aria-label="Popular routes">\n'
+        '  <h2>Popular routes</h2>\n'
+        '  <p>Direct flights from Cork and Dublin. Each page has the routes we '
+        'scan and the fares from the latest check.</p>\n'
+        '  <div class="popular-grid">\n    '
+        + "\n    ".join(cards)
+        + "\n  </div>\n</section>"
+    )
+    return POPULAR_START + "\n" + inner + "\n" + POPULAR_END
+
+
+def update_popular_routes():
+    """Insert or refresh the homepage popular-routes block. A deal refresh
+    rewrites destination pages, so this block has to live in the generator."""
+    path = "index.html"
+    if not os.path.exists(path):
+        print("  skip popular routes: index.html missing")
+        return
+    with open(path, encoding="utf-8") as f:
+        doc = f.read()
+    block = popular_routes_html()
+    if POPULAR_START in doc and POPULAR_END in doc:
+        pattern = re.compile(re.escape(POPULAR_START) + r".*?" + re.escape(POPULAR_END), re.DOTALL)
+        new, count = pattern.subn(block, doc, count=1)
+        if count != 1:
+            print("  skip popular routes: could not replace the block")
+            return
+    else:
+        anchor = "<!-- ═══ TABS ═══ -->"
+        if anchor not in doc:
+            print("  skip popular routes: no insertion point in index.html")
+            return
+        new = doc.replace(anchor, block + "\n\n" + anchor, 1)
+    if new != doc:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(new)
+        print(f"  updated homepage popular routes ({len(POPULAR_ROUTES)} links)")
+    else:
+        print("  homepage popular routes already current")
 
 
 def write_404():
@@ -615,6 +1041,7 @@ def main():
                 + "\n".join(entries) + "\n</urlset>\n")
     print(f"wrote sitemap.xml ({1 + len(INFO_PAGES) + len(urls)} urls)")
     update_homepage_footer()
+    update_popular_routes()
     write_404()
 
 

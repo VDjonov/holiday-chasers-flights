@@ -653,3 +653,18 @@ img{max-width:100%}
   .pd-month2{display:none}
   .pd-labels{justify-content:center}
 }
+
+/* Popular routes — generated into index.html by generate_pages.py */
+.popular-routes{max-width:1120px;margin:0 auto;padding:28px 24px 8px}
+.popular-routes h2{font-family:var(--font-display);font-size:30px;font-weight:600;letter-spacing:-.02em;line-height:1.1}
+.popular-routes p{font-size:15px;color:var(--muted);margin-top:8px;max-width:640px}
+.popular-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:18px}
+.popular-grid a{display:block;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow-sm);transition:border-color .18s,transform .18s}
+.popular-grid a:hover{border-color:var(--gold);transform:translateY(-2px)}
+.popular-grid .pr-kicker{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.popular-grid strong{display:block;font-family:var(--font-display);font-size:18px;font-weight:600;line-height:1.25;margin-top:4px;color:var(--ink)}
+.popular-grid span{display:block;font-size:13px;color:var(--muted);margin-top:4px}
+@media(max-width:600px){
+  .popular-routes{padding:4px 16px 28px}
+  .popular-routes h2{font-size:24px}
+}

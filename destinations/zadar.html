@@ -22,10 +22,13 @@ main{max-width:820px;margin:0 auto;padding:28px 20px 60px}
 h1{font-size:30px;line-height:1.2;margin-bottom:10px}
 .sub{color:var(--muted);font-size:15px;margin-bottom:22px}
 .cta{display:inline-block;background:var(--ink);color:var(--ivory);padding:13px 22px;border-radius:10px;text-decoration:none;font-weight:700;margin:8px 0 26px}
-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:14px}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;min-width:640px;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:14px}
 th{text-align:left;background:var(--cream);padding:10px 12px;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
 td{padding:10px 12px;border-top:1px solid var(--line)}td.p{font-weight:800}
 h2{font-size:20px;margin:34px 0 10px}
+h3{font-size:16px;margin:16px 0 4px}
+.routes p{margin:0 0 10px}
 details{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:8px 0}
 summary{font-weight:700;cursor:pointer}
 details p{margin-top:8px;color:var(--muted);font-size:14px}
@@ -52,13 +55,15 @@ footer a.ext{color:var(--ink);font-weight:600;border-bottom:1px solid var(--gold
 <a class="cta" href="/" data-hc-event="flight_click" data-hc-destination="Zadar" data-hc-dest="ZAD" data-hc-source="destination_page">See Cork &amp; Dublin deals that are on the board →</a>
 
 <h2>Every scanned date for Zadar</h2>
+<div class="table-wrap">
 <table>
 <thead><tr><th>From</th><th>Trip</th><th>Dates</th><th>Per person</th><th>Airline</th></tr></thead>
 <tbody>
 <tr><td colspan='5'>No direct fare in the latest scan.</td></tr>
 </tbody>
 </table>
-<p class="note">Direct flights only · prices per person, return · last scanned Fri 13 Nov · 💡 = midweek saver</p>
+</div>
+<p class="note">Direct flights only · prices per person, return · last scanned Fri 13 Nov</p>
 
 <h2>Good to know</h2>
 <details><summary>How much are flights to Zadar from Ireland right now?</summary><p>No direct flights from Cork or Dublin to Zadar in the dates this scan covers, through 30 Jan 2027. Next on that schedule: Dublin from 29 Mar 2027, Mondays and Fridays; Cork from 4 Jun 2027, Mondays and Fridays. We don't estimate a price for the gap.</p></details>
