@@ -273,6 +273,20 @@ GUIDES = {
         "title": "Flights to Rhodes from Ireland | Cork & Dublin | Holiday Chasers",
         "h1": "Flights to Rhodes from Ireland",
         "lead": "Flights to Rhodes from Ireland",
+        "intro": (
+            "This scan stored no Rhodes fare from Cork or from Dublin. It only prices "
+            "through 30 January 2027. Ryanair lists Cork to Rhodes from May 2027 and "
+            "Dublin to Rhodes from March 2027. No price is estimated for the gap."
+        ),
+        "desc": (
+            "Flights to Rhodes from Ireland. No fare in this scan, through 30 Jan 2027. "
+            "Ryanair lists Cork from May 2027 and Dublin from March 2027."
+        ),
+        "fare_answer": (
+            "This scan stored no Rhodes fare from Cork or Dublin. It only prices through "
+            "30 January 2027. Ryanair lists Cork to Rhodes from May 2027 and Dublin to "
+            "Rhodes from March 2027. No price is estimated for the gap."
+        ),
         "airline_answer": (
             "Ryanair lists both Cork to Rhodes and Dublin to Rhodes. "
             "Their Cork page has no fare from November 2026 through April 2027 and lists flights again from May 2027. "
@@ -299,9 +313,28 @@ GUIDES = {
         ],
     },
     "KRK": {
-        "title": "Cork to Krakow flights | Cork & Dublin | Holiday Chasers",
-        "h1": "Cork to Krakow flights",
-        "lead": "Cork to Krakow flights",
+        "title": "Cork to Krakow flights | Fly direct from Dublin | Holiday Chasers",
+        "h1": "Cork to Krakow flights: fly direct from Dublin",
+        "lead": "Cork to Krakow flights: fly direct from Dublin",
+        "desc": (
+            "Cork to Krakow flights: no direct Cork route in this scan. "
+            "Dublin to Krakow with Ryanair, from €{price} return per person."
+        ),
+        "intro": (
+            "There is no direct flight from Cork to Krakow in this scan. Ryanair's "
+            "route list does not include Cork to Krakow. The direct route is Dublin "
+            "to Krakow with Ryanair, from €{price} per person on the latest scan."
+        ),
+        "price_answer": (
+            "There is no direct Cork to Krakow fare in this scan. The cheapest "
+            "Dublin to Krakow return it stored is €{price} per person, with Ryanair. "
+            "Prices refresh automatically every few days."
+        ),
+        "airline_answer": (
+            "Ryanair flies Dublin to Krakow, and that is the only direct route on "
+            "this scan. Ryanair's route list does not include Cork to Krakow, so "
+            "this page does not show a Cork fare."
+        ),
         "sections": [
             ("Cork", [
                 "Ryanair's city-to-city list includes Dublin to Krakow and does not include Cork to Krakow. This scan does not look for a Cork to Krakow flight, because that direct route is not on the list.",
@@ -314,15 +347,34 @@ GUIDES = {
         ],
         "faqs": [
             ("Is there a direct flight from Cork to Krakow?",
-             "Not on Ryanair's route list, and not in the routes this scan prices. The direct flight we track leaves from Dublin."),
+             "No. There is no direct flight from Cork to Krakow in this scan, and Ryanair's route list does not include Cork to Krakow. The direct route is Dublin to Krakow with Ryanair."),
             ("Does Dublin fly to Krakow every day?",
              "Ryanair says the Dublin to Krakow flight runs every day, typically once a day and sometimes twice. The table shows the weekend and one-week dates the latest scan actually stored."),
         ],
     },
     "PSA": {
-        "title": "Dublin to Pisa flights | Cork & Dublin | Holiday Chasers",
+        "title": "Dublin to Pisa flights | No Cork fare in this scan | Holiday Chasers",
         "h1": "Dublin to Pisa flights",
         "lead": "Dublin to Pisa flights",
+        "desc": (
+            "Dublin to Pisa flights with Ryanair, from €{price} return per person. "
+            "No Cork fare in this scan. Ryanair lists Cork to Pisa again from March 2027."
+        ),
+        "intro": (
+            "The fares on this page are Dublin to Pisa with Ryanair, from €{price} "
+            "per person on the latest scan. There is no direct Cork fare in this scan. "
+            "Ryanair shows no Cork to Pisa flight from November 2026 through February 2027, "
+            "and lists that route again from March 2027."
+        ),
+        "price_answer": (
+            "The cheapest fare in this scan is a Dublin to Pisa return at €{price} "
+            "per person, with Ryanair. There is no Cork fare stored."
+        ),
+        "airline_answer": (
+            "Ryanair flies Dublin to Pisa, and those are the fares in the table. "
+            "Ryanair also lists Cork to Pisa, but shows no fare from November 2026 "
+            "through February 2027, and this scan stored none."
+        ),
         "sections": [
             ("Cork", [
                 "Ryanair's Cork to Pisa page shows no fare for November 2026 through February 2027. From March 2027 it lists flights on multiple days each week. Dates on the page include Friday 23 April 2027, Friday 21 May 2027, Monday 9 August 2027 and Friday 3 September 2027.",
@@ -354,9 +406,9 @@ TRIP_PARAGRAPH = (
 POPULAR_ROUTES = (
     ("faro.html", "Faro", "Flights to Faro", "Cork and Dublin"),
     ("tenerife.html", "Tenerife", "Flights to Tenerife from Cork", "Cork and Dublin"),
-    ("rhodes.html", "Rhodes", "Flights to Rhodes from Ireland", "Cork and Dublin"),
-    ("krakow.html", "Krakow", "Cork to Krakow", "Direct from Dublin"),
-    ("pisa.html", "Pisa", "Dublin to Pisa", "Cork and Dublin"),
+    ("rhodes.html", "Rhodes", "Flights to Rhodes from Ireland", "No fare in this scan"),
+    ("krakow.html", "Krakow", "Cork to Krakow", "Fly direct from Dublin"),
+    ("pisa.html", "Pisa", "Dublin to Pisa", "No Cork fare in this scan"),
     ("palma-mallorca.html", "Palma", "Flights to Palma", "Cork and Dublin"),
     ("lanzarote.html", "Lanzarote", "Flights to Lanzarote", "Cork and Dublin"),
     ("malaga.html", "Malaga", "Flights to Malaga", "Cork and Dublin"),
@@ -554,6 +606,16 @@ def route_section(code, rows):
     return "\n".join(parts)
 
 
+def _fill_price(text, min_p, bold=False):
+    """Swap €{price} for the scanned fare. Bold is only for the visible intro."""
+    if "{price}" not in text:
+        return text
+    if not min_p:
+        return text.replace("€{price}", "")
+    shown = f"<b>€{min_p}</b>" if bold else f"€{min_p}"
+    return text.replace("€{price}", shown)
+
+
 def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
     prices = [r["price"] for r in rows if r["price"]]
     min_p = min(prices) if prices else None
@@ -600,6 +662,8 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
             )
         else:
             desc = desc.replace(f"{city} flights from Cork and Dublin", guide["lead"], 1)
+        if guide.get("desc"):
+            desc = _fill_price(guide["desc"], min_p)
     desc = desc if len(desc) <= 160 else _clip(desc, 160)
 
     fare_rows = "\n".join(
@@ -657,7 +721,13 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
              "The destinations linked below have direct returns in the latest scan. "
              "The homepage board is the same data."),
         ]
+    if guide and guide.get("intro"):
+        lead = _fill_price(guide["intro"], min_p, bold=True)
     if guide:
+        if guide.get("fare_answer"):
+            faq[0] = (faq[0][0], guide["fare_answer"])
+        elif guide.get("price_answer") and min_p:
+            faq[0] = (faq[0][0], guide["price_answer"].format(price=min_p))
         if guide.get("airline_answer"):
             faq[1] = (faq[1][0], guide["airline_answer"])
         faq.extend(guide.get("faqs") or [])
