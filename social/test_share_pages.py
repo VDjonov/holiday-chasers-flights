@@ -23,6 +23,15 @@ def main():
     assert g.share_id("classic", porto, "hero_dub") == g.share_id("classic", porto, "sun_dub")
     assert g.share_id("classic", porto, "hero_dub") not in g.PINNED_SHARES
     assert g.share_id("ivory", [], "trip_glance") == "trip_glance_ivory"
+    # A new share lands on the scanned dates. The page id does not change.
+    assert g.link(porto[0]) == (
+        "holidaychasers.ie/?dest=OPO&from=DUB&out=2026-12-05&ret=2026-12-12"
+        "&utm_source=facebook&utm_medium=social"
+    )
+    assert g.share_id("classic", porto, "hero_dub") == "dub-opo-20261205-20261212-39-classic"
+    undated = dict(porto[0], dep="", ret="")
+    assert "out=" not in g.link(undated) and "ret=" not in g.link(undated)
+    assert "dest=OPO" in g.link(undated) and "from=DUB" in g.link(undated)
 
     sun = [
         deal("DUB", "AGP", 40, "2027-01-09", "2027-01-16", "Malaga"),
@@ -59,6 +68,21 @@ def main():
              "https://holidaychasers.ie/?dest=FAO&from=DUB&utm_source=facebook&utm_medium=social"),
         ], d)
         assert os.path.exists(os.path.join(d, "dub-fao-20261212-20261219-38-classic.html"))
+        assert open(path, encoding="utf-8").read() == first
+        dated_id = "dub-opo-20261205-20261212-46-classic"
+        dated_url = "https://" + g.link(deal("DUB", "OPO", 46, "2026-12-05", "2026-12-12", "Porto"))
+        g.publish_share_pages([
+            (dated_id, "Dublin to Porto from €46 return per person", "d",
+             "https://holidaychasers.ie/social/card/" + dated_id + ".jpg", dated_url),
+        ], d)
+        dated_path = os.path.join(d, dated_id + ".html")
+        dated_html = open(dated_path, encoding="utf-8").read()
+        assert "out=2026-12-05" in dated_html and "ret=2026-12-12" in dated_html
+        assert "from=DUB" in dated_html and "dest=OPO" in dated_html
+        g.publish_share_pages([
+            (dated_id, "CHANGED", "d", "https://example/other.jpg", "https://example/?dest=FAO"),
+        ], d)
+        assert open(dated_path, encoding="utf-8").read() == dated_html
         assert open(path, encoding="utf-8").read() == first
 
     print("ok")

@@ -81,7 +81,15 @@ def pick(cands, ap, kinds, n, exclude=(), sun=False, no_uk=False, direct=False):
 
 
 def link(c):
-    return f"{SITE}/?dest={c['code']}&from={c['ap']}&utm_source=facebook&utm_medium=social"
+    """Landing URL for one scanned fare. Dates are added only when this fare has both."""
+    url = f"{SITE}/?dest={c['code']}&from={c['ap']}"
+    dep, ret = c.get("dep") or "", c.get("ret") or ""
+    try:
+        if dt.date.fromisoformat(dep).isoformat() == dep and dt.date.fromisoformat(ret).isoformat() == ret:
+            url += f"&out={dep}&ret={ret}"
+    except ValueError:
+        pass
+    return url + "&utm_source=facebook&utm_medium=social"
 
 
 # ── city photos ─────────────────────────────────────────────────────────────

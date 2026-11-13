@@ -64,10 +64,14 @@ function hcTrackDestinationClick(e){
   const dest = a.getAttribute("data-hc-dest");
   const source = a.getAttribute("data-hc-source");
   const origin = a.getAttribute("data-hc-origin");
+  const out = a.getAttribute("data-hc-out");
+  const ret = a.getAttribute("data-hc-ret");
   if (destination) params.destination = destination;
   if (dest) params.dest = dest;
   if (source) params.source = source;
   if (origin) params.origin = origin;
+  if (out && /^\d{4}-\d{2}-\d{2}$/.test(out)) params.out = out;
+  if (ret && /^\d{4}-\d{2}-\d{2}$/.test(ret)) params.ret = ret;
   const label = (a.textContent || "").trim().slice(0, 40);
   if (label) params.label = label;
   gtag("event", name, params);
