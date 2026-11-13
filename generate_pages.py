@@ -27,7 +27,6 @@ INFO_PAGES = (
     "how-it-works.html",
     "about.html",
     "contact.html",
-    "privacy.html",
 )
 
 # slug + one-line intro per destination (kept short; the fares are the content)
@@ -245,7 +244,7 @@ footer a.ext{{color:var(--ink);font-weight:600;border-bottom:1px solid var(--gol
 <h2>More destinations</h2>
 <p class="rel">{related_html} · <a href="/">all deals →</a></p>
 </main>
-<footer>© Holiday Chasers Ireland · <a href="/" style="color:var(--muted)">holidaychasers.ie</a> · <a href="/how-it-works.html" style="color:var(--muted)">How it works</a> · <a href="/about.html" style="color:var(--muted)">About</a> · <a href="/contact.html" style="color:var(--muted)">Contact</a> · <a href="/privacy.html" style="color:var(--muted)">Privacy</a> · <a class="ext" href="https://www.facebook.com/holidaychasersie" rel="noopener" target="_blank">Facebook</a> · <a class="ext" href="https://www.instagram.com/holidaychasers.ie/" rel="noopener" target="_blank">Instagram</a></footer>
+<footer>© Holiday Chasers Ireland · <a href="/" style="color:var(--muted)">holidaychasers.ie</a> · <a href="/how-it-works.html" style="color:var(--muted)">How it works</a> · <a href="/about.html" style="color:var(--muted)">About</a> · <a href="/contact.html" style="color:var(--muted)">Contact</a> · <a class="ext" href="https://www.facebook.com/holidaychasersie" rel="noopener" target="_blank">Facebook</a> · <a class="ext" href="https://www.instagram.com/holidaychasers.ie/" rel="noopener" target="_blank">Instagram</a></footer>
 <div class="consent-bar" id="consentBar">
   <div class="consent-txt"><b>Quick one:</b> we use anonymous analytics to see which deals people love, so we can find better ones. No ads, no selling data.</div>
   <div class="consent-btns">
