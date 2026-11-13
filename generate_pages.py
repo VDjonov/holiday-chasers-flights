@@ -15,7 +15,7 @@ Zero API credits — everything renders from data already paid for.
 """
 
 import html as html_lib
-import json, os, re, datetime as dt
+import json, os, re, subprocess, datetime as dt
 
 import refresh_deals
 
@@ -946,6 +946,23 @@ def empty_copy(code, city, updated):
     )
 
 
+def fare_tbody(rows):
+    """The <tbody> inner HTML for one destination. Also the fare fingerprint.
+
+    An empty scan is the empty string. The page shows a no-fare panel then,
+    not a table row.
+    """
+    if not rows:
+        return ""
+    return "\n".join(
+        f"<tr><td>{r['from']}</td><td>{r['kind']}</td>"
+        f"<td>{fmt_date(r['dep'])} → {fmt_date(r['ret'])}"
+        + (f" · {r['nights']}n" if r["nights"] else "") + "</td>"
+        f"<td class='p'>€{r['price']}" + (" 💡" if r["saver"] else "") + "</td>"
+        f"<td>{html_lib.escape(r['airline'])}</td></tr>"
+        for r in rows)
+
+
 def _name_list(names):
     names = [name for name in names if name]
     if not names:
@@ -1107,13 +1124,7 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
         desc = f"{h1}. No fare in the current scan. No price is estimated."
     desc = desc if len(desc) <= 160 else _clip(desc, 160)
 
-    fare_rows = "\n".join(
-        f"<tr><td>{r['from']}</td><td>{r['kind']}</td>"
-        f"<td>{fmt_date(r['dep'])} → {fmt_date(r['ret'])}"
-        + (f" · {r['nights']}n" if r["nights"] else "") + "</td>"
-        f"<td class='p'>€{r['price']}" + (" 💡" if r["saver"] else "") + "</td>"
-        f"<td>{html_lib.escape(r['airline'])}</td></tr>"
-        for r in rows)
+    fare_rows = fare_tbody(rows)
 
     related = related_destinations(code, fare_counts)
     related_html = " · ".join(
@@ -1500,6 +1511,88 @@ footer a.ext{color:var(--ink);font-weight:600;border-bottom:1px solid var(--gold
     print(f"wrote 404.html ({len(CITIES)} destination redirects)")
 
 
+def read_sitemap_lastmods(path="sitemap.xml"):
+    """loc -> lastmod already published. Missing file or tag returns nothing."""
+    if not os.path.exists(path):
+        return {}
+    text = open(path, encoding="utf-8").read()
+    out = {}
+    for block in re.findall(r"<url>(.*?)</url>", text, re.S):
+        loc = re.search(r"<loc>([^<]+)</loc>", block)
+        last = re.search(r"<lastmod>([^<]+)</lastmod>", block)
+        if loc and last:
+            out[loc.group(1)] = last.group(1).strip()
+    return out
+
+
+def git_file_date(path):
+    """Last commit date for path (YYYY-MM-DD), or None if git cannot say."""
+    try:
+        out = subprocess.check_output(
+            ["git", "log", "-1", "--format=%cs", "--", path],
+            text=True, stderr=subprocess.DEVNULL, timeout=10).strip()
+    except (subprocess.SubprocessError, OSError):
+        return None
+    return out if re.fullmatch(r"\d{4}-\d{2}-\d{2}", out) else None
+
+
+def file_tbody(path):
+    if not os.path.exists(path):
+        return None
+    html = open(path, encoding="utf-8").read()
+    match = re.search(r"<tbody>\n(.*)\n</tbody>", html, re.S)
+    if match:
+        return match.group(1)
+    if 'class="empty-fare"' in html:
+        return ""
+    return None
+
+
+def destination_lastmod(slug, fare_rows, cache_date, previous):
+    """Scan date when the fare table changed. Otherwise keep the old lastmod."""
+    url = f"{SITE}/destinations/{slug}.html"
+    path = os.path.join(OUT_DIR, f"{slug}.html")
+    old_rows = file_tbody(path)
+    if old_rows is not None and old_rows == fare_rows:
+        if url in previous:
+            return previous[url]
+        return git_file_date(path) or cache_date
+    return cache_date
+
+
+def static_lastmod(path, url, cache_date, previous, changed=False):
+    """Info pages and the homepage are not the fare scan.
+
+    A deal refresh must not stamp About or Contact with the cache date.
+    Use the file's last commit, then the date already in the sitemap.
+    """
+    if changed:
+        return cache_date
+    return git_file_date(path) or previous.get(url) or cache_date
+
+
+def homepage_footer_will_change():
+    path = "index.html"
+    if not os.path.exists(path):
+        return False
+    doc = open(path, encoding="utf-8").read()
+    if FOOTER_START not in doc or FOOTER_END not in doc:
+        return False
+    pattern = re.compile(
+        re.escape(FOOTER_START) + r".*?" + re.escape(FOOTER_END), re.S)
+    match = pattern.search(doc)
+    if not match:
+        return False
+    new = FOOTER_START + "\n    " + city_links() + "\n    " + FOOTER_END
+    return match.group(0) != new
+
+
+def sitemap_entry(loc, freq, priority, lastmod):
+    last = f"<lastmod>{lastmod}</lastmod>" if lastmod else ""
+    return (f"  <url><loc>{loc}</loc><changefreq>{freq}</changefreq>"
+            f"<priority>{priority}</priority>{last}</url>")
+
+
 def _fare_table(rows, empty_city):
     if not rows:
         return (
@@ -1721,6 +1814,7 @@ def main():
         cache = json.load(f)
     updated_iso = (cache.get("updated_utc") or "")[:10] or dt.date.today().isoformat()
     updated = fmt_date(updated_iso)
+    previous_lastmod = read_sitemap_lastmods()
 
     os.makedirs(OUT_DIR, exist_ok=True)
     collected = []
@@ -1728,38 +1822,52 @@ def main():
         collected.append((code, slug, city, country, blurb, collect_fares(cache, code)))
     fare_counts = {code: len(rows) for code, _slug, _city, _country, _blurb, rows in collected}
     urls = []
+    dest_lastmod = {}
     for code, slug, city, country, blurb, rows in collected:
+        # Compare against the page on disk before this run overwrites it.
+        body = fare_tbody(rows)
+        url = f"{SITE}/destinations/{slug}.html"
+        dest_lastmod[url] = destination_lastmod(slug, body, updated_iso, previous_lastmod)
         html = page_html(code, slug, city, country, blurb, rows, updated, fare_counts)
         with open(os.path.join(OUT_DIR, f"{slug}.html"), "w", encoding="utf-8") as f:
             f.write(html)
-        urls.append(f"{SITE}/destinations/{slug}.html")
-        print(f"  wrote {slug}.html ({len(rows)} fares, title {len(SEARCH[code][0]) + 19} chars)")
+        urls.append(url)
+        print(f"  wrote {slug}.html ({len(rows)} fares, lastmod {dest_lastmod[url]})")
 
     by_code = {code: (slug, city, rows) for code, slug, city, _country, _blurb, rows in collected}
     os.makedirs("routes", exist_ok=True)
     route_urls = []
+    route_lastmod = {}
     for route in ROUTES:
         slug, city, rows = by_code[route["code"]]
+        mine = [r for r in rows if r["from"] == route["origin"]]
+        route_url = f"{SITE}/routes/{route['slug']}.html"
+        route_path = os.path.join("routes", f"{route['slug']}.html")
+        old_rows = file_tbody(route_path)
+        body = fare_tbody(mine)
+        if old_rows is not None and old_rows == body:
+            route_lastmod[route_url] = (
+                previous_lastmod.get(route_url) or git_file_date(route_path) or updated_iso)
+        else:
+            route_lastmod[route_url] = updated_iso
         html = route_page_html(route, city, slug, rows, updated)
-        with open(os.path.join("routes", f"{route['slug']}.html"), "w", encoding="utf-8") as f:
+        with open(route_path, "w", encoding="utf-8") as f:
             f.write(html)
-        route_urls.append(f"{SITE}/routes/{route['slug']}.html")
-        print(f"  wrote routes/{route['slug']}.html")
+        route_urls.append(route_url)
+        print(f"  wrote routes/{route['slug']}.html (lastmod {route_lastmod[route_url]})")
 
-    # sitemap: homepage + info pages + destination pages + route pages.
-    # lastmod stays the scan date, same as before. A separate change owns lastmod.
-    lastmod = updated_iso
-    entries = [f"  <url><loc>{SITE}/</loc><changefreq>daily</changefreq>"
-               f"<priority>1.0</priority><lastmod>{lastmod}</lastmod></url>"]
-    entries += [f"  <url><loc>{SITE}/{name}</loc><changefreq>monthly</changefreq>"
-                f"<priority>0.4</priority><lastmod>{lastmod}</lastmod></url>"
-                for name in INFO_PAGES]
-    entries += [f"  <url><loc>{u}</loc><changefreq>weekly</changefreq>"
-                f"<priority>0.8</priority><lastmod>{lastmod}</lastmod></url>"
-                for u in urls]
-    entries += [f"  <url><loc>{u}</loc><changefreq>weekly</changefreq>"
-                f"<priority>0.7</priority><lastmod>{lastmod}</lastmod></url>"
-                for u in route_urls]
+    # lastmod follows the page that changed. Route pages use the same rule.
+    home_url = f"{SITE}/"
+    home_last = static_lastmod(
+        "index.html", home_url, updated_iso, previous_lastmod,
+        changed=homepage_footer_will_change())
+    entries = [sitemap_entry(home_url, "daily", "1.0", home_last)]
+    entries += [sitemap_entry(
+        f"{SITE}/{name}", "monthly", "0.4",
+        static_lastmod(name, f"{SITE}/{name}", updated_iso, previous_lastmod))
+        for name in INFO_PAGES]
+    entries += [sitemap_entry(url, "weekly", "0.8", dest_lastmod[url]) for url in urls]
+    entries += [sitemap_entry(url, "weekly", "0.7", route_lastmod[url]) for url in route_urls]
     with open("sitemap.xml", "w", encoding="utf-8") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n'
                 '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
