@@ -4,6 +4,8 @@ Build ready-to-post Facebook posts from the live fare cache.
 Reads  deals_cache.json  (written by refresh_deals.py)
 Writes social/out/<slot>.png   one 1080x1080 poster per post
        social/posts.json       captions + deep links + poster paths
+       social/p/<deal>.html    permanent share page (written once, never replaced)
+       social/card/<deal>.jpg  the preview image that page points at
 
 Run after refresh_deals.py. Needs Playwright + Chromium to render posters
 (pip install playwright && playwright install chromium).
@@ -79,7 +81,15 @@ def pick(cands, ap, kinds, n, exclude=(), sun=False, no_uk=False, direct=False):
 
 
 def link(c):
-    return f"{SITE}/?dest={c['code']}&from={c['ap']}&utm_source=facebook&utm_medium=social"
+    """Landing URL for one scanned fare. Dates are added only when this fare has both."""
+    url = f"{SITE}/?dest={c['code']}&from={c['ap']}"
+    dep, ret = c.get("dep") or "", c.get("ret") or ""
+    try:
+        if dt.date.fromisoformat(dep).isoformat() == dep and dt.date.fromisoformat(ret).isoformat() == ret:
+            url += f"&out={dep}&ret={ret}"
+    except ValueError:
+        pass
+    return url + "&utm_source=facebook&utm_medium=social"
 
 
 # ── city photos ─────────────────────────────────────────────────────────────
@@ -251,6 +261,35 @@ def make_card(png_path, jpg_path):
     bg.save(jpg_path, quality=88, optimize=True)
 
 
+# These filenames were used for whatever deal was current, and live Facebook posts
+# already point at them. Never write them again.
+PINNED_SHARES = frozenset({
+    "hero_dub_classic",   # Dublin–Porto, posted 11 Nov 2026
+    "sun_dub_classic",    # Dublin winter sun, posted 11 Nov 2026
+    "sun_ork_classic",    # Cork winter sun, posted 11 Nov 2026
+})
+
+
+def share_id(design, deals, slot):
+    """Stable page id. Deal pages name the route, dates and price, so a later fare is a new file.
+    Feature posts have no fare; they keep the slot name."""
+    if not deals:
+        return f"{slot}_{design}"
+    parts = []
+    for c in deals:
+        parts.append(
+            f"{c['ap'].lower()}-{c['code'].lower()}-{c['dep'].replace('-', '')}-{c['ret'].replace('-', '')}-{int(c['price'])}"
+        )
+    return "-".join(parts) + f"-{design}"
+
+
+def share_is_frozen(sid, page_dir):
+    """True when this share page must be left exactly as it is."""
+    if sid in PINNED_SHARES:
+        return True
+    return os.path.exists(os.path.join(page_dir, sid + ".html"))
+
+
 def share_page(path, title, desc, image_url, target):
     """Tiny page Facebook scrapes for a clickable preview card (poster image + title). People are sent on to the site."""
     t = html.escape(title, quote=True); dsc = html.escape(desc, quote=True)
@@ -263,6 +302,16 @@ def share_page(path, title, desc, image_url, target):
         f"<meta property=og:image content=\"{image_url}\"><meta property=og:image:width content=1200><meta property=og:image:height content=630>"
         f"<meta name=twitter:card content=summary_large_image></head><body style='font-family:sans-serif;text-align:center;padding:40px'>"
         f"<script>location.replace({target_js})</script><p>Taking you to <a href={target_js}>holidaychasers.ie</a>…</p></body></html>")
+
+
+def publish_share_pages(shares, page_dir):
+    """Write share pages that do not exist yet. An existing page is a published link: leave it alone."""
+    os.makedirs(page_dir, exist_ok=True)
+    for sid, title, desc, image_url, target in shares:
+        if share_is_frozen(sid, page_dir):
+            print("  keep share page", sid)
+            continue
+        share_page(os.path.join(page_dir, sid + ".html"), title, desc, image_url, target)
 
 
 # ── main ────────────────────────────────────────────────────────────────────
@@ -279,17 +328,25 @@ def build(today=None):
     posts, pages = [], {}
     SHARES = []
 
+    page_dir = os.path.join(ROOT, "p")
+
     def add(slot, kind, cs, caption, html_, link_url, title, desc):
-        posters = {}
+        posters, sids = {}, {}
         for (des, f), h in html_.items():
-            name = f"{slot}_{des}" + {"story": "_story", "card": "_card", "feed": ""}[f]
-            pages[name] = h
-            if f != "card":
+            if f == "card":
+                sid = share_id(des, cs, slot)
+                sids[des] = sid
+                # The preview image is part of the published page. Skip it once that page exists.
+                if not share_is_frozen(sid, page_dir):
+                    pages[sid + "_card"] = h
+            else:
+                name = f"{slot}_{des}" + ("_story" if f == "story" else "")
+                pages[name] = h
                 posters.setdefault(des, {})[f] = f"social/out/{name}.png"
-        for des in posters:
-            posters[des]["card"] = f"social/card/{slot}_{des}.jpg"
-            posters[des]["share"] = f"{SHARE_BASE}p/{slot}_{des}.html?v={today.strftime('%m%d')}"
-            SHARES.append((slot, des, title, desc, link_url))
+        for des, sid in sids.items():
+            posters[des]["card"] = f"social/card/{sid}.jpg"
+            posters[des]["share"] = f"{SHARE_BASE}p/{sid}.html"
+            SHARES.append((sid, title, desc, f"{SHARE_BASE}card/{sid}.jpg", link_url))
         posts.append(dict(id=slot, type=kind, airport=cs[0]["ap"] if cs else None, caption=caption, link=link_url.replace("https://", ""),
                           poster=posters["classic"]["feed"], story=posters["classic"]["story"], posters=posters, deals=cs,
                           expires=min(c["dep"] for c in cs) if cs else None))
@@ -324,17 +381,16 @@ def build(today=None):
     os.makedirs(OUT, exist_ok=True); shutil.rmtree(BUILD, ignore_errors=True); os.makedirs(BUILD)
     for f in glob.glob(os.path.join(OUT, "*.png")):
         os.remove(f)
-    shutil.rmtree(os.path.join(ROOT, "card"), ignore_errors=True)
-    for slot, h in pages.items():
-        open(os.path.join(BUILD, slot + ".html"), "w", encoding="utf-8").write(h)
+    # social/p and social/card are not cleared: a share URL, once published, keeps its deal.
+    for name, h in pages.items():
+        open(os.path.join(BUILD, name + ".html"), "w", encoding="utf-8").write(h)
     render(list(pages))
     shutil.rmtree(BUILD, ignore_errors=True)
 
-    # link-preview cards + share pages (clickable poster when posted as a link)
-    pdir = os.path.join(ROOT, "p")
-    shutil.rmtree(pdir, ignore_errors=True); os.makedirs(pdir)
-    for slot, des, title, desc, target in SHARES:
-        share_page(os.path.join(pdir, f"{slot}_{des}.html"), title, desc, f"{SHARE_BASE}card/{slot}_{des}.jpg", target)
+    for sid in sorted(PINNED_SHARES):
+        if not os.path.exists(os.path.join(page_dir, sid + ".html")):
+            print("WARNING: pinned share page missing:", sid)
+    publish_share_pages(SHARES, page_dir)
 
     # evergreen posts (no prices, never go stale)
     ev = [
@@ -360,6 +416,8 @@ def render(slots):
         os.makedirs(os.path.join(ROOT, "card"), exist_ok=True)
         for s in slots:
             card = s.endswith("_card")
+            if card and share_is_frozen(s[:-5], os.path.join(ROOT, "p")):
+                continue
             pg = b.new_page(viewport={"width": 1200, "height": 630} if card else {"width": 1080, "height": 1920 if s.endswith("_story") else 1080})
             pg.goto("file://" + os.path.join(BUILD, s + ".html"))
             pg.wait_for_timeout(500)

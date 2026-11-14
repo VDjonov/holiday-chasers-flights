@@ -118,10 +118,6 @@
 <meta name="theme-color" content="#0A1B2E">
 <meta name="keywords" content="cheap flights Ireland, Cork Airport flights, Dublin Airport flights, Cork to Europe, Dublin to Europe, family holidays Ireland, weekend breaks Ireland, ORK flights, DUB flights">
 <link rel="icon" type="image/png" href="favicon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"></noscript>
 <link rel="stylesheet" href="styles.css">
 
 </head>
@@ -131,18 +127,49 @@
 
 <!-- ═══ NAV ═══ -->
 <nav class="nav">
-  <div class="nav-brand"><a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit"><img class="nav-logo" width="38" height="38" src="images/logo-mark.png" alt="Holiday Chasers Ireland"> Holiday Chasers</a></div>
-  <a class="nav-alerts" href="#signup">✉ Deal alerts</a>
+  <div class="nav-brand"><a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit"><picture class="hc-logo"><source srcset="images/logo-mark.webp" type="image/webp"><img class="nav-logo" width="38" height="38" src="images/logo-mark.png" alt="Holiday Chasers Ireland"></picture> Holiday Chasers</a></div>
 </nav>
 
 <!-- ═══ HERO ═══ -->
 <section class="hero">
   <div class="hero-eyebrow">Cork · ORK &nbsp;·&nbsp; Dublin · DUB &nbsp;·&nbsp; Ireland</div>
-  <h1>Escape the drizzle. <br><em>Chase the sun.</em></h1>
-  <p>Pick your airport and dates — see the cheapest flights.</p>
+  <h1>Escape the drizzle.<br><em>Chase the sun.</em></h1>
+  <p>Hand-picked return fares from Cork &amp; Dublin — checked every few days, free to browse.</p>
   <div class="hero-stats" id="heroStats"></div>
 </section>
 <div class="rainsun"></div>
+
+<!-- hc-popular-routes -->
+<section class="popular-routes" aria-label="Popular routes">
+  <h2>Popular routes</h2>
+  <p>Pages for the searches that already reach the site. Where this scan has no Cork fare, the card says so.</p>
+  <div class="popular-grid">
+    <a href="/destinations/rhodes.html"><span class="pr-kicker">Rhodes</span><strong>Flights to Rhodes from Ireland</strong><span>No fare in this scan</span></a>
+    <a href="/destinations/pisa.html"><span class="pr-kicker">Pisa</span><strong>Dublin to Pisa</strong><span>No Cork fare in this scan</span></a>
+    <a href="/destinations/berlin.html"><span class="pr-kicker">Berlin</span><strong>Flights to Berlin from Cork</strong><span>Dublin fares in this scan</span></a>
+    <a href="/destinations/faro.html"><span class="pr-kicker">Faro</span><strong>Flights to Faro from Cork</strong><span>Cork and Dublin</span></a>
+    <a href="/destinations/venice.html"><span class="pr-kicker">Venice</span><strong>Dublin to Venice</strong><span>No Cork fare in this scan</span></a>
+    <a href="/destinations/madrid.html"><span class="pr-kicker">Madrid</span><strong>Cork to Madrid</strong><span>Dublin fares in this scan</span></a>
+    <a href="/destinations/krakow.html"><span class="pr-kicker">Krakow</span><strong>Cork to Krakow</strong><span>Fly direct from Dublin</span></a>
+    <a href="/destinations/budapest.html"><span class="pr-kicker">Budapest</span><strong>Budapest from Cork</strong><span>Dublin fares in this scan</span></a>
+    <a href="/destinations/copenhagen.html"><span class="pr-kicker">Copenhagen</span><strong>Cork to Copenhagen</strong><span>Dublin fares in this scan</span></a>
+    <a href="/destinations/malta.html"><span class="pr-kicker">Malta</span><strong>Malta from Cork</strong><span>Dublin fares in this scan</span></a>
+    <a href="/destinations/porto.html"><span class="pr-kicker">Porto</span><strong>Cork to Porto</strong><span>Fly from Dublin</span></a>
+    <a href="/routes/cork-to-fuerteventura.html"><span class="pr-kicker">Fuerteventura</span><strong>Cork to Fuerteventura</strong><span>A few flights a month</span></a>
+    <a href="/destinations/malaga.html"><span class="pr-kicker">Malaga</span><strong>Malaga from Cork</strong><span>Cork and Dublin</span></a>
+    <a href="/destinations/lisbon.html"><span class="pr-kicker">Lisbon</span><strong>Cork to Lisbon</strong><span>Dublin fares in this scan</span></a>
+    <a href="/destinations/seville.html"><span class="pr-kicker">Seville</span><strong>Cork to Seville</strong><span>Cork and Dublin</span></a>
+    <a href="/destinations/athens.html"><span class="pr-kicker">Athens</span><strong>Cork to Athens</strong><span>No fare in this scan</span></a>
+    <a href="/destinations/alicante.html"><span class="pr-kicker">Alicante</span><strong>Dublin to Alicante</strong><span>Cork and Dublin</span></a>
+    <a href="/destinations/rome.html"><span class="pr-kicker">Rome</span><strong>Rome holidays from Dublin</strong><span>Dublin fares</span></a>
+    <a href="/destinations/nice.html"><span class="pr-kicker">Nice</span><strong>Nice from Cork</strong><span>Dublin fares in this scan</span></a>
+    <a href="/destinations/zadar.html"><span class="pr-kicker">Zadar</span><strong>Cork to Zadar</strong><span>No fare in this scan</span></a>
+    <a href="/destinations/tenerife.html"><span class="pr-kicker">Tenerife</span><strong>Tenerife from Cork</strong><span>Cork and Dublin</span></a>
+    <a href="/routes/dublin-to-edinburgh.html"><span class="pr-kicker">Edinburgh</span><strong>Dublin to Edinburgh</strong><span>Daily on Ryanair&#x27;s page</span></a>
+    <a href="/routes/cork-to-barcelona.html"><span class="pr-kicker">Barcelona</span><strong>Cork to Barcelona</strong><span>Several days a week</span></a>
+  </div>
+</section>
+<!-- /hc-popular-routes -->
 
 <!-- ═══ TABS ═══ -->
 <div class="tabs-bar">
@@ -156,9 +183,15 @@
 
 <!-- ═══ TAB: DEAL BOARD ═══ -->
 <section id="tab-deals" class="tab-content active">
-  <!-- Step 1 — airport -->
-  <div class="step-row">
-  <div class="step-label"><span class="step-n">1</span> From</div>
+  <div class="section-hdr">
+    <h2 id="boardHeading">Cheapest escapes from Ireland</h2>
+    <p id="boardSubtitle">Per-person return fares — weekend or full week.</p>
+    <div class="trust-line">✦ We scan real fares from Cork &amp; Dublin every few days and show you the cheapest — we don't sell flights, we just help you find them.</div>
+    <div class="updated-tag" id="dealsUpdated"></div>
+    <a href="#signup" class="fav-chip" id="favChip" style="display:none">♥ <span class="fav-count">0</span> saved — <span class="fav-cta">get alerts by email</span></a>
+  </div>
+
+  <!-- Airport selector -->
   <div class="airport-toggle">
     <button class="ap-btn active" data-ap="ORK" onclick="switchAirport('ORK')">
       <span class="ap-ic">🛫</span>
@@ -173,39 +206,8 @@
       <span class="ap-txt"><span class="ap-name">Best deal</span><span class="ap-code">Both</span><span class="ap-count" id="cntBEST"></span></span>
     </button>
   </div>
-  </div>
   <div class="wins-line" id="winsLine"></div>
 
-  <!-- Step 2 — trip length -->
-  <div class="step-row">
-  <div class="step-label"><span class="step-n">2</span> Trip</div>
-  <div class="trip-toggle" id="boardToggle">
-    <button data-board="weekend">🏖️ Weekend</button>
-    <button class="active" data-board="week">✈️ One week</button>
-  </div>
-  </div>
-
-  <!-- Step 3 — which week / weekend (swipeable strip, next ~10 weeks) -->
-  <div id="weekendPickerRow">
-    <div class="step-label"><span class="step-n">3</span> <span id="pickerLabel">Which week</span></div>
-    <div class="strip-wrap"><div id="weekendPicker" class="weekend-buttons"></div></div>
-  </div>
-
-  <!-- Results heading -->
-  <div class="section-hdr results-hdr">
-    <div class="results-row">
-      <h2 id="boardHeading">Cheapest escapes from Ireland</h2>
-      <button type="button" class="opts-toggle" id="optsToggle" aria-expanded="false" aria-controls="optsPanel" onclick="toggleOpts()">
-        <span id="optsSummary">1 traveller</span> <span class="opts-caret">▾</span>
-      </button>
-    </div>
-    <p id="boardSubtitle">Per-person return fares.</p>
-    <div class="updated-tag" id="dealsUpdated"></div>
-    <a href="#signup" class="fav-chip" id="favChip" style="display:none">♥ <span class="fav-count">0</span> saved — <span class="fav-cta">get alerts by email</span></a>
-  </div>
-
-  <!-- Travellers + budget: folded away until asked for -->
-  <div class="opts-panel" id="optsPanel" hidden>
   <div class="traveller-bar">
     <span class="tv-label">Who's travelling?</span>
     <div class="tv-group">
@@ -227,6 +229,16 @@
     <span class="tv-total" id="tvSummary">1 traveller</span>
   </div>
 
+  <div class="trip-toggle" id="boardToggle">
+    <button data-board="weekend">🏖️ Weekend</button>
+    <button class="active" data-board="week">✈️ One week</button>
+  </div>
+
+  <div id="weekendPickerRow" style="margin-bottom:16px">
+    <label id="pickerLabel" style="font-size:13px;font-weight:600;color:var(--gray);display:block;margin-bottom:8px">Choose your weekend:</label>
+    <div id="weekendPicker" class="weekend-buttons"></div>
+  </div>
+
   <div class="filter-bar">
     <label>Budget:</label>
     <button class="filter-btn active" data-max="0">All</button>
@@ -234,14 +246,12 @@
     <button class="filter-btn" data-max="150">Under €150pp</button>
     <button class="filter-btn" data-max="250">Under €250pp</button>
   </div>
-  </div>
 
   <div id="dealCards" class="deal-grid"></div>
   <div id="dealsLoading" class="loading"><div class="spinner"></div><br>Loading deals…</div>
   <div id="dealsEmpty" style="display:none;text-align:center;padding:40px;color:var(--gray)">
     No deals match this budget. Try a higher limit or switch trip type.
   </div>
-  <div class="trust-line">✦ We scan real fares from Cork &amp; Dublin every few days and show you the cheapest — we don't sell flights, we just help you find them.</div>
 
   <!-- ═══ NEWSLETTER SIGNUP ═══ -->
   <div class="signup-band" id="signup">
@@ -338,17 +348,20 @@
 <div id="detailOverlay" class="detail-overlay">
   <div class="detail-topbar">
     <button class="detail-back" onclick="closeDetail()">← Back to deals</button>
-    <div class="detail-topbrand"><img class="nav-logo" width="34" height="34" src="images/logo-mark.png" alt="Holiday Chasers Ireland"> <a href="/" style="color:inherit;text-decoration:none">Holiday Chasers</a></div>
+    <div class="detail-topbrand"><picture class="hc-logo"><source srcset="images/logo-mark.webp" type="image/webp"><img class="nav-logo" width="34" height="34" src="images/logo-mark.png" alt="Holiday Chasers Ireland"></picture> <a href="/" style="color:inherit;text-decoration:none">Holiday Chasers</a></div>
   </div>
   <div id="detailBody" class="detail-body"></div>
 </div>
 
 <div class="rainsun"></div>
 <footer class="footer">
-  <img class="foot-logo" width="220" height="97" src="images/logo-footer.png" alt="Holiday Chasers Ireland">
+  <picture class="hc-logo"><source srcset="images/logo-footer.webp" type="image/webp"><img class="foot-logo" width="220" height="97" src="images/logo-footer.png" alt="Holiday Chasers Ireland" decoding="async"></picture>
   Real fares from airline data · prices are indicative and confirmed at booking<br>
   <span class="foot-disclosure">Some links to hotels and car hire are affiliate links — if you book through them we may earn a small commission, at no extra cost to you. This helps keep Holiday Chasers Ireland free.</span><br>
   <a href="https://holidaychasers.ie">holidaychasers.ie</a> · <a href="https://www.facebook.com/holidaychasersie" rel="noopener" target="_blank">Facebook</a> · <a href="https://www.instagram.com/holidaychasers.ie/" rel="noopener" target="_blank">Instagram</a>
+  <nav class="foot-pages" aria-label="About Holiday Chasers" style="margin-top:14px">
+    <a href="/how-it-works.html">How it works</a> · <a href="/about.html">About</a> · <a href="/contact.html">Contact</a>
+  </nav>
   <nav class="foot-destinations" aria-label="All destinations" style="max-width:900px;margin:18px auto 0;font-size:11px;line-height:2;color:var(--muted)">
     <strong style="display:block;margin-bottom:4px">Cheap flights from Cork &amp; Dublin to:</strong>
     <!-- hc-footer-cities -->
@@ -361,7 +374,7 @@
 <script src="app.js" defer></script>
 
 <div class="consent-bar" id="consentBar">
-  <div class="consent-txt"><b>Cookies:</b> OK to use anonymous analytics to see which deals people love? No ads, no selling data.</div>
+  <div class="consent-txt"><b>Quick one:</b> we use anonymous analytics to see which deals people love, so we can find better ones. No ads, no selling data.</div>
   <div class="consent-btns">
     <button class="consent-btn consent-decline" onclick="hcConsent(false)">No thanks</button>
     <button class="consent-btn consent-accept" onclick="hcConsent(true)">That's fine</button>
