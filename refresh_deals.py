@@ -718,7 +718,20 @@ def build_board(origin, label, out_date, ret_date, nights, kind):
             "nights": nights, "deals": deals}
 
 
+def use_manual_fares():
+    """FARE_SOURCE=manual reads the scout CSV and does not call FlightAPI.
+
+    The scheduled workflow does not set this. Unset, or any other value, keeps
+    the paid FlightAPI path.
+    """
+    return os.environ.get("FARE_SOURCE", "flightapi").strip().lower() == "manual"
+
+
 def main():
+    if use_manual_fares():
+        import manual_fares
+        print("FARE_SOURCE=manual — reading the scout CSV. FlightAPI is not called.")
+        sys.exit(manual_fares.publish_from_env())
     if not FLIGHTAPI_KEY:
         print("ERROR: FLIGHTAPI_KEY secret not set.")
         sys.exit(1)

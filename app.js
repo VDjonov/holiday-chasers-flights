@@ -721,7 +721,7 @@ function tripAttrs(from, dest, airline, dep, ret) {
 const DEST_SLUG = {
   ALC:"alicante", BCN:"barcelona", AGP:"malaga", PMI:"palma-mallorca", MAD:"madrid",
   TFS:"tenerife", ACE:"lanzarote", FAO:"faro", LIS:"lisbon", OPO:"porto", FCO:"rome",
-  BGY:"milan", CDG:"paris", NCE:"nice", AMS:"amsterdam", BER:"berlin", MUC:"munich",
+  BGY:"milan", CDG:"paris", BVA:"paris", NCE:"nice", AMS:"amsterdam", BER:"berlin", MUC:"munich",
   BUD:"budapest", KRK:"krakow", WMI:"warsaw", PRG:"prague", EDI:"edinburgh", STN:"london",
   MAN:"manchester", GVA:"geneva", MLA:"malta", VIE:"vienna", ATH:"athens", VLC:"valencia",
   CPH:"copenhagen", SVQ:"seville", VCE:"venice", PSA:"pisa", ZAD:"zadar", RHO:"rhodes",
@@ -938,8 +938,9 @@ function populateBoardPicker() {
     const btn = document.createElement("button");
     btn.className = "weekend-btn" + (i === activeIdx ? " active" : "");
     btn.onclick = () => selectBoard(i);
-    const cheapest = b.deals && b.deals.length
-      ? Math.round([...b.deals].sort((a,c)=>a.price-c.price)[0].price / trav) : null;
+    const cheapestDeal = b.deals && b.deals.length
+      ? [...b.deals].sort((a,c)=>a.price-c.price)[0] : null;
+    const cheapest = cheapestDeal ? fmtMoney(moneyAmount(cheapestDeal, trav)) : null;
     const fallback = currentBoard === "weekend" ? `Weekend ${i+1}` : `Week ${i+1}`;
     const isBest = i === bestBoardIdx(list);
     btn.innerHTML = `<span class="wb-label">${b.label || fallback}${isBest ? " ⭐" : ""}</span>` +
@@ -1128,6 +1129,104 @@ function refreshFavUI(){
   }
 }
 
+function esc(value) {
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[ch]));
+}
+
+function fmtMoney(amount) {
+  const n = Math.round(Number(amount) * 100) / 100;
+  if (!Number.isFinite(n)) return "";
+  return Number.isInteger(n) ? String(n) : n.toFixed(2);
+}
+
+// Manual fares keep cents. FlightAPI fares are already whole euros, and this
+// rounds them the same way the card always has.
+function moneyAmount(deal, cacheTravellers) {
+  const raw = Number(deal.price) / (cacheTravellers || 1);
+  if (deal.source === "manual" || deal.fare_label) return Math.round(raw * 100) / 100;
+  return Math.round(raw);
+}
+
+function farePriceCaption(deal) {
+  if (deal && deal.fare_label) return deal.fare_label;
+  if (deal && deal.source === "manual") return "from, no bags";
+  return "per person";
+}
+
+function checkedHost(deal) {
+  try {
+    const url = new URL(deal.source_url);
+    if (url.protocol !== "https:") return "";
+    const host = url.hostname.replace(/^www\./i, "");
+    if (host === "ryanair.com" || host === "aerlingus.com") return host;
+  } catch (e) { /* unusable URL */ }
+  return "";
+}
+
+function relativeChecked(then) {
+  const mins = Math.round((Date.now() - then.getTime()) / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return mins + " minute" + (mins === 1 ? "" : "s") + " ago";
+  const hours = Math.round(mins / 60);
+  if (hours < 48) return hours + " hour" + (hours === 1 ? "" : "s") + " ago";
+  const days = Math.round(hours / 24);
+  return days + " day" + (days === 1 ? "" : "s") + " ago";
+}
+
+function dublinStamp(then) {
+  return new Intl.DateTimeFormat("en-IE", {
+    timeZone: "Europe/Dublin",
+    day: "numeric", month: "short", year: "numeric",
+    hour: "2-digit", minute: "2-digit", hourCycle: "h23"
+  }).format(then);
+}
+
+function fareCheckedLabel(deal) {
+  if (!deal || !deal.checked_at) return "";
+  const then = new Date(deal.checked_at);
+  if (Number.isNaN(then.getTime())) return "";
+  const host = checkedHost(deal) || "the airline site";
+  const stale = deal.stale ? " · fare may have changed" : "";
+  return `Checked on ${host} ${relativeChecked(then)} (${dublinStamp(then)} Dublin)${stale}`;
+}
+
+function fareCheckedHtml(deal) {
+  const text = fareCheckedLabel(deal);
+  if (!text) return "";
+  const seats = deal.seats_note && !/\bexample\b/i.test(deal.seats_note)
+    ? `<div class="deal-seats">${esc(deal.seats_note)}</div>` : "";
+  return `<div class="deal-checked${deal.stale ? " stale" : ""}">${esc(text)}</div>${seats}`;
+}
+
+function manualFlightBit(deal, leg) {
+  const number = leg === "ret" ? deal.ret_flight : deal.out_flight;
+  const time = leg === "ret" ? deal.ret_time : deal.out_time;
+  if (!number && !time) return "";
+  return " · " + esc([number, time].filter(Boolean).join(" "));
+}
+
+function applyManualSubtitle() {
+  if (!cachedDeals || !cachedDeals.fare_label) return;
+  const el = document.getElementById("boardSubtitle");
+  if (!el) return;
+  const marker = " · " + cachedDeals.fare_label;
+  const base = el.textContent.includes(marker)
+    ? el.textContent.slice(0, el.textContent.indexOf(marker))
+    : el.textContent;
+  const types = new Set();
+  for (const airport of Object.values(cachedDeals.airports || {})) {
+    for (const board of airport.special_boards || []) {
+      if ((board.deals || []).length && board.trip_type) {
+        types.add(String(board.trip_type).replace(/_/g, " "));
+      }
+    }
+  }
+  const extra = types.size ? ` · ${[...types].join(", ")} trips are on the destination pages` : "";
+  el.textContent = base + marker + extra;
+}
+
 function renderDeals() {
   const grid = document.getElementById("dealCards");
   const loading = document.getElementById("dealsLoading");
@@ -1139,6 +1238,7 @@ function renderDeals() {
     empty.style.display = "block"; empty.textContent = "No deals loaded.";
     grid.innerHTML = ""; return;
   }
+  applyManualSubtitle();
 
   // Resolve which board to show
   const list = currentBoardList();
@@ -1293,18 +1393,19 @@ function renderDeals() {
         <div class="deal-card-bottom">
           <div class="deal-price-block">
             <div class="deal-dates">${fmtD(d.depart_date || dep)} — ${fmtD(d.return_date || ret)}${d.nights && d.nights !== board.nights ? ` · ${d.nights}n` : ""}</div>
-            <div class="deal-price"><sup>€</sup>${perPerson(d)}<small>per person</small></div>
+            <div class="deal-price"><sup>€</sup>${fmtMoney(moneyAmount(d, cacheTravellers))}<small>${esc(farePriceCaption(d))}</small></div>
           </div>
           ${groupSize > 1 ? `<div class="deal-perperson">
-            <div class="pp-amount">€${groupTotal(d)}</div>
+            <div class="pp-amount">€${fmtMoney(moneyAmount(d, cacheTravellers) * groupSize)}</div>
             <div class="pp-label">${travellerLabel()}</div>
           </div>` : ''}
         </div>
         <div class="deal-meta">
           <span class="${d.stops === 0 ? 'tag-direct' : ''}">${d.stops === 0 ? '✦ Direct' : d.stops + ' stop' + (d.stops>1?'s':'')}</span>
-          <span>${d.total_time || '—'}</span>
-          <span>${d.airlines || '—'}</span>
+          <span>${d.out_flight ? esc([d.out_flight, d.out_time].filter(Boolean).join(" ")) : (d.total_time || "—")}</span>
+          <span>${d.airlines || '—'}${d.airport_label ? " · " + esc(d.airport_label) : ""}</span>
         </div>
+        ${fareCheckedHtml(d)}
         <div class="deal-weather" id="weather-${d.code}-${i}"><span class="wx-loading">Checking weather…</span></div>
         <div class="deal-viewmore">View full details &amp; guide →</div>
       </button>
@@ -1425,7 +1526,7 @@ function guideTimeline(d){
   for (const apCode of ["ORK","DUB"]) {
     for (const b of _allBoards(apCode)) {
       const deal = _findDeal(b, d.code);
-      if (deal) found.push({ apCode, b, deal, pp: Math.round(deal.price / trav) });
+      if (deal) found.push({ apCode, b, deal, pp: moneyAmount(deal, trav) });
     }
   }
   if (!found.length) { section.style.display = "none"; return; }
@@ -1453,7 +1554,7 @@ function guideTimeline(d){
           <td>${r.apCode === "ORK" ? "Cork" : "Dublin"}</td>
           <td>${r.b._type === "weekend" ? "🏖️ Weekend" : "✈️ Week"}</td>
           <td>${fmtD(r.deal.depart_date || r.b.depart_date)} → ${fmtD(r.deal.return_date || r.b.return_date)}</td>
-          <td class="price-cell">€${r.pp}${r.pp === minPP ? " ⭐" : ""}</td>
+          <td class="price-cell">€${fmtMoney(r.pp)}${r.pp === minPP ? " ⭐" : ""}</td>
           <td>${r.deal.airlines || "—"}${viewing ? ' <span style="font-size:10px;color:var(--muted)">· viewing</span>' : ''}</td>
         </tr>`;}).join("")}</tbody>
     </table>` +
@@ -1718,7 +1819,7 @@ function cheapestByAirport(code){
     for (const b of _allBoards(ap)) {
       const deal = _findDeal(b, code);
       if (!deal) continue;
-      const pp = Math.round(deal.price / trav);
+      const pp = moneyAmount(deal, trav);
       if (!out[ap] || pp < out[ap].pp) out[ap] = { pp, deal, board: b };
     }
   }
@@ -1804,7 +1905,7 @@ function renderDirectTimeline(){
   const rows = [];
   for (const b of _allBoards(apCode)) {
     const d = _findDeal(b, code);
-    if (d) rows.push({ b, d, pp: Math.round(d.price / trav) });
+    if (d) rows.push({ b, d, pp: moneyAmount(d, trav) });
   }
   rows.sort((a, c) => (a.b.depart_date || "").localeCompare(c.b.depart_date || ""));
 
@@ -1838,7 +1939,7 @@ function renderDirectTimeline(){
             onclick='openDetail(${ddJson}, "${r.d.depart_date || r.b.depart_date}", "${r.d.return_date || r.b.return_date}", ${selAdults + selChildren}, ${_cacheTrav()}, true)'>
           <td>${r.b._type === "weekend" ? "🏖️ Weekend" : "✈️ Week"}</td>
           <td>${fmtD(r.d.depart_date || r.b.depart_date)} → ${fmtD(r.d.return_date || r.b.return_date)}${r.d.nights ? ` · ${r.d.nights}n` : ""}</td>
-          <td class="price-cell">€${r.pp}${r.pp === minPP ? " ⭐" : ""}</td>
+          <td class="price-cell">€${fmtMoney(r.pp)}${r.pp === minPP ? " ⭐" : ""}</td>
           <td>${r.d.airlines || "—"}</td>
           <td><a class="deal-book secondary" style="padding:6px 12px;font-size:12px"
                  href="${flightUrl(r.d.airlines || "", apCode, r.d.code, r.d.depart_date || r.b.depart_date, r.d.return_date || r.b.return_date, 1, 0)}"${tripAttrs(apCode, r.d.code, r.d.airlines, r.d.depart_date || r.b.depart_date, r.d.return_date || r.b.return_date)}
@@ -1883,7 +1984,7 @@ function searchEuropeFromCache(){
   for (const apCode of ["ORK", "DUB"]) {
     for (const b of _allBoards(apCode)) {
       const d = _findDeal(b, code);
-      if (d) found.push({ apCode, b, d, pp: Math.round(d.price / trav) });
+      if (d) found.push({ apCode, b, d, pp: moneyAmount(d, trav) });
     }
   }
   found.sort((a, c) => a.pp - c.pp);
@@ -1922,7 +2023,7 @@ function searchEuropeFromCache(){
             onclick='openDetail(${ddJson}, "${r.d.depart_date || r.b.depart_date}", "${r.d.return_date || r.b.return_date}", selAdults + selChildren, _cacheTrav(), true)'>
           <td>${r.apCode === "ORK" ? "Cork" : "Dublin"}</td>
           <td>${fmtD(r.d.depart_date || r.b.depart_date)} → ${fmtD(r.d.return_date || r.b.return_date)}${r.d.nights ? ` · ${r.d.nights}n` : ""}</td>
-          <td class="price-cell">€${r.pp}</td>
+          <td class="price-cell">€${fmtMoney(r.pp)}</td>
           <td>${r.d.airlines || "—"}</td>
           <td><a class="deal-book secondary" style="padding:6px 12px;font-size:12px"
                  href="${flightUrl(r.d.airlines || "", r.apCode, r.d.code, r.d.depart_date || r.b.depart_date, r.d.return_date || r.b.return_date, 1, 0)}"${tripAttrs(r.apCode, r.d.code, r.d.airlines, r.d.depart_date || r.b.depart_date, r.d.return_date || r.b.return_date)}
@@ -2088,7 +2189,7 @@ function planCheapestCached(code) {
   for (const ap of ["ORK", "DUB"]) {
     for (const b of _allBoards(ap)) {
       const d = _findDeal(b, code);
-      if (d) { const pp = Math.round(d.price / trav); if (best === null || pp < best) best = pp; }
+      if (d) { const pp = moneyAmount(d, trav); if (best === null || pp < best) best = pp; }
     }
   }
   return best;
@@ -2105,7 +2206,7 @@ function onPlanCityChange() {
     const corkToo = servedFrom("ORK", meta.code);
     const where = corkToo ? "Cork &amp; Dublin" : "Dublin";
     const price = planCheapestCached(code);
-    const teaser = price !== null ? ` · from €${price}pp` : "";
+    const teaser = price !== null ? ` · from €${fmtMoney(price)}pp` : "";
     badge.innerHTML = `<span style="display:inline-flex;align-items:center;gap:9px;background:var(--gold-soft);border:1px solid var(--gold);border-radius:100px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--ink)"><span style="font-size:14px">✈</span> Direct from ${where}${teaser}</span>`;
   } else {
     badge.innerHTML = `<span style="font-size:13px;color:var(--muted)">We don't fly here direct — we'll open the full planner and search live prices for your dates.</span>`;
@@ -2805,7 +2906,7 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = fal
     else history.pushState({ hcGuide: d.code }, "", url);
   } catch (e) {}
   const hasPrice = d.price != null;
-  const perP = hasPrice ? Math.round(d.price / cacheTravellers) : null;
+  const perP = hasPrice ? moneyAmount(d, cacheTravellers) : null;
   const groupTot = hasPrice ? perP * groupSize : null;
   const liveFlightUrl = aviasalesUrl(flightOrigin, d.code, dep, ret, Math.max(1, selAdults));
   const groupLbl = travellerLabel();
@@ -2825,11 +2926,12 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = fal
       </div>
     </div>
     <div class="dt-pricestrip">
-      <div class="dt-priceitem"><div class="lbl">Per person</div><div class="val" id="dtPP">${hasPrice ? '€'+perP : '<a href="'+liveFlightUrl+'"'+tripAttrs(flightOrigin, d.code, d.airlines, dep, ret)+' target="_blank" rel="noopener noreferrer sponsored" style="font-size:15px">Check live →</a>'}</div></div>
-      <div class="dt-priceitem"><div class="lbl">${groupLbl}</div><div class="val" id="dtGroupTot">${hasPrice ? '€'+groupTot : '—'}</div></div>
+      <div class="dt-priceitem"><div class="lbl">${d.fare_label ? esc(d.fare_label) : "Per person"}</div><div class="val" id="dtPP">${hasPrice ? '€'+fmtMoney(perP) : '<a href="'+liveFlightUrl+'"'+tripAttrs(flightOrigin, d.code, d.airlines, dep, ret)+' target="_blank" rel="noopener noreferrer sponsored" style="font-size:15px">Check live →</a>'}</div></div>
+      <div class="dt-priceitem"><div class="lbl">${groupLbl}</div><div class="val" id="dtGroupTot">${hasPrice ? '€'+fmtMoney(groupTot) : '—'}</div></div>
       <div class="dt-priceitem"><div class="lbl">Flight</div><div class="val">${d.stops==null ? '<small>' + (dep && ret ? new Date(dep+"T12:00:00").toLocaleDateString("en-IE",{day:"numeric",month:"short"}) + " – " + new Date(ret+"T12:00:00").toLocaleDateString("en-IE",{day:"numeric",month:"short"}) : "your dates") + '</small>' : (d.stops===0?'Direct':d.stops+' stop'+(d.stops>1?'s':'')) + ' <small>'+(d.total_time||'')+'</small>'}</div></div>
       <div class="dt-priceitem"><div class="lbl">Airline</div><div class="val" style="font-size:16px">${d.airlines||'—'}</div></div>
     </div>
+    ${fareCheckedHtml(d)}
 
     <div id="dtAltAirport"></div>
 
@@ -2902,21 +3004,21 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = fal
 
     ${hasPrice ? `<div class="dt-section">
       <h2>✈️ Your flights</h2>
-      <div class="dt-sub">${depFmt} → ${retFmt}</div>
+      <div class="dt-sub">${depFmt} → ${retFmt}${d.fare_label ? " · " + esc(d.fare_label) : ""}</div>
       ${d.is_cheaper && d.hist_typical ? `<div class="dt-cheaper-note">↓ This fare is cheaper than usual for ${d.city} — typically around €${Math.round(d.hist_typical/cacheTravellers)} per person.</div>` : ''}
       ${d.midweek_saver && d.weekend_price ? `<div class="dt-cheaper-note">💡 Midweek saver — these ${new Date(dep+"T12:00:00").toLocaleDateString("en-IE",{weekday:"long"})} dates cost €${Math.round((d.weekend_price - d.price)/cacheTravellers)} less per person than the same trip on weekend dates.</div>` : ''}
       <div class="dt-leg">
         <div class="dt-leg-dir">OUT</div>
         <div class="dt-leg-main">
           <div class="dt-leg-route">${flightOrigin === "DUB" ? "Dublin (DUB)" : "Cork (ORK)"} → ${d.city} (${d.code})</div>
-          <div class="dt-leg-info">${depFmt} · ${d.stops===0?'Direct':d.stops+' stop'+(d.stops>1?'s':'')} · ${d.total_time||''} · ${d.airlines||''}</div>
+          <div class="dt-leg-info">${depFmt} · ${d.stops===0?'Direct':d.stops+' stop'+(d.stops>1?'s':'')} · ${d.total_time||''} · ${d.airlines||''}${manualFlightBit(d, "out")}</div>
         </div>
       </div>
       <div class="dt-leg">
         <div class="dt-leg-dir">RETURN</div>
         <div class="dt-leg-main">
           <div class="dt-leg-route">${d.city} (${d.code}) → ${flightOrigin === "DUB" ? "Dublin (DUB)" : "Cork (ORK)"}</div>
-          <div class="dt-leg-info">${retFmt} · same airline · price shown for ${groupLbl} (estimated from per-person fare)</div>
+          <div class="dt-leg-info">${retFmt} · same airline · price shown for ${groupLbl} (estimated from per-person fare)${manualFlightBit(d, "ret")}</div>
         </div>
       </div>
       <div style="margin-top:18px">
@@ -3072,7 +3174,7 @@ function guideAltAirportBanner(d, dep, ret){
     <div class="alt-airport-banner" role="button" tabindex="0"
          onclick='openDetail(${dealJson}, "${ad.depart_date || ab.depart_date}", "${ad.return_date || ab.return_date}", ${g.groupSize || 1}, ${_cacheTrav()}, ${g.planner === true})'>
       <span class="aab-plane">✈</span>
-      <span class="aab-text">${save ? `<b>${otherName} is €${save} cheaper</b> for this trip` : `<b>Also flies from ${otherName}</b>`} — from <b>€${otherBest.pp}pp</b> on scanned dates</span>
+      <span class="aab-text">${save ? `<b>${otherName} is €${fmtMoney(save)} cheaper</b> for this trip` : `<b>Also flies from ${otherName}</b>`} — from <b>€${fmtMoney(otherBest.pp)}pp</b> on scanned dates</span>
       <span class="aab-cta">See ${otherName} dates →</span>
     </div>`;
 }
