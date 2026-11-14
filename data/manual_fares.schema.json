@@ -55,7 +55,7 @@
     "trip_type": {
       "type": "string",
       "description": "weekend and week fill the existing homepage boards. Any other slug, such as christmas, is kept for the destination page.",
-      "pattern": "^[A-Za-z][A-Za-z0-9_ -]{0,31}$"
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_ -]{0,31}$"
     },
     "airline": {
       "type": "string",
@@ -117,8 +117,8 @@
     },
     "screenshot_ref": {
       "type": "string",
-      "description": "Audit id for the saved screenshot. Not copied into deals_cache.json. A value starting with EXAMPLE is a fixture and cannot be published.",
-      "minLength": 1,
+      "description": "Audit id for the saved screenshot. Not copied into deals_cache.json. A value starting with EXAMPLE is a fixture and cannot be published. Blank when the scout did not record an id. Two ids may be joined with a semicolon.",
+      "minLength": 0,
       "maxLength": 180
     }
   }

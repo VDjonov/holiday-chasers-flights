@@ -138,8 +138,10 @@ MAX_HORIZON_DAYS = 400
 FLIGHT_RE = re.compile(r"^[A-Z]{2,3}\d{1,4}$")
 TIME_RE = re.compile(r"^([01]\d|2[0-3]):[0-5]\d$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-SHOT_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_./-]{0,179}$")
-TRIP_RE = re.compile(r"^[a-z][a-z0-9_]{0,31}$")
+# A scout row can name two screenshot ids, joined with ";".
+SHOT_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_./;-]{0,179}$")
+# "3-night" is a real slug from the scout file. It normalises to 3_night.
+TRIP_RE = re.compile(r"^[a-z0-9][a-z0-9_]{0,31}$")
 BOOLS = {"true": True, "false": False, "yes": True, "no": False, "1": True, "0": False}
 
 
@@ -325,9 +327,9 @@ def validate_row(line_no, row, now):
     if len(row["seats_note"]) > 160:
         bad("seats_note is longer than 160 characters")
     shot = row["screenshot_ref"]
-    if not shot:
-        bad("screenshot_ref is required so the check can be audited")
-    elif ".." in shot or not SHOT_RE.fullmatch(shot):
+    # A blank id is kept. The November 2026 shortlist did not record one.
+    # Inventing an id would pretend a screenshot exists. ".." is still refused.
+    if shot and (".." in shot or not SHOT_RE.fullmatch(shot)):
         bad("screenshot_ref must be a relative id such as checks/2026-11-13/ork-fao.png")
 
     return errors
@@ -511,6 +513,63 @@ def convert_rows(rows, now, allow_example=False):
 def convert_file(path, now=None, allow_example=False):
     now = now or dt.datetime.now(dt.timezone.utc)
     return convert_rows(read_csv(path), now, allow_example=allow_example)
+
+
+def supplement_deals(path=None, now=None):
+    """Valid rows for pages that FlightAPI left empty.
+
+    A bad row is reported and skipped. It does not reject the rest of the
+    file, and nothing here writes deals_cache.json. matched_shortlist false
+    is still a fare: the page price is the one that was checked.
+
+    Returns (deals, report). deals are the same dicts _deal_from builds,
+    without departed trips and without fares older than HIDE_HOURS.
+    """
+    path = path or DEFAULT_CSV
+    now = (now or dt.datetime.now(dt.timezone.utc)).astimezone(dt.timezone.utc)
+    today = now.astimezone(DUBLIN).date()
+    deals = []
+    report = {
+        "rejected": [],
+        "excluded": [],
+        "departed": [],
+        "expired": [],
+        "blank_screenshot": 0,
+    }
+    for line_no, row in read_csv(path):
+        origin = row["origin"].strip().upper()
+        dest = row["destination"].strip().upper()
+        if origin not in REJECTED_ORIGINS and dest in EXCLUDED_DESTINATIONS:
+            message = exclusion_message(line_no, dest)
+            report["excluded"].append(message)
+            continue
+        errors = validate_row(line_no, row, now)
+        if is_example(row):
+            errors.append(
+                f"line {line_no}: EXAMPLE fixtures cannot be shown as live prices"
+            )
+        if errors:
+            report["rejected"].append({
+                "line": line_no,
+                "origin": origin,
+                "destination": dest,
+                "out_date": row["out_date"],
+                "ret_date": row["ret_date"],
+                "airline": row["airline"],
+                "errors": errors,
+            })
+            continue
+        if not row["screenshot_ref"]:
+            report["blank_screenshot"] += 1
+        deal, _checked, age, out_day = _deal_from(row, now)
+        if out_day < today:
+            report["departed"].append(line_no)
+            continue
+        if age > dt.timedelta(hours=HIDE_HOURS):
+            report["expired"].append(line_no)
+            continue
+        deals.append(deal)
+    return deals, report
 
 
 def count_deals(payload):

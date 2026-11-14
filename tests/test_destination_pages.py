@@ -75,7 +75,7 @@ class DestinationPageTests(unittest.TestCase):
         self.assertNotIn("marrakesh", slugs.values())
         self.assertEqual(
             generate_pages.SEARCH["MAD"],
-            ("Cork to Madrid | Dublin fares", "Cork to Madrid flights: Dublin fares in this scan"),
+            ("Dublin to Madrid flights", "Dublin to Madrid flights"),
         )
         self.assertEqual(generate_pages.SEARCH["LPA"][0], "Las Palmas flights from Cork")
         self.assertIn("Cork and Dublin", generate_pages.SEARCH["LPA"][1])
