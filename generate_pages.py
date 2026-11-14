@@ -8,7 +8,7 @@ deals_cache.json and writes:
   destinations/<slug>.html   one static, indexable page per destination
   sitemap.xml                homepage, info pages, and all destination pages
   index.html footer          destination links, same cities as these pages
-  index.html popular routes  refreshed in place, after the deal and plan tabs
+  index.html popular routes  refreshed in place, inside the Popular routes tab
   404.html                   branded not-found page; trailing-slash redirects
 
 Pages are rebuilt on every scan, so Google sees fresh fares every few days.
@@ -897,9 +897,9 @@ POPULAR_ROUTES = (
 )
 POPULAR_START = "<!-- hc-popular-routes -->"
 POPULAR_END = "<!-- /hc-popular-routes -->"
-# The block belongs after both homepage tabs. This is the marker it sits in
-# front of when it has to be inserted or moved back down.
-POPULAR_ANCHOR = "<!-- ═══ BACKEND CONNECT MODAL ═══ -->"
+# The cards live inside this tab panel. A refresh updates them there and
+# moves a block that is still sitting outside the panel back into it.
+ROUTES_TAB_ID = "tab-routes"
 
 
 def fmt_date(iso):
@@ -1908,34 +1908,50 @@ def _popular_match(doc):
     return pattern.search(doc)
 
 
-def _popular_is_below_tabs(doc, match):
-    """True when the block follows both the deal board and Plan a trip."""
-    deals = doc.find('id="tab-deals"')
-    plan = doc.find('id="tab-plan"')
-    if deals < 0 or plan < 0:
+_ROUTES_TAB_OPEN = re.compile(
+    r'<section\b(?=[^>]*\bid="' + re.escape(ROUTES_TAB_ID) + r'")'
+    r'(?=[^>]*\bclass="[^"]*\btab-content\b)[^>]*>'
+)
+
+
+def _routes_tab_open(doc):
+    return _ROUTES_TAB_OPEN.search(doc)
+
+
+def _popular_is_in_routes_tab(doc, match):
+    """True when the block is the body of the Popular routes tab panel."""
+    open_tag = _routes_tab_open(doc)
+    if not open_tag or open_tag.end() > match.start():
         return False
-    return match.start() > deals and match.start() > plan
+    between = doc[open_tag.end():match.start()]
+    if between.strip():
+        return False
+    return doc.find("</section>", match.end()) != -1
 
 
 def homepage_with_popular_routes(doc):
-    """Homepage HTML with Popular routes after the deal and plan tabs.
+    """Homepage HTML with Popular routes inside its tab panel.
 
-    Returns None when the page has no place to put the block. A refresh
-    replaces the cards in place when they are already below the tabs, and
-    moves the whole block there when an older page still has it above them.
+    Returns None when the page has no Popular routes tab to put the block
+    in. A refresh replaces the cards in place when they are already in that
+    panel, and moves the whole block into the panel when an older page still
+    has it above the tabs or below them. It never puts the block back outside
+    the panel.
     """
     block = popular_routes_html()
     match = _popular_match(doc)
-    if match and _popular_is_below_tabs(doc, match):
+    if match and _popular_is_in_routes_tab(doc, match):
         if match.group(0) == block:
             return doc
         return doc[:match.start()] + block + doc[match.end():]
     if match:
         doc = doc[:match.start()] + doc[match.end():]
         doc = re.sub(r"\n{3,}", "\n\n", doc)
-    if POPULAR_ANCHOR not in doc:
+    open_tag = _routes_tab_open(doc)
+    if not open_tag:
         return None
-    return doc.replace(POPULAR_ANCHOR, block + "\n\n" + POPULAR_ANCHOR, 1)
+    suffix = doc[open_tag.end():].lstrip("\n")
+    return doc[:open_tag.end()] + "\n" + block + "\n" + suffix
 
 
 def popular_routes_will_change():
@@ -1951,7 +1967,8 @@ def popular_routes_will_change():
 def update_popular_routes():
     """Insert or refresh the homepage popular-routes block. A deal refresh
     rewrites destination pages, so this block has to live in the generator.
-    It stays below the deal board and Plan a trip, where the homepage puts it."""
+    The cards stay inside the Popular routes tab. A refresh never moves
+    them back out of that panel."""
     path = "index.html"
     if not os.path.exists(path):
         print("  skip popular routes: index.html missing")
