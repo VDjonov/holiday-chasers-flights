@@ -122,6 +122,59 @@ assert(junk && junk.kind === "deal", "bad dates fall back to cheapest");
 
 assert(guideQuery("OPO", "DUB", "2026-12-05", "2026-12-12") === "?dest=OPO&from=DUB&out=2026-12-05&ret=2026-12-12", "guide query");
 
+const { withExistingUtms, outboundClickParams, track, destPageLink } = sandbox;
+const social = "?dest=OPO&from=DUB&out=2026-12-05&ret=2026-12-12&utm_source=facebook&utm_medium=social&utm_campaign=winter&utm_content=hero&utm_term=porto&gclid=drop-me";
+const kept = withExistingUtms(guideQuery("OPO", "DUB", "2026-12-05", "2026-12-12"), social);
+const keptParams = new URLSearchParams(kept.slice(1));
+assert(keptParams.get("dest") === "OPO" && keptParams.get("from") === "DUB", "rewrite keeps the trip");
+assert(keptParams.get("out") === "2026-12-05" && keptParams.get("ret") === "2026-12-12", "rewrite keeps the dates");
+for (const key of ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"]) {
+  assert(keptParams.get(key) === new URLSearchParams(social.slice(1)).get(key), "keeps " + key);
+}
+assert(!keptParams.has("gclid"), "does not keep unrelated params");
+assert(withExistingUtms("?dest=FAO", "?dest=FAO") === "?dest=FAO", "adds no utm when none are present");
+assert(withExistingUtms("/", "?utm_source=instagram&utm_medium=social") === "/?utm_source=instagram&utm_medium=social", "tab rewrite keeps utms");
+assert(!withExistingUtms("?tab=planner", "").includes("utm_"), "does not invent utms");
+
+function anchor(href, attrs) {
+  return {
+    getAttribute(name) {
+      if (name === "href") return href;
+      return attrs && Object.prototype.hasOwnProperty.call(attrs, name) ? attrs[name] : null;
+    },
+  };
+}
+const ryan = outboundClickParams(anchor(
+  "https://www.ryanair.com/ie/en/trip/flights/select?originIata=DUB&destinationIata=OPO&dateOut=2026-12-05&dateIn=2026-12-12&adults=1",
+  { "data-hc-dest": "STALE", "data-hc-from": "ORK" }
+));
+assert(ryan && ryan.link_domain === "ryanair.com", "ryanair domain");
+assert(ryan.destination === "OPO" && ryan.from === "DUB", "ryanair route comes from the link");
+assert(ryan.airline === "Ryanair" && ryan.out === "2026-12-05" && ryan.ret === "2026-12-12", "ryanair dates");
+const avia = outboundClickParams(anchor(
+  "https://www.aviasales.com/search/ORK2011AMS22111?marker=543929",
+  { "data-hc-dest": "AMS", "data-hc-from": "ORK", "data-hc-airline": "KLM", "data-hc-out": "2026-11-20", "data-hc-ret": "2026-11-22" }
+));
+assert(avia && avia.link_domain === "aviasales.com" && avia.destination === "AMS" && avia.from === "ORK", "aviasales route");
+assert(avia.airline === "KLM" && avia.out === "2026-11-20" && avia.ret === "2026-11-22", "aviasales stamped dates");
+assert(outboundClickParams(anchor("https://www.discovercars.com/search?pickupLocation=Porto", {})) === null, "car hire is not an outbound flight");
+assert(outboundClickParams(anchor("", {})) === null, "in-page guide button is not an outbound flight");
+assert(destPageLink("BCN", "Barcelona") === '<a class="deal-dest-link" href="/destinations/barcelona.html">Barcelona destination page</a>', "destination page link");
+assert(destPageLink("BIO", "Bilbao") === "", "no link when the city has no page");
+
+let sent = null;
+sandbox.gtag = (type, name, params) => { sent = { type, name, params }; };
+track("outbound_click", { destination: "OPO", link_domain: "ryanair.com" }, true);
+assert(sent && sent.name === "outbound_click" && sent.params.transport_type === "beacon", "outbound uses a beacon");
+assert(sent.params.destination === "OPO", "beacon keeps the route");
+sent = null;
+sandbox.gtag = null;
+track("outbound_click", { destination: "OPO" }, true);
+assert(sent === null, "no event before consent loads gtag");
+const appSource = fs.readFileSync(__dirname + "/app.js", "utf8");
+assert(!appSource.includes("track('flight_click'"), "homepage does not send a second flight_click");
+assert(!appSource.includes('kind = "flight_click"'), "deal-book is not counted as flight_click");
+
 const real = JSON.parse(fs.readFileSync(__dirname + "/deals_cache.json", "utf8"));
 let sample = null;
 for (const [ap, airport] of Object.entries(real.airports || {})) {

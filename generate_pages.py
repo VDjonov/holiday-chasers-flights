@@ -271,16 +271,16 @@ GUIDES = {
         ],
     },
     "RHO": {
-        "title": "Flights to Rhodes from Ireland | Cork & Dublin | Holiday Chasers",
-        "h1": "Flights to Rhodes from Ireland",
-        "lead": "Flights to Rhodes from Ireland",
+        "title": "Rhodes flights from Cork & Dublin | Holiday Chasers",
+        "h1": "Flights to Rhodes from Cork and Dublin",
+        "lead": "Flights to Rhodes from Cork and Dublin",
         "intro": (
             "This scan stored no Rhodes fare from Cork or from Dublin. It only prices "
             "through 30 January 2027. Ryanair lists Cork to Rhodes from May 2027 and "
             "Dublin to Rhodes from March 2027. No price is estimated for the gap."
         ),
         "desc": (
-            "Flights to Rhodes from Ireland. No fare in this scan, through 30 Jan 2027. "
+            "Flights to Rhodes from Cork and Dublin. No fare in this scan, through 30 Jan 2027. "
             "Ryanair lists Cork from May 2027 and Dublin from March 2027."
         ),
         "fare_answer": (
@@ -732,7 +732,7 @@ ROUTES = (
 # Heads are kept at 41 characters or fewer so the full title is about 60.
 # H1s follow the Search Console wording and stay honest when Cork is not the fare.
 SEARCH = {
-    "RHO": ("Rhodes flights from Ireland", "Flights to Rhodes from Ireland"),
+    "RHO": ("Rhodes flights from Cork & Dublin", "Flights to Rhodes from Cork and Dublin"),
     "PSA": ("Dublin to Pisa flights", "Dublin to Pisa flights"),
     "BER": ("Cork to Berlin | Dublin fares", "Flights to Berlin from Cork: Dublin fares in this scan"),
     "FAO": ("Flights to Faro from Cork", "Flights to Faro from Cork and Dublin"),
@@ -749,7 +749,7 @@ SEARCH = {
     "SVQ": ("Cork to Seville flights", "Cork to Seville flights"),
     "ATH": ("Cork to Athens | No fare yet", "Cork to Athens flights: no fare in this scan"),
     "ALC": ("Dublin to Alicante flights", "Dublin to Alicante flights"),
-    "FCO": ("Rome holidays from Dublin", "Rome holidays from Dublin"),
+    "FCO": ("Dublin to Rome flights", "Dublin to Rome flights"),
     "NCE": ("Nice from Cork | Dublin fares", "Flights to Nice from Cork: Dublin fares in this scan"),
     "ZAD": ("Cork to Zadar | No fare yet", "Cork to Zadar flights: no fare in this scan"),
     "TFS": ("Tenerife flights from Cork", "Flights to Tenerife from Cork"),
@@ -787,7 +787,7 @@ TRIP_PARAGRAPH = (
 
 # Homepage links. href is the path. Anchor text follows the search, not a price.
 POPULAR_ROUTES = (
-    ("/destinations/rhodes.html", "Rhodes", "Flights to Rhodes from Ireland", "No fare in this scan"),
+    ("/destinations/rhodes.html", "Rhodes", "Flights to Rhodes from Cork and Dublin", "No fare in this scan"),
     ("/destinations/pisa.html", "Pisa", "Dublin to Pisa", "No Cork fare in this scan"),
     ("/destinations/berlin.html", "Berlin", "Flights to Berlin from Cork", "Dublin fares in this scan"),
     ("/destinations/faro.html", "Faro", "Flights to Faro from Cork", "Cork and Dublin"),
@@ -804,7 +804,7 @@ POPULAR_ROUTES = (
     ("/destinations/seville.html", "Seville", "Cork to Seville", "Cork and Dublin"),
     ("/destinations/athens.html", "Athens", "Cork to Athens", "No fare in this scan"),
     ("/destinations/alicante.html", "Alicante", "Dublin to Alicante", "Cork and Dublin"),
-    ("/destinations/rome.html", "Rome", "Rome holidays from Dublin", "Dublin fares"),
+    ("/destinations/rome.html", "Rome", "Dublin to Rome flights", "Dublin fares"),
     ("/destinations/nice.html", "Nice", "Nice from Cork", "Dublin fares in this scan"),
     ("/destinations/zadar.html", "Zadar", "Cork to Zadar", "No fare in this scan"),
     ("/destinations/tenerife.html", "Tenerife", "Tenerife from Cork", "Cork and Dublin"),
