@@ -8,6 +8,7 @@ deals_cache.json and writes:
   destinations/<slug>.html   one static, indexable page per destination
   sitemap.xml                homepage, info pages, and all destination pages
   index.html footer          destination links, same cities as these pages
+  index.html popular routes  refreshed in place, after the deal and plan tabs
   404.html                   branded not-found page; trailing-slash redirects
 
 Pages are rebuilt on every scan, so Google sees fresh fares every few days.
@@ -896,6 +897,9 @@ POPULAR_ROUTES = (
 )
 POPULAR_START = "<!-- hc-popular-routes -->"
 POPULAR_END = "<!-- /hc-popular-routes -->"
+# The block belongs after both homepage tabs. This is the marker it sits in
+# front of when it has to be inserted or moved back down.
+POPULAR_ANCHOR = "<!-- ═══ BACKEND CONNECT MODAL ═══ -->"
 
 
 def fmt_date(iso):
@@ -1896,41 +1900,68 @@ def popular_routes_html():
     return POPULAR_START + "\n" + inner + "\n" + POPULAR_END
 
 
+def _popular_match(doc):
+    if POPULAR_START not in doc or POPULAR_END not in doc:
+        return None
+    pattern = re.compile(
+        re.escape(POPULAR_START) + r".*?" + re.escape(POPULAR_END), re.DOTALL)
+    return pattern.search(doc)
+
+
+def _popular_is_below_tabs(doc, match):
+    """True when the block follows both the deal board and Plan a trip."""
+    deals = doc.find('id="tab-deals"')
+    plan = doc.find('id="tab-plan"')
+    if deals < 0 or plan < 0:
+        return False
+    return match.start() > deals and match.start() > plan
+
+
+def homepage_with_popular_routes(doc):
+    """Homepage HTML with Popular routes after the deal and plan tabs.
+
+    Returns None when the page has no place to put the block. A refresh
+    replaces the cards in place when they are already below the tabs, and
+    moves the whole block there when an older page still has it above them.
+    """
+    block = popular_routes_html()
+    match = _popular_match(doc)
+    if match and _popular_is_below_tabs(doc, match):
+        if match.group(0) == block:
+            return doc
+        return doc[:match.start()] + block + doc[match.end():]
+    if match:
+        doc = doc[:match.start()] + doc[match.end():]
+        doc = re.sub(r"\n{3,}", "\n\n", doc)
+    if POPULAR_ANCHOR not in doc:
+        return None
+    return doc.replace(POPULAR_ANCHOR, block + "\n\n" + POPULAR_ANCHOR, 1)
+
+
 def popular_routes_will_change():
     path = "index.html"
     if not os.path.exists(path):
         return False
-    doc = open(path, encoding="utf-8").read()
-    block = popular_routes_html()
-    if POPULAR_START not in doc or POPULAR_END not in doc:
-        return True
-    pattern = re.compile(re.escape(POPULAR_START) + r".*?" + re.escape(POPULAR_END), re.DOTALL)
-    match = pattern.search(doc)
-    return not match or match.group(0) != block
+    with open(path, encoding="utf-8") as f:
+        doc = f.read()
+    new = homepage_with_popular_routes(doc)
+    return new is not None and new != doc
 
 
 def update_popular_routes():
     """Insert or refresh the homepage popular-routes block. A deal refresh
-    rewrites destination pages, so this block has to live in the generator."""
+    rewrites destination pages, so this block has to live in the generator.
+    It stays below the deal board and Plan a trip, where the homepage puts it."""
     path = "index.html"
     if not os.path.exists(path):
         print("  skip popular routes: index.html missing")
         return
     with open(path, encoding="utf-8") as f:
         doc = f.read()
-    block = popular_routes_html()
-    if POPULAR_START in doc and POPULAR_END in doc:
-        pattern = re.compile(re.escape(POPULAR_START) + r".*?" + re.escape(POPULAR_END), re.DOTALL)
-        new, count = pattern.subn(block, doc, count=1)
-        if count != 1:
-            print("  skip popular routes: could not replace the block")
-            return
-    else:
-        anchor = "<!-- ═══ TABS ═══ -->"
-        if anchor not in doc:
-            print("  skip popular routes: no insertion point in index.html")
-            return
-        new = doc.replace(anchor, block + "\n\n" + anchor, 1)
+    new = homepage_with_popular_routes(doc)
+    if new is None:
+        print("  skip popular routes: no insertion point in index.html")
+        return
     if new != doc:
         with open(path, "w", encoding="utf-8") as f:
             f.write(new)
