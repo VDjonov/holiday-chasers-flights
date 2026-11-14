@@ -19,6 +19,7 @@ import json, os, re, subprocess, datetime as dt
 from urllib.parse import urlencode, urlparse
 
 import refresh_deals
+import manual_fares
 
 SITE = "https://holidaychasers.ie"
 OUT_DIR = "destinations"
@@ -397,7 +398,7 @@ GUIDES = {
         "sections": [
             ("Cork", [
                 "Ryanair's Cork to Pisa page shows no fare for November 2026 through February 2027. From March 2027 it lists flights on multiple days each week. Dates on the page include Friday 23 April 2027, Friday 21 May 2027, Monday 9 August 2027 and Friday 3 September 2027.",
-                "The schedule this scan uses is Mondays and Fridays from 3 April 2026 to 23 October 2026, with nothing after that, so this run stored no Cork fare.",
+                "The schedule this scan uses is Mondays and Fridays from 3 April 2026 to 23 October 2026, with nothing after that, so the scan stored no Cork fare.",
                 "SCAN",
             ]),
             ("Dublin", [
@@ -813,7 +814,7 @@ SEARCH = {
     "BER": ("Cork to Berlin | Dublin fares", "Flights to Berlin from Cork: Dublin fares in this scan"),
     "FAO": ("Flights to Faro from Cork", "Flights to Faro from Cork and Dublin"),
     "VCE": ("Dublin to Venice flights", "Dublin to Venice flights"),
-    "MAD": ("Cork to Madrid | Dublin fares", "Cork to Madrid flights: Dublin fares in this scan"),
+    "MAD": ("Dublin to Madrid flights", "Dublin to Madrid flights"),
     "KRK": ("Cork to Krakow | From Dublin", "Cork to Krakow flights: fly direct from Dublin"),
     "BUD": ("Cork to Budapest | Dublin fares", "Flights to Budapest from Cork: Dublin fares in this scan"),
     "CPH": ("Cork to Copenhagen | Dublin", "Cork to Copenhagen flights: Dublin fares in this scan"),
@@ -823,13 +824,13 @@ SEARCH = {
     "AGP": ("Malaga flights from Cork", "Flights to Malaga from Cork"),
     "LIS": ("Cork to Lisbon | Dublin fares", "Cork to Lisbon flights: Dublin fares in this scan"),
     "SVQ": ("Cork to Seville flights", "Cork to Seville flights"),
-    "ATH": ("Cork to Athens | No fare yet", "Cork to Athens flights: no fare in this scan"),
+    "ATH": ("Dublin to Athens flights", "Dublin to Athens flights"),
     "ALC": ("Dublin to Alicante flights", "Dublin to Alicante flights"),
     "FCO": ("Dublin to Rome flights", "Dublin to Rome flights"),
     "NCE": ("Nice from Cork | Dublin fares", "Flights to Nice from Cork: Dublin fares in this scan"),
-    "ZAD": ("Cork to Zadar | No fare yet", "Cork to Zadar flights: no fare in this scan"),
+    "ZAD": ("Dublin to Zadar flights", "Dublin to Zadar flights"),
     "TFS": ("Tenerife flights from Cork", "Flights to Tenerife from Cork"),
-    "PMI": ("Palma flights | No fare yet", "Flights to Palma from Cork and Dublin"),
+    "PMI": ("Palma flights from Cork & Dublin", "Flights to Palma from Cork and Dublin"),
     "ACE": ("Lanzarote flights from Cork", "Flights to Lanzarote from Cork"),
     "BCN": ("Cork to Barcelona flights", "Cork to Barcelona flights"),
     "EDI": ("Edinburgh flights from Cork", "Edinburgh flights from Cork"),
@@ -869,12 +870,12 @@ TRIP_PARAGRAPH = (
 
 # Homepage links. href is the path. Anchor text follows the search, not a price.
 POPULAR_ROUTES = (
-    ("/destinations/rhodes.html", "Rhodes", "Flights to Rhodes from Cork and Dublin", "No fare in this scan"),
-    ("/destinations/pisa.html", "Pisa", "Dublin to Pisa", "No Cork fare in this scan"),
+    ("/destinations/rhodes.html", "Rhodes", "Dublin to Rhodes", "Hand-checked on ryanair.com"),
+    ("/destinations/pisa.html", "Pisa", "Dublin to Pisa", "Cork fare hand-checked"),
     ("/destinations/berlin.html", "Berlin", "Flights to Berlin from Cork", "Dublin fares in this scan"),
     ("/destinations/faro.html", "Faro", "Flights to Faro from Cork", "Cork and Dublin"),
     ("/destinations/venice.html", "Venice", "Dublin to Venice", "No Cork fare in this scan"),
-    ("/destinations/madrid.html", "Madrid", "Cork to Madrid", "Dublin fares in this scan"),
+    ("/destinations/madrid.html", "Madrid", "Dublin to Madrid", "Dublin fares in this scan"),
     ("/destinations/krakow.html", "Krakow", "Cork to Krakow", "Fly direct from Dublin"),
     ("/destinations/budapest.html", "Budapest", "Budapest from Cork", "Dublin fares in this scan"),
     ("/destinations/copenhagen.html", "Copenhagen", "Cork to Copenhagen", "Dublin fares in this scan"),
@@ -884,11 +885,11 @@ POPULAR_ROUTES = (
     ("/destinations/malaga.html", "Malaga", "Malaga from Cork", "Cork and Dublin"),
     ("/destinations/lisbon.html", "Lisbon", "Cork to Lisbon", "Dublin fares in this scan"),
     ("/destinations/seville.html", "Seville", "Cork to Seville", "Cork and Dublin"),
-    ("/destinations/athens.html", "Athens", "Cork to Athens", "No fare in this scan"),
+    ("/destinations/athens.html", "Athens", "Dublin to Athens", "Hand-checked on ryanair.com"),
     ("/destinations/alicante.html", "Alicante", "Dublin to Alicante", "Cork and Dublin"),
     ("/destinations/rome.html", "Rome", "Dublin to Rome flights", "Dublin fares"),
     ("/destinations/nice.html", "Nice", "Nice from Cork", "Dublin fares in this scan"),
-    ("/destinations/zadar.html", "Zadar", "Cork to Zadar", "No fare in this scan"),
+    ("/destinations/zadar.html", "Zadar", "Dublin to Zadar", "Hand-checked on ryanair.com"),
     ("/destinations/tenerife.html", "Tenerife", "Tenerife from Cork", "Cork and Dublin"),
     ("/routes/dublin-to-edinburgh.html", "Edinburgh", "Dublin to Edinburgh", "Daily on Ryanair's page"),
     ("/routes/cork-to-barcelona.html", "Barcelona", "Cork to Barcelona", "Several days a week"),
@@ -925,6 +926,13 @@ PAGE_ORIGINS = {
     "AGA": ("DUB",),
     "FNC": ("DUB",),
 }
+
+# Madrid is Dublin only on this scan. The page does not name Cork.
+DUBLIN_ONLY_PAGES = {"MAD"}
+
+# These airports already have destination pages. Manual rows for them are
+# kept in the CSV and are not added to the page. No new page is created.
+SUPPLEMENT_SKIP = {"GVA", "LYS", "MUC", "PRG"}
 
 
 def _page_airports(code):
@@ -1031,6 +1039,8 @@ def _page_origin_pairs(code):
     if code in PAGE_ORIGINS:
         allowed = set(PAGE_ORIGINS[code])
         return [pair for pair in (("Cork", "ORK"), ("Dublin", "DUB")) if pair[1] in allowed]
+    if code in DUBLIN_ONLY_PAGES:
+        return [("Dublin", "DUB")]
     return [("Cork", "ORK"), ("Dublin", "DUB")]
 
 
@@ -1117,28 +1127,58 @@ CHECKED_ASSETS = """<style>
 .basis{font-weight:600;font-size:11px;color:var(--muted)}
 .checked{display:block;font-weight:500;font-size:11px;color:var(--muted);margin-top:4px}
 .checked[data-stale="1"]{color:#9A3412}
+a.fare-link{color:inherit}
 </style>
 <script>
 (function () {
+  var STALE_HOURS = __STALE_HOURS__;
+  var HIDE_HOURS = __HIDE_HOURS__;
   function rel(then) {
     var mins = Math.round((Date.now() - then.getTime()) / 60000);
     if (mins < 1) return "just now";
     if (mins < 60) return mins + " minute" + (mins === 1 ? "" : "s") + " ago";
     var hours = Math.round(mins / 60);
-    if (hours < 48) return hours + " hour" + (hours === 1 ? "" : "s") + " ago";
+    if (hours < STALE_HOURS) return hours + " hour" + (hours === 1 ? "" : "s") + " ago";
     var days = Math.round(hours / 24);
     return days + " day" + (days === 1 ? "" : "s") + " ago";
   }
-  var nodes = document.querySelectorAll(".checked[data-checked-at]");
-  for (var i = 0; i < nodes.length; i++) {
-    var el = nodes[i];
-    var then = new Date(el.getAttribute("data-checked-at"));
-    if (isNaN(then.getTime())) continue;
+  var rows = document.querySelectorAll("tr[data-manual][data-checked-at]");
+  var now = Date.now();
+  for (var i = 0; i < rows.length; i++) {
+    var tr = rows[i];
+    var el = tr.querySelector(".checked");
+    var then = new Date(tr.getAttribute("data-checked-at"));
+    if (!el || isNaN(then.getTime())) continue;
+    var age = now - then.getTime();
+    if (age >= HIDE_HOURS * 3600000) {
+      if (tr.parentNode) tr.parentNode.removeChild(tr);
+      continue;
+    }
     var host = el.getAttribute("data-host") || "the airline site";
     var dublin = el.getAttribute("data-dublin") || "";
-    var stale = el.getAttribute("data-stale") ? " · fare may have changed" : "";
+    var stale = age >= STALE_HOURS * 3600000;
+    if (stale) el.setAttribute("data-stale", "1");
+    else el.removeAttribute("data-stale");
     var when = dublin ? " (" + dublin + " Dublin)" : "";
-    el.textContent = "Checked on " + host + " " + rel(then) + when + stale;
+    var warn = stale ? " · fare may have changed" : "";
+    el.textContent = "Checked on " + host + " " + rel(then) + when + warn;
+  }
+  var blocks = document.querySelectorAll("[data-fare-block]");
+  for (var j = 0; j < blocks.length; j++) {
+    var block = blocks[j];
+    var body = block.querySelector("tbody");
+    if (!body || body.querySelector("tr")) continue;
+    var wrap = block.querySelector(".table-wrap");
+    var heading = block.querySelector("h2");
+    var fallback = block.querySelector("template[data-manual-fallback]");
+    if (wrap) wrap.hidden = true;
+    if (heading) heading.hidden = true;
+    if (fallback && fallback.content) block.appendChild(fallback.content.cloneNode(true));
+  }
+  if (!document.querySelector("tbody tr")) {
+    var lead = document.querySelector("[data-manual-lead]");
+    var dropped = document.querySelector(".empty-fare p");
+    if (lead && dropped) lead.textContent = dropped.textContent;
   }
 })();
 </script>
@@ -1154,7 +1194,56 @@ def checked_note(rows):
 def checked_assets(rows):
     if not any(row.get("checked_at") for row in rows):
         return ""
-    return CHECKED_ASSETS
+    return (CHECKED_ASSETS
+            .replace("__STALE_HOURS__", str(manual_fares.STALE_HOURS))
+            .replace("__HIDE_HOURS__", str(manual_fares.HIDE_HOURS)))
+
+
+def _format_price(price):
+    if isinstance(price, float):
+        return f"{price:.2f}"
+    return str(price)
+
+
+def _checked_moment(iso, now=None):
+    now = now or dt.datetime.now(dt.timezone.utc)
+    text = (iso or "").strip()
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
+    then = dt.datetime.fromisoformat(text).astimezone(dt.timezone.utc)
+    return now.astimezone(dt.timezone.utc) - then
+
+
+def relative_checked(iso, now=None):
+    """Same buckets as the page script: minutes, then hours, then days."""
+    try:
+        age = _checked_moment(iso, now)
+    except (ValueError, TypeError):
+        return "recently"
+    mins = int(age.total_seconds() / 60 + 0.5)
+    if mins < 1:
+        return "just now"
+    if mins < 60:
+        unit = "minute" if mins == 1 else "minutes"
+        return f"{mins} {unit} ago"
+    hours = int(mins / 60 + 0.5)
+    if hours < manual_fares.STALE_HOURS:
+        unit = "hour" if hours == 1 else "hours"
+        return f"{hours} {unit} ago"
+    days = int(hours / 24 + 0.5)
+    unit = "day" if days == 1 else "days"
+    return f"{days} {unit} ago"
+
+
+def _row_is_stale(row, now=None):
+    checked = row.get("checked_at") or ""
+    if not checked:
+        return False
+    try:
+        age = _checked_moment(checked, now)
+    except (ValueError, TypeError):
+        return bool(row.get("stale"))
+    return age > dt.timedelta(hours=manual_fares.STALE_HOURS)
 
 
 def _fare_host(url):
@@ -1166,23 +1255,40 @@ def _fare_host(url):
 
 def checked_price_extra(row):
     """Empty unless this fare was read by the scout. FlightAPI rows stay as they are."""
+    if not row.get("checked_at"):
+        return ""
+    return manual_price_html(row, linked=False)
+
+
+def checked_line(row):
     checked = row.get("checked_at") or ""
     if not checked:
         return ""
     host = _fare_host(row.get("source_url") or "") or "the airline site"
-    basis = html_lib.escape(row.get("fare_label") or "from, no bags")
     dublin = row.get("checked_at_dublin") or ""
-    stale_attr = ' data-stale="1"' if row.get("stale") else ""
-    fallback = f"Checked on {html_lib.escape(host)}"
+    stale = _row_is_stale(row)
+    stale_attr = ' data-stale="1"' if stale else ""
+    fallback = f"Checked on {html_lib.escape(host)} {html_lib.escape(relative_checked(checked))}"
     if dublin:
-        fallback += f" · {html_lib.escape(dublin)} Dublin"
-    if row.get("stale"):
+        fallback += f" ({html_lib.escape(dublin)} Dublin)"
+    if stale:
         fallback += " · fare may have changed"
     return (
-        f" <span class=\"basis\">{basis}</span>"
         f"<div class=\"checked\" data-checked-at=\"{html_lib.escape(checked, quote=True)}\""
         f" data-host=\"{html_lib.escape(host, quote=True)}\""
         f" data-dublin=\"{html_lib.escape(dublin, quote=True)}\"{stale_attr}>{fallback}</div>"
+    )
+
+
+def manual_price_html(row, linked=True):
+    phrase = f"from €{_format_price(row.get('price'))} return, no bags"
+    line = checked_line(row)
+    if not linked or not row.get("source_url"):
+        return f" <span class=\"basis\">{html_lib.escape(phrase)}</span>{line}"
+    url = html_lib.escape(row["source_url"], quote=True)
+    return (
+        f"<a class=\"fare-link\" href=\"{url}\" rel=\"noopener noreferrer\" target=\"_blank\">"
+        f"{html_lib.escape(phrase)}</a>{line}"
     )
 
 
@@ -1192,10 +1298,19 @@ def fare_row(row):
         origin = f"{row['from']} → {html_lib.escape(row['airport_label'])}"
     nights = f" · {row['nights']}n" if row["nights"] else ""
     saver = " 💡" if row["saver"] else ""
+    if row.get("checked_at"):
+        attrs = (
+            f" data-manual=\"1\""
+            f" data-checked-at=\"{html_lib.escape(row['checked_at'], quote=True)}\""
+        )
+        price = manual_price_html(row)
+    else:
+        attrs = ""
+        price = f"€{row['price']}{saver}{checked_price_extra(row)}"
     return (
-        f"<tr><td>{origin}</td><td>{row['kind']}</td>"
+        f"<tr{attrs}><td>{origin}</td><td>{row['kind']}</td>"
         f"<td>{fmt_date(row['dep'])} → {fmt_date(row['ret'])}{nights}</td>"
-        f"<td class='p'>€{row['price']}{saver}{checked_price_extra(row)}</td>"
+        f"<td class='p'>{price}</td>"
         f"<td>{html_lib.escape(row['airline'])}</td></tr>"
     )
 
@@ -1224,8 +1339,25 @@ def _name_list(names):
 
 def _scan_paragraph(origin, rows):
     """Airlines, weekdays and trip lengths actually stored for one airport."""
-    if not rows:
+    manual = [r for r in rows if r.get("checked_at")]
+    scanned = [r for r in rows if not r.get("checked_at")]
+    if manual and not scanned:
+        bits = []
+        ordered = sorted(manual, key=lambda item: (item.get("price") or 0, item.get("dep") or ""))
+        for row in ordered:
+            host = _fare_host(row.get("source_url") or "") or "the airline site"
+            when = ""
+            if row.get("dep") and row.get("ret"):
+                when = f" on {fmt_date(row['dep'])} to {fmt_date(row['ret'])}"
+            airline = row.get("airline") or "The airline"
+            bits.append(
+                f"A {airline} return checked on {host}{when}, "
+                f"from €{_format_price(row.get('price'))} return, no bags."
+            )
+        return " ".join(bits) + " It is not a fare from the FlightAPI scan."
+    if not scanned:
         return f"The latest scan stored no {origin} fare."
+    rows = scanned
     airlines = _name_list(sorted({
         r["airline"] for r in rows if r["airline"] and r["airline"] != "—"
     }))
@@ -1250,14 +1382,19 @@ def _scan_paragraph(origin, rows):
     return text + "."
 
 
-def auto_sections(code, city):
+def auto_sections(code, city, rows=None):
     """Scan facts only. Does not invent an airline weekday pattern."""
-    if code in PAGE_ORIGINS:
+    rows = rows or []
+    by_origin = {}
+    for row in rows:
+        by_origin.setdefault(row["from"], []).append(row)
+    if code in PAGE_ORIGINS or code in DUBLIN_ONLY_PAGES:
         return [(origin, ["SCAN"]) for origin, _ap in _page_origin_pairs(code)]
     served = set(refresh_deals.served_origins(code))
     sections = []
-    for origin, ap in (("Cork", "ORK"), ("Dublin", "DUB")):
-        if ap not in served:
+    for origin, ap in _page_origin_pairs(code):
+        has_manual = any(row.get("checked_at") for row in by_origin.get(origin, []))
+        if ap not in served and not has_manual:
             sections.append((origin, [
                 f"This scan does not price {origin} to {city}.",
             ]))
@@ -1268,6 +1405,13 @@ def auto_sections(code, city):
 
 def trip_fit_paragraph(origin, rows):
     """Which stored fares are a weekend (Thu–Sat, 2–3 nights) or a week (6–8)."""
+    manual = [r for r in rows if r.get("checked_at")]
+    scanned = [r for r in rows if not r.get("checked_at")]
+    if manual and not scanned:
+        return (
+            f"The {origin} fare in the table was opened on the airline site. "
+            "It is not one of the weekend or one-week dates from the FlightAPI scan."
+        )
     def shape(group, label):
         if not group:
             return f"The latest scan stored no {label} trip from {origin}."
@@ -1291,12 +1435,13 @@ def trip_fit_paragraph(origin, rows):
 
 def route_section(code, city, rows):
     guide = GUIDES.get(code)
-    if guide and guide.get("sections"):
+    manual_only = bool(rows) and all(row.get("checked_at") for row in rows)
+    if guide and guide.get("sections") and not manual_only:
         sections = guide["sections"]
         origin_names = ("Cork", "Dublin")
         heading = "Routes from Cork and Dublin"
     else:
-        sections = auto_sections(code, city)
+        sections = auto_sections(code, city, rows)
         origin_names = tuple(name for name, _ap in _page_origin_pairs(code))
         heading = "Routes from " + " and ".join(origin_names)
     by_origin = {}
@@ -1363,6 +1508,8 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
     prices = [r["price"] for r in rows if r["price"]]
     min_p = min(prices) if prices else None
     airlines = sorted({r["airline"] for r in rows if r["airline"] != "—"})
+    manual_rows = [r for r in rows if r.get("checked_at")]
+    manual_only = bool(rows) and len(manual_rows) == len(rows)
     guide = GUIDES.get(code)
     head, h1 = SEARCH[code]
     title = f"{head} | Holiday Chasers"
@@ -1370,7 +1517,7 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
         raise SystemExit(f"title is {len(title)} characters, over 60: {title}")
     if "(2026)" in title or title.lower().startswith("cheap flights"):
         raise SystemExit(f"stale title pattern: {title}")
-    if guide and guide.get("desc") and (min_p or "{price}" not in guide["desc"]):
+    if guide and guide.get("desc") and not manual_rows and (min_p or "{price}" not in guide["desc"]):
         desc = _fill_price(guide["desc"], min_p)
     elif min_p:
         desc = (
@@ -1438,9 +1585,9 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
         ]
     note += checked_note(rows)
     assets = checked_assets(rows)
-    if guide and guide.get("intro"):
-        lead = _fill_price(guide["intro"], min_p, bold=True)
-    if guide:
+    if guide and not manual_rows:
+        if guide.get("intro"):
+            lead = _fill_price(guide["intro"], min_p, bold=True)
         if guide.get("fare_answer"):
             faq[0] = (faq[0][0], guide["fare_answer"])
         elif guide.get("price_answer") and min_p:
@@ -1451,6 +1598,45 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
                 guide["airline_answer"],
             )
         faq.extend(guide.get("faqs") or [])
+    if manual_rows and min_p:
+        who = _name_list([name for name in ("Cork", "Dublin") if any(r["from"] == name for r in manual_rows)])
+        amount = _format_price(min_p)
+        hosts = _name_list(sorted({
+            _fare_host(r.get("source_url") or "") or "the airline site" for r in manual_rows
+        }))
+        if manual_only:
+            lead = (
+                f"Hand-checked {who} returns from <b>€{amount}</b>, no bags. "
+                "The table is the cheapest fare opened on the airline site for each origin. "
+                "It is not a price from the FlightAPI scan."
+            )
+            desc = f"{h1}. From €{amount} return, no bags. Hand-checked for {who}."
+            note = f"Direct flights only · hand-checked return, no bags{checked_note(rows)}"
+            faq = [
+                (f"How much are flights to {city} from {who} right now?",
+                 f"The cheapest hand-checked return is €{amount}, no bags, on {hosts}. "
+                 "The time in the table is when that fare was read. It can move before you book."),
+                (f"Which airline was checked for {city}?",
+                 (_name_list(airlines) + ". The price links to the page that was opened.")
+                 if airlines else
+                 "The price links to the airline page that was opened."),
+                (f"Is this the same figure as the homepage board?",
+                 "No. The homepage board is the FlightAPI scan. This figure was read on the airline site "
+                 "because that scan has no fare for this trip."),
+            ]
+        else:
+            cheapest = min(rows, key=lambda r: r["price"])
+            if cheapest.get("checked_at"):
+                lead = (
+                    f"Direct returns from <b>€{amount}</b>, no bags. "
+                    "The lowest figure was checked on the airline site. "
+                    "Fares already in the scan are unchanged."
+                )
+                desc = (
+                    f"{h1}. From €{amount} return, no bags. "
+                    "Hand-checked where this scan has no fare."
+                )
+        desc = desc if len(desc) <= 160 else _clip(desc, 160)
     faq.append((
         f"What trip lengths does this scan search for {city}?",
         TRIP_PARAGRAPH,
@@ -1529,6 +1715,18 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
             f"<tbody>\n{fare_rows}\n</tbody>\n</table>\n</div>\n"
             f"<p class=\"note\">{note}</p>"
         )
+        if manual_rows:
+            fallback = (
+                "<template data-manual-fallback>\n"
+                "<div class=\"empty-fare\">\n"
+                "<h2>No fare in the current scan</h2>\n"
+                f"<p>No price is shown for {html_lib.escape(city)}. "
+                "A fare appears here only after a scan stores a real return. "
+                "Nothing on this page is an estimated price.</p>\n"
+                "</div>\n"
+                "</template>\n"
+            )
+            fare_block = f"<div data-fare-block=\"1\">\n{fare_block}{fallback}</div>"
     else:
         fare_block = (
             "<div class=\"empty-fare\">\n"
@@ -1542,6 +1740,7 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
     h1_html = html_lib.escape(h1)
     title = html_lib.escape(title)
     desc = html_lib.escape(desc, quote=True)
+    lead_attrs = " data-manual-lead=\"1\"" if manual_only else ""
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -1604,7 +1803,7 @@ footer a.ext{{color:var(--ink);font-weight:600;border-bottom:1px solid var(--gol
 {crumbs_html}
 <h1>{h1_html}</h1>
 <p class="sub">{blurb}</p>
-<p>{lead}</p>
+<p{lead_attrs}>{lead}</p>
 {cta_html}
 {routes_block}
 {fare_block}
@@ -1695,6 +1894,19 @@ def popular_routes_html():
         + "\n  </div>\n</section>"
     )
     return POPULAR_START + "\n" + inner + "\n" + POPULAR_END
+
+
+def popular_routes_will_change():
+    path = "index.html"
+    if not os.path.exists(path):
+        return False
+    doc = open(path, encoding="utf-8").read()
+    block = popular_routes_html()
+    if POPULAR_START not in doc or POPULAR_END not in doc:
+        return True
+    pattern = re.compile(re.escape(POPULAR_START) + r".*?" + re.escape(POPULAR_END), re.DOTALL)
+    match = pattern.search(doc)
+    return not match or match.group(0) != block
 
 
 def update_popular_routes():
@@ -1886,11 +2098,23 @@ def _fare_table(rows, empty_city):
             "</div>"
         )
     body = fare_tbody(rows)
-    return (
+    table = (
         "<div class=\"table-wrap\">\n<table>\n"
         "<thead><tr><th>From</th><th>Trip</th><th>Dates</th><th>Per person</th><th>Airline</th></tr></thead>\n"
         f"<tbody>\n{body}\n</tbody>\n</table>\n</div>"
     )
+    if not any(row.get("checked_at") for row in rows):
+        return table
+    fallback = (
+        "<template data-manual-fallback>\n"
+        "<div class=\"empty-fare\">\n"
+        "<h2>No fare in the current scan</h2>\n"
+        f"<p>No price is shown for {html_lib.escape(empty_city)}. "
+        "A fare appears here only after a scan stores a real return.</p>\n"
+        "</div>\n"
+        "</template>"
+    )
+    return f"<div data-fare-block=\"1\">\n{table}\n{fallback}\n</div>"
 
 
 def route_page_html(route, city, dest_slug, rows, updated):
@@ -1899,11 +2123,20 @@ def route_page_html(route, city, dest_slug, rows, updated):
     mine = [r for r in rows if r["from"] == origin]
     prices = [r["price"] for r in mine if r["price"]]
     min_p = min(prices) if prices else None
+    manual_only = bool(mine) and all(row.get("checked_at") for row in mine)
     title = route["title"]
     h1 = route["h1"]
     if len(title) > 60:
         raise SystemExit(f"route title is {len(title)} characters, over 60: {title}")
-    if min_p:
+    if manual_only and min_p:
+        amount = _format_price(min_p)
+        host = _fare_host(mine[0].get("source_url") or "") or "the airline site"
+        desc = f"{h1}. From €{amount} return, no bags, checked on {host}."
+        lead = (
+            f"A hand-checked {origin} to {city} return from <b>€{amount}</b>, no bags. "
+            "The FlightAPI scan has no fare for this route."
+        )
+    elif min_p:
         desc = (
             f"{h1}. From €{min_p} return per person on the latest scan. "
             "No price is copied from an airline website."
@@ -2012,12 +2245,16 @@ def route_page_html(route, city, dest_slug, rows, updated):
         f'<a href="/destinations/{html_lib.escape(dest_slug, quote=True)}.html">{html_lib.escape(city)}</a>'
         f'<span aria-hidden="true">/</span>{html_lib.escape(h1)}</nav>'
     )
-    note = (
-        f"Direct flights only · prices per person, return · last scanned {updated}"
-        + (" · 💡 = midweek saver" if mine else "")
-    )
+    if manual_only:
+        note = "Direct flights only · hand-checked return, no bags"
+    else:
+        note = (
+            f"Direct flights only · prices per person, return · last scanned {updated}"
+            + (" · 💡 = midweek saver" if mine else "")
+        )
     note += checked_note(mine)
     assets = checked_assets(mine)
+    route_lead_attrs = " data-manual-lead=\"1\"" if manual_only else ""
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2078,7 +2315,7 @@ footer a.ext{{color:var(--ink);font-weight:600;border-bottom:1px solid var(--gol
 {crumbs}
 <h1>{html_lib.escape(h1)}</h1>
 <p class="sub">{html_lib.escape(origin)} only. The combined {html_lib.escape(city)} page lists both airports.</p>
-<p>{lead}</p>
+<p{route_lead_attrs}>{lead}</p>
 {cta}
 {body}
 {transport_html}
@@ -2103,9 +2340,75 @@ footer a.ext{{color:var(--ink);font-weight:600;border-bottom:1px solid var(--gol
 </html>"""
 
 
+def _deal_rank(deal):
+    return (deal["price"], deal["depart_date"], deal.get("checked_at") or "")
+
+
+def cheapest_manual(deals, code):
+    """Cheapest still-valid manual fare for one destination, per origin."""
+    best = {}
+    for deal in deals:
+        if deal.get("code") != code or deal.get("origin_airport") not in ("ORK", "DUB"):
+            continue
+        origin = deal["origin_airport"]
+        prev = best.get(origin)
+        if prev is None:
+            best[origin] = deal
+            continue
+        new, old = _deal_rank(deal), _deal_rank(prev)
+        if new[0] < old[0] or (new[0] == old[0] and (new[1] < old[1] or (new[1] == old[1] and new[2] > old[2]))):
+            best[origin] = deal
+    return best
+
+
+def deal_to_row(deal):
+    trip = deal.get("trip_type") or ""
+    if trip == "weekend":
+        kind = "Weekend"
+    elif trip == "week":
+        kind = "Week"
+    else:
+        kind = trip.replace("_", " ").strip().title() or "Trip"
+    return {
+        "from": "Cork" if deal["origin_airport"] == "ORK" else "Dublin",
+        "kind": kind,
+        "dep": deal.get("depart_date") or "",
+        "ret": deal.get("return_date") or "",
+        "nights": deal.get("nights") or "",
+        "price": deal.get("price"),
+        "airline": deal.get("airlines") or "—",
+        "saver": False,
+        "code": deal.get("code") or "",
+        "checked_at": deal.get("checked_at") or "",
+        "checked_at_dublin": deal.get("checked_at_dublin") or "",
+        "source_url": deal.get("source_url") or "",
+        "fare_label": deal.get("fare_label") or "from, no bags",
+        "stale": bool(deal.get("stale")),
+        "airport_label": deal.get("airport_label") or "",
+    }
+
+
+def supplement_rows(code, flight_rows, deals):
+    """Keep FlightAPI rows. Add the cheapest manual fare only for an origin
+    that has none. GVA, LYS, MUC and PRG are not displayed."""
+    if code in SUPPLEMENT_SKIP:
+        return list(flight_rows)
+    have = {row["from"] for row in flight_rows}
+    allowed = {name for name, _ap in _page_origin_pairs(code)}
+    extra = []
+    for origin, deal in cheapest_manual(deals, code).items():
+        name = "Cork" if origin == "ORK" else "Dublin"
+        if name not in allowed or name in have:
+            continue
+        extra.append(deal_to_row(deal))
+    extra.sort(key=lambda row: (row["dep"], row["from"]))
+    return list(flight_rows) + extra
+
+
 def main():
     with open(CACHE, encoding="utf-8") as f:
         cache = json.load(f)
+    manual_deals, manual_report = manual_fares.supplement_deals()
     updated_iso = (cache.get("updated_utc") or "")[:10] or dt.date.today().isoformat()
     updated = fmt_date(updated_iso)
     previous_lastmod = read_sitemap_lastmods()
@@ -2113,7 +2416,9 @@ def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     collected = []
     for code, (slug, city, country, blurb) in CITIES.items():
-        collected.append((code, slug, city, country, blurb, collect_fares(cache, code)))
+        flight_rows = collect_fares(cache, code)
+        rows = supplement_rows(code, flight_rows, manual_deals)
+        collected.append((code, slug, city, country, blurb, rows))
     fare_counts = {code: len(rows) for code, _slug, _city, _country, _blurb, rows in collected}
     urls = []
     dest_lastmod = {}
@@ -2154,7 +2459,7 @@ def main():
     home_url = f"{SITE}/"
     home_last = static_lastmod(
         "index.html", home_url, updated_iso, previous_lastmod,
-        changed=homepage_footer_will_change())
+        changed=homepage_footer_will_change() or popular_routes_will_change())
     entries = [sitemap_entry(home_url, "daily", "1.0", home_last)]
     entries += [sitemap_entry(
         f"{SITE}/{name}", "monthly", "0.4",
@@ -2170,6 +2475,15 @@ def main():
     update_homepage_footer()
     update_popular_routes()
     write_404([r["slug"] for r in ROUTES])
+    if manual_report["rejected"]:
+        print(f"manual fares rejected ({len(manual_report['rejected'])} rows):")
+        for item in manual_report["rejected"]:
+            print(" ", item["errors"][0])
+    print(
+        f"manual fares eligible={len(manual_deals)} "
+        f"blank_screenshot={manual_report['blank_screenshot']} "
+        f"excluded={len(manual_report['excluded'])}"
+    )
 
 
 if __name__ == "__main__":
