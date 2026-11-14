@@ -62,7 +62,10 @@ COLUMNS = [
 ORIGINS = {"ORK": "Cork", "DUB": "Dublin"}
 # Named so a Kerry or Shannon row fails with the policy, not a generic code error.
 REJECTED_ORIGINS = {"KIR": "Kerry", "SNN": "Shannon"}
-REJECTED_DESTINATIONS = {"RAK": "Marrakesh"}
+# Soft exclusion. A row for one of these airports is skipped, and the run says
+# why. There is no policy ban: the airport stays off the site until a
+# destination page is approved. Add or remove a code here.
+EXCLUDED_DESTINATIONS = {"RAK": "Marrakesh"}
 
 # city, country, airport label shown when the IATA is not the city's main code.
 DESTINATIONS = {
@@ -112,6 +115,11 @@ DESTINATIONS = {
     "CRL": ("Brussels", "Belgium", ""),
     "LYS": ("Lyon", "France", ""),
     "ADB": ("Izmir", "Turkey", ""),
+    "MXP": ("Milan", "Italy", "Malpensa"),
+    "LUX": ("Luxembourg", "Luxembourg", ""),
+    "BRU": ("Brussels", "Belgium", "Zaventem"),
+    "AGA": ("Agadir", "Morocco", ""),
+    "FNC": ("Funchal", "Portugal", ""),
 }
 
 AIRLINES = {
@@ -230,9 +238,7 @@ def validate_row(line_no, row, now):
         bad("origin must be ORK or DUB")
 
     dest = row["destination"].upper()
-    if dest in REJECTED_DESTINATIONS:
-        bad(f"{REJECTED_DESTINATIONS[dest]} ({dest}) is excluded by policy and is not on the site")
-    elif not re.fullmatch(r"[A-Z]{3}", dest) or dest not in DESTINATIONS:
+    if not re.fullmatch(r"[A-Z]{3}", dest) or dest not in DESTINATIONS:
         bad(f"destination {dest or '(blank)'} is not a Holiday Chasers airport")
     elif dest == origin:
         bad("destination must differ from origin")
@@ -371,9 +377,31 @@ def _deal_from(row, now):
     return deal, checked, age, out_day
 
 
+def exclusion_message(line_no, dest):
+    name = EXCLUDED_DESTINATIONS[dest]
+    return (
+        f"line {line_no}: {name} ({dest}) is excluded until a destination page is approved"
+    )
+
+
+def _partition_rows(rows):
+    """Drop soft-excluded destinations. A rejected origin is still validated."""
+    kept = []
+    notes = []
+    for line_no, row in rows:
+        origin = row["origin"].strip().upper()
+        dest = row["destination"].strip().upper()
+        if origin not in REJECTED_ORIGINS and dest in EXCLUDED_DESTINATIONS:
+            notes.append(exclusion_message(line_no, dest))
+            continue
+        kept.append((line_no, row))
+    return kept, notes
+
+
 def convert_rows(rows, now, allow_example=False):
     """rows is a list of (line_no, dict). Returns (payload, report)."""
     now = now.astimezone(dt.timezone.utc)
+    rows, excluded_notes = _partition_rows(rows)
     errors = []
     examples = []
     for line_no, row in rows:
@@ -389,11 +417,15 @@ def convert_rows(rows, now, allow_example=False):
     if errors:
         raise ValidationError(errors)
     if not rows:
-        raise ValidationError(["no fare rows"])
+        raise ValidationError(excluded_notes or ["no fare rows"])
 
     today = now.astimezone(DUBLIN).date()
     kept = {}
-    report = {"stale": 0, "hidden_age": 0, "departed": 0, "duplicates": 0, "examples": len(examples)}
+    report = {
+        "stale": 0, "hidden_age": 0, "departed": 0, "duplicates": 0,
+        "examples": len(examples), "excluded": len(excluded_notes),
+        "excluded_messages": excluded_notes,
+    }
     for line_no, row in rows:
         deal, checked, age, out_day = _deal_from(row, now)
         if out_day < today:
@@ -415,7 +447,9 @@ def convert_rows(rows, now, allow_example=False):
         kept[key] = (checked, deal)
 
     if not kept:
-        raise ValidationError(["no fares left after dropping departed and expired rows"])
+        notes = ["no fares left after dropping departed and expired rows"]
+        notes.extend(excluded_notes)
+        raise ValidationError(notes)
 
     boards = {}
     latest = None
@@ -544,8 +578,10 @@ def publish_from_env():
     print(
         f"published={report['published']} stale={report['stale']} "
         f"hidden_age={report['hidden_age']} departed={report['departed']} "
-        f"duplicates={report['duplicates']}"
+        f"duplicates={report['duplicates']} excluded={report['excluded']}"
     )
+    for message in report["excluded_messages"]:
+        print(message)
     return 0
 
 
@@ -574,8 +610,11 @@ def main(argv=None):
     print(
         f"published={report['published']} stale={report['stale']} "
         f"hidden_age={report['hidden_age']} departed={report['departed']} "
-        f"duplicates={report['duplicates']} examples={report['examples']}"
+        f"duplicates={report['duplicates']} examples={report['examples']} "
+        f"excluded={report['excluded']}"
     )
+    for message in report["excluded_messages"]:
+        print(message)
     if args.dry_run:
         print("Dry run: no file written.")
         return 0

@@ -79,6 +79,18 @@ CITIES = {
     "CRL": ("brussels", "Brussels", "Belgium", "Grand Place, waffles and chocolate — flying into Charleroi, with a shuttle to the centre."),
     "LYS": ("lyon", "Lyon", "France", "France's food capital: bouchons, Roman ruins and a hillside old town."),
     "ADB": ("izmir", "Izmir", "Turkey", "Aegean sunshine, bazaars and Ephesus within easy reach."),
+    "BVA": ("paris-beauvais", "Paris Beauvais", "France",
+            "Paris from Beauvais: museums, the river and neighbourhood walks, with the airport well north of the city."),
+    "MXP": ("milan-malpensa", "Milan Malpensa", "Italy",
+            "Milan from Malpensa: the cathedral, the galleries and a walk in the centre."),
+    "LUX": ("luxembourg", "Luxembourg", "Luxembourg",
+            "A compact old town above a river valley, reached from Findel airport."),
+    "BRU": ("brussels-airport", "Brussels Airport", "Belgium",
+            "Brussels from the city airport at Zaventem: the Grand Place and the old centre."),
+    "AGA": ("agadir", "Agadir", "Morocco",
+            "A beach city on the Atlantic, with the bay and the seafront as the usual walk."),
+    "FNC": ("funchal", "Funchal", "Portugal",
+            "Madeira's capital: the harbour, the old town and gardens above the port."),
 }
 
 # Distinctive half of each <title>, after "flights from Cork & Dublin | ".
@@ -128,6 +140,12 @@ HOOKS = {
     "CRL": "Charleroi city breaks",
     "LYS": "food-city breaks",
     "ADB": "Aegean sun breaks",
+    "BVA": "Paris from Beauvais",
+    "MXP": "Milan from Malpensa",
+    "LUX": "old-town city breaks",
+    "BRU": "city-airport breaks",
+    "AGA": "Atlantic beach breaks",
+    "FNC": "Madeira harbour breaks",
 }
 
 # Same country, region, or a nearby city. Earlier groups win.
@@ -611,6 +629,64 @@ TRANSPORT = {
         "It runs every day from 6:00 to midnight, and until 1:00 from 1 June to 30 September. "
         "The operator says the ride between the airport and Pisa Centrale takes about 5 minutes, including that stop."
     ),
+    "BVA": (
+        "Paris-Beauvais Airport is well north of Paris. "
+        "Check the airport's own site for the ride into the city. "
+        "This page does not quote a timetable or a fare."
+    ),
+    "MXP": (
+        "Milan Malpensa is north-west of the city. "
+        "Check the airport's own site for the ride into Milan. "
+        "This page does not quote a timetable or a fare."
+    ),
+    "LUX": (
+        "Luxembourg Airport is east of the city, at Findel. "
+        "Check the airport's own site for the ride into town. "
+        "This page does not quote a timetable or a fare."
+    ),
+    "BRU": (
+        "Brussels Airport is at Zaventem, north-east of the city centre. "
+        "Check the airport's own site for the ride into town. "
+        "This page does not quote a timetable or a fare."
+    ),
+    "AGA": (
+        "Agadir Al Massira Airport is south of the city, inland from the bay. "
+        "Check the airport's own site for the ride into town. "
+        "This page does not quote a timetable or a fare."
+    ),
+    "FNC": (
+        "Funchal Airport is east of the city, on the hillside above the coast. "
+        "Check the airport's own site for the ride into town. "
+        "This page does not quote a timetable or a fare."
+    ),
+}
+
+# What the city is, in generic terms. No prices, no timetables.
+PLACE_NOTES = {
+    "BVA": (
+        "Most trips through Beauvais are for Paris: museums, the river and a neighbourhood walk. "
+        "Beauvais itself is the town beside the airport."
+    ),
+    "MXP": (
+        "Milan's usual city break is the cathedral, the shopping galleries and a walk in the centre. "
+        "The lakes are a separate day out from the city."
+    ),
+    "LUX": (
+        "Luxembourg's old town sits above the river valley. "
+        "The usual walk is the old streets and the view over the gorge."
+    ),
+    "BRU": (
+        "This page is Brussels Airport at Zaventem, the airport beside the city. "
+        "The usual centre is the Grand Place and the streets and galleries around it."
+    ),
+    "AGA": (
+        "Agadir is a beach city on Morocco's Atlantic coast. "
+        "The seafront and the bay are the usual reason for the trip."
+    ),
+    "FNC": (
+        "Funchal is the capital of Madeira. "
+        "The harbour, the old town and the gardens above the port are the usual walk."
+    ),
 }
 
 # One page per origin, only where that airline page exists and the scan prices
@@ -761,7 +837,13 @@ SEARCH = {
     "CDG": ("Paris flights from Cork", "Paris flights from Cork"),
     "PRG": ("Prague flights from Cork", "Prague flights from Cork"),
     "MUC": ("Munich flights from Cork", "Munich flights from Cork"),
-    "LPA": ("Las Palmas flights from Cork", "Las Palmas flights from Cork"),
+    "LPA": ("Las Palmas flights from Cork", "Flights to Las Palmas from Cork and Dublin"),
+    "BVA": ("Paris Beauvais from Cork & Dublin", "Flights to Paris Beauvais from Cork and Dublin"),
+    "MXP": ("Dublin to Milan Malpensa", "Dublin to Milan Malpensa flights"),
+    "LUX": ("Dublin to Luxembourg flights", "Dublin to Luxembourg flights"),
+    "BRU": ("Dublin to Brussels Airport", "Dublin to Brussels Airport flights"),
+    "AGA": ("Dublin to Agadir flights", "Dublin to Agadir flights"),
+    "FNC": ("Dublin to Funchal flights", "Dublin to Funchal flights"),
     "VLC": ("Cork to Valencia | Dublin fares", "Flights to Valencia from Cork: Dublin fares in this scan"),
     "ZRH": ("Cork to Zurich | Dublin fares", "Cork to Zurich flights: Dublin fares in this scan"),
     "BGY": ("Milan flights from Dublin", "Milan flights from Dublin"),
@@ -829,8 +911,20 @@ def fmt_date_year(iso):
         return iso or ""
 
 
-# Paris Beauvais is a separate airport. Its fares belong on the Paris page.
+# Paris Beauvais is a separate airport. Its fares also belong on the Paris page.
 PAGE_AIRPORTS = {"CDG": ("CDG", "BVA")}
+
+# Origins named on pages for airports checked on ryanair.com on 13–14 Nov 2026.
+# This is not the FlightAPI route list. Leaving a code out of refresh_deals
+# keeps the scheduled scan from spending credits on it.
+PAGE_ORIGINS = {
+    "BVA": ("ORK", "DUB"),
+    "MXP": ("DUB",),
+    "LUX": ("DUB",),
+    "BRU": ("DUB",),
+    "AGA": ("DUB",),
+    "FNC": ("DUB",),
+}
 
 
 def _page_airports(code):
@@ -927,8 +1021,28 @@ def related_destinations(code, fare_counts, limit=4):
     return chosen
 
 
+def _page_origin_pairs(code):
+    """(name, IATA) pairs this page may name.
+
+    PAGE_ORIGINS is the verified list for airports that are not all on the
+    FlightAPI route list. Every other city still shows Cork and Dublin, and
+    says when the scanner does not price one of them.
+    """
+    if code in PAGE_ORIGINS:
+        allowed = set(PAGE_ORIGINS[code])
+        return [pair for pair in (("Cork", "ORK"), ("Dublin", "DUB")) if pair[1] in allowed]
+    return [("Cork", "ORK"), ("Dublin", "DUB")]
+
+
 def empty_copy(code, city, updated):
     """Honest explanation when the cache has no fare. Never states a price."""
+    if code in PAGE_ORIGINS:
+        who = " and ".join(name for name, _ap in _page_origin_pairs(code))
+        return (
+            f"No fare in the current scan ({updated}). "
+            f"This page is for direct returns from {who}. "
+            f"A price is shown here only after a scan stores a real return."
+        )
     info = refresh_deals.coverage(code)
     window = fmt_date_year(info["window_end"].isoformat())
     flying = [o for o in info["origins"] if o["queryable"]]
@@ -1138,6 +1252,8 @@ def _scan_paragraph(origin, rows):
 
 def auto_sections(code, city):
     """Scan facts only. Does not invent an airline weekday pattern."""
+    if code in PAGE_ORIGINS:
+        return [(origin, ["SCAN"]) for origin, _ap in _page_origin_pairs(code)]
     served = set(refresh_deals.served_origins(code))
     sections = []
     for origin, ap in (("Cork", "ORK"), ("Dublin", "DUB")):
@@ -1175,19 +1291,26 @@ def trip_fit_paragraph(origin, rows):
 
 def route_section(code, city, rows):
     guide = GUIDES.get(code)
-    sections = guide["sections"] if guide and guide.get("sections") else auto_sections(code, city)
+    if guide and guide.get("sections"):
+        sections = guide["sections"]
+        origin_names = ("Cork", "Dublin")
+        heading = "Routes from Cork and Dublin"
+    else:
+        sections = auto_sections(code, city)
+        origin_names = tuple(name for name, _ap in _page_origin_pairs(code))
+        heading = "Routes from " + " and ".join(origin_names)
     by_origin = {}
     for row in rows:
         by_origin.setdefault(row["from"], []).append(row)
-    parts = ["<h2>Routes from Cork and Dublin</h2>"]
-    for heading, paragraphs in sections:
-        parts.append(f"<h3>{html_lib.escape(heading)}</h3>")
+    parts = [f"<h2>{html_lib.escape(heading)}</h2>"]
+    for section_heading, paragraphs in sections:
+        parts.append(f"<h3>{html_lib.escape(section_heading)}</h3>")
         for para in paragraphs:
-            text = _scan_paragraph(heading, by_origin.get(heading, [])) if para == "SCAN" else para
+            text = _scan_paragraph(section_heading, by_origin.get(section_heading, [])) if para == "SCAN" else para
             parts.append(f"<p>{html_lib.escape(text, quote=False)}</p>")
     parts.append("<h3>Weekend or one week</h3>")
     parts.append(f"<p>{html_lib.escape(TRIP_PARAGRAPH)}</p>")
-    for origin in ("Cork", "Dublin"):
+    for origin in origin_names:
         parts.append(f"<p>{html_lib.escape(trip_fit_paragraph(origin, by_origin.get(origin, [])))}</p>")
     return "\n".join(parts)
 
@@ -1298,10 +1421,16 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
         note = f"Direct flights only · prices per person, return · last scanned {updated}"
         related_heading = "Destinations with fares right now"
         cta_label = "See Cork &amp; Dublin deals that are on the board →"
+        if code in PAGE_ORIGINS:
+            who = " and ".join(name for name, _ap in _page_origin_pairs(code))
+            fare_q = f"How much are flights to {city} from {who} right now?"
+            airline_q = f"Which airlines fly direct to {city} from {who}?"
+        else:
+            fare_q = f"How much are flights to {city} from Ireland right now?"
+            airline_q = f"Which airlines fly direct to {city} from Cork or Dublin?"
         faq = [
-            (f"How much are flights to {city} from Ireland right now?",
-             gap),
-            (f"Which airlines fly direct to {city} from Cork or Dublin?",
+            (fare_q, gap),
+            (airline_q,
              "None are in the latest scan, so this page doesn't name a carrier or a price."),
             (f"Where can I see a fare while {city} has none?",
              "The destinations linked below have direct returns in the latest scan. "
@@ -1369,6 +1498,11 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
     )
     routes_html = route_section(code, city, rows)
     routes_block = f'\n<div class="routes">\n{routes_html}\n</div>\n' if routes_html else ""
+    place = PLACE_NOTES.get(code)
+    notes_html = (
+        "<h2>What to see</h2>\n"
+        f"<p>{html_lib.escape(place, quote=False)}</p>\n"
+    ) if place else ""
     page_url = f"{SITE}/destinations/{slug}.html"
     og_image = city_image(code)
     crumbs_html = (
@@ -1474,7 +1608,7 @@ footer a.ext{{color:var(--ink);font-weight:600;border-bottom:1px solid var(--gol
 {cta_html}
 {routes_block}
 {fare_block}
-{transport_html}
+{notes_html}{transport_html}
 {route_links}
 
 <h2>Good to know</h2>

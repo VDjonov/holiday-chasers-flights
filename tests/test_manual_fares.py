@@ -148,13 +148,30 @@ class ManualFareTests(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertEqual(LIVE.read_bytes(), self.cache_before)
 
-    def test_cork_and_dublin_only_and_no_marrakesh(self):
+    def test_cork_and_dublin_only_and_marrakesh_is_skipped(self):
         for origin, needle in (("KIR", "Kerry"), ("SNN", "Shannon"), ("ORKK", "ORK or DUB")):
             text = " ".join(self.errors([{"origin": origin}]))
             self.assertIn(needle, text)
+        self.assertEqual(manual_fares.EXCLUDED_DESTINATIONS["RAK"], "Marrakesh")
         text = " ".join(self.errors([{"destination": "RAK"}]))
         self.assertIn("Marrakesh", text)
+        self.assertIn("excluded until a destination page is approved", text)
+        self.assertNotIn("policy", text.lower())
         self.assertTrue(self.errors([{"destination": "ZZZ"}]))
+
+        payload, report = self.convert([
+            {"destination": "RAK", "screenshot_ref": "checks/2026-11-13/rak.png"},
+            {"destination": "AGP", "screenshot_ref": "checks/2026-11-13/agp.png"},
+        ])
+        self.assertEqual(report["excluded"], 1)
+        self.assertIn("excluded until a destination page is approved", report["excluded_messages"][0])
+        codes = [deal["code"] for board in payload["airports"]["ORK"]["weekend_boards"]
+                 for deal in board["deals"]]
+        self.assertEqual(codes, ["AGP"])
+        self.assertNotIn("RAK", json.dumps(payload))
+
+        kerry = self.errors([{"origin": "KIR", "destination": "RAK"}])
+        self.assertTrue(any("Kerry" in item for item in kerry))
 
     def test_date_price_and_checked_at_rules(self):
         self.assertTrue(self.errors([{"ret_date": "2026-12-01", "nights": "1"}]))
