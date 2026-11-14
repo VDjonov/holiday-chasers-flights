@@ -34,7 +34,7 @@
     },
     "destination": {
       "type": "string",
-      "description": "Arrival IATA code that already has a Holiday Chasers page, or BVA for Paris Beauvais. Marrakesh (RAK) is rejected.",
+      "description": "Arrival IATA code for an airport that has a Holiday Chasers page. There is no policy ban on Marrakesh (RAK). Those rows are skipped until a destination page is approved.",
       "pattern": "^[A-Z]{3}$"
     },
     "out_date": {

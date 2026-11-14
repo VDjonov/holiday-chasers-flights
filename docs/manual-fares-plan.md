@@ -15,7 +15,7 @@ The scout writes `data/manual_fares.csv`. The header is fixed, in this order:
 What each column means:
 
 - `origin` is `ORK` or `DUB`. Kerry (`KIR`) and Shannon (`SNN`) are rejected by name, not just as unknown codes.
-- `destination` is an IATA code the site already has a page for, plus `BVA` for Paris Beauvais. Marrakesh (`RAK`) is rejected. It is not on the site, and it stays off.
+- `destination` is an IATA code the site already has a page for. There is no policy ban on Marrakesh (`RAK`). It has no destination page yet, so the converter skips those rows until a page is approved, and says `excluded until a destination page is approved`. The list is `EXCLUDED_DESTINATIONS` in `manual_fares.py`.
 - `out_date` and `ret_date` are `YYYY-MM-DD`. The return is on or after the outbound. `nights` is the exact number of days between them. A departure date already in the past (Europe/Dublin) is dropped. Dates more than 400 days ahead are rejected.
 - `trip_type` is a short slug. `weekend` and `week` fill the homepage boards. Anything else, including `christmas`, is kept and listed on the destination page.
 - `airline` is `Ryanair` or `Aer Lingus`.
@@ -81,7 +81,7 @@ Leave these out for the winter:
 - Rhodes, Zadar, and Palma. They are seasonal.
 - Pisa from Cork. It is seasonal from Cork. Dublin–Pisa is not on the priority list either, so it is not in the daily set.
 - Izmir. There is no Ryanair route.
-- Marrakesh. It is excluded by policy, and the converter rejects `RAK`.
+- Marrakesh. There is no policy ban. It stays off this daily list because there is no destination page yet. The converter skips `RAK` until a page is approved.
 
 A day that fits the clock:
 
