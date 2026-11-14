@@ -15,7 +15,10 @@ on:
 jobs:
   # Skip a SCHEDULED run if the deals were already refreshed in the last 36 hours
   # (e.g. after a manual run). Manual runs (workflow_dispatch) always go ahead.
+  # staging-manual is a hand-checked preview. The schedule uses the default
+  # branch. A dispatch on staging-manual must not scan and must not push.
   gate:
+    if: github.ref != 'refs/heads/staging-manual'
     runs-on: ubuntu-latest
     outputs:
       skip: ${{ steps.check.outputs.skip }}
@@ -36,7 +39,7 @@ jobs:
   # single job, and a failure in one can no longer throw away the other's fresh fares.
   scan:
     needs: gate
-    if: ${{ needs.gate.outputs.skip != 'true' }}
+    if: ${{ github.ref != 'refs/heads/staging-manual' && needs.gate.outputs.skip != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 350
     strategy:
@@ -65,7 +68,12 @@ jobs:
           SERPAPI_KEY3: ${{ secrets.SERPAPI_KEY3 }}
           SERPAPI_KEY4: ${{ secrets.SERPAPI_KEY4 }}
           SERPAPI_KEY5: ${{ secrets.SERPAPI_KEY5 }}
-        run: python refresh_deals.py
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "staging-manual" ]; then
+            echo "Refusing to scan staging-manual. This workflow does not call FlightAPI here and does not push to this branch."
+            exit 1
+          fi
+          python refresh_deals.py
 
       - name: Upload scan part
         if: always()
@@ -77,7 +85,7 @@ jobs:
 
   finalize:
     needs: [gate, scan]
-    if: ${{ !cancelled() && needs.gate.outputs.skip != 'true' }}
+    if: ${{ github.ref != 'refs/heads/staging-manual' && !cancelled() && needs.gate.outputs.skip != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
@@ -111,6 +119,10 @@ jobs:
 
       - name: Commit the updated cache
         run: |
+          if [ "${GITHUB_REF_NAME}" = "staging-manual" ]; then
+            echo "Refusing to commit or push from staging-manual."
+            exit 1
+          fi
           git config user.name "deal-bot"
           git config user.email "deal-bot@users.noreply.github.com"
           git add deals_cache.json price_history.json destinations sitemap.xml index.html 404.html social/posts.json social/out social/card social/p social/assets/cities

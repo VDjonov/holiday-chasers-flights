@@ -867,6 +867,11 @@ TRIP_PARAGRAPH = (
     "Thursday, Friday or Saturday. A week is 6, 7 or 8 nights, and 7 nights is preferred. "
     "A date is listed only when a real return fare came back for one of those shapes."
 )
+MANUAL_TRIP_PARAGRAPH = (
+    "A weekend here is 2 or 3 nights. A week is 6, 7 or 8 nights. "
+    "Other trip types, such as Christmas, are listed on the destination page. "
+    "A date is listed only when that return was checked on the airline site."
+)
 
 # Homepage links. href is the path. Anchor text follows the search, not a price.
 POPULAR_ROUTES = (
@@ -896,6 +901,9 @@ POPULAR_ROUTES = (
 )
 POPULAR_START = "<!-- hc-popular-routes -->"
 POPULAR_END = "<!-- /hc-popular-routes -->"
+# Set by main() when the cache itself is the hand-checked file.
+HAND_CHECKED_SITE = False
+FARE_BY_HREF = None
 
 
 def fmt_date(iso):
@@ -1044,8 +1052,47 @@ def _page_origin_pairs(code):
     return [("Cork", "ORK"), ("Dublin", "DUB")]
 
 
-def empty_copy(code, city, updated):
+def empty_heading(hand_checked):
+    return "No hand-checked fare yet" if hand_checked else "No fare in the current scan"
+
+
+def empty_fare_block(city, hand_checked, with_estimate=True):
+    """The panel for a page that has no stored price. Never states one."""
+    heading = empty_heading(hand_checked)
+    if hand_checked:
+        detail = (
+            f"No price is shown for {html_lib.escape(city)}. "
+            "A fare appears here only after it is checked on the airline site. "
+            "Nothing on this page is an estimated price."
+        )
+    elif with_estimate:
+        detail = (
+            f"No price is shown for {html_lib.escape(city)}. "
+            "A fare appears here only after a scan stores a real return. "
+            "Nothing on this page is an estimated price."
+        )
+    else:
+        detail = (
+            f"No price is shown for {html_lib.escape(city)}. "
+            "A fare appears here only after a scan stores a real return."
+        )
+    return (
+        "<div class=\"empty-fare\">\n"
+        f"<h2>{heading}</h2>\n"
+        f"<p>{detail}</p>\n"
+        "</div>"
+    )
+
+
+def empty_copy(code, city, updated, hand_checked=False):
     """Honest explanation when the cache has no fare. Never states a price."""
+    if hand_checked:
+        who = " and ".join(name for name, _ap in _page_origin_pairs(code))
+        return (
+            f"No hand-checked fare yet ({updated}). "
+            f"This page is for direct returns from {who}. "
+            "A price is shown here only after a fare is read on the airline site."
+        )
     if code in PAGE_ORIGINS:
         who = " and ".join(name for name, _ap in _page_origin_pairs(code))
         return (
@@ -1337,7 +1384,7 @@ def _name_list(names):
     return ", ".join(names[:-1]) + " and " + names[-1]
 
 
-def _scan_paragraph(origin, rows):
+def _scan_paragraph(origin, rows, hand_checked=False):
     """Airlines, weekdays and trip lengths actually stored for one airport."""
     manual = [r for r in rows if r.get("checked_at")]
     scanned = [r for r in rows if not r.get("checked_at")]
@@ -1354,8 +1401,12 @@ def _scan_paragraph(origin, rows):
                 f"A {airline} return checked on {host}{when}, "
                 f"from €{_format_price(row.get('price'))} return, no bags."
             )
+        if hand_checked:
+            return " ".join(bits) + " The homepage board uses this same hand-checked file."
         return " ".join(bits) + " It is not a fare from the FlightAPI scan."
     if not scanned:
+        if hand_checked:
+            return f"No hand-checked {origin} fare yet."
         return f"The latest scan stored no {origin} fare."
     rows = scanned
     airlines = _name_list(sorted({
@@ -1382,7 +1433,7 @@ def _scan_paragraph(origin, rows):
     return text + "."
 
 
-def auto_sections(code, city, rows=None):
+def auto_sections(code, city, rows=None, hand_checked=False):
     """Scan facts only. Does not invent an airline weekday pattern."""
     rows = rows or []
     by_origin = {}
@@ -1395,19 +1446,29 @@ def auto_sections(code, city, rows=None):
     for origin, ap in _page_origin_pairs(code):
         has_manual = any(row.get("checked_at") for row in by_origin.get(origin, []))
         if ap not in served and not has_manual:
-            sections.append((origin, [
-                f"This scan does not price {origin} to {city}.",
-            ]))
+            if hand_checked:
+                sections.append((origin, [
+                    f"No hand-checked {origin} to {city} fare yet.",
+                ]))
+            else:
+                sections.append((origin, [
+                    f"This scan does not price {origin} to {city}.",
+                ]))
         else:
             sections.append((origin, ["SCAN"]))
     return sections
 
 
-def trip_fit_paragraph(origin, rows):
+def trip_fit_paragraph(origin, rows, hand_checked=False):
     """Which stored fares are a weekend (Thu–Sat, 2–3 nights) or a week (6–8)."""
     manual = [r for r in rows if r.get("checked_at")]
     scanned = [r for r in rows if not r.get("checked_at")]
     if manual and not scanned:
+        if hand_checked:
+            return (
+                f"The {origin} fare in the table was opened on the airline site. "
+                "Weekend and week rows from the same file are on the homepage board."
+            )
         return (
             f"The {origin} fare in the table was opened on the airline site. "
             "It is not one of the weekend or one-week dates from the FlightAPI scan."
@@ -1433,15 +1494,15 @@ def trip_fit_paragraph(origin, rows):
     return shape(weekend, "weekend") + " " + shape(week, "one-week")
 
 
-def route_section(code, city, rows):
+def route_section(code, city, rows, hand_checked=False):
     guide = GUIDES.get(code)
     manual_only = bool(rows) and all(row.get("checked_at") for row in rows)
-    if guide and guide.get("sections") and not manual_only:
+    if guide and guide.get("sections") and not manual_only and not hand_checked:
         sections = guide["sections"]
         origin_names = ("Cork", "Dublin")
         heading = "Routes from Cork and Dublin"
     else:
-        sections = auto_sections(code, city, rows)
+        sections = auto_sections(code, city, rows, hand_checked=hand_checked)
         origin_names = tuple(name for name, _ap in _page_origin_pairs(code))
         heading = "Routes from " + " and ".join(origin_names)
     by_origin = {}
@@ -1451,12 +1512,19 @@ def route_section(code, city, rows):
     for section_heading, paragraphs in sections:
         parts.append(f"<h3>{html_lib.escape(section_heading)}</h3>")
         for para in paragraphs:
-            text = _scan_paragraph(section_heading, by_origin.get(section_heading, [])) if para == "SCAN" else para
+            if para == "SCAN":
+                text = _scan_paragraph(
+                    section_heading, by_origin.get(section_heading, []), hand_checked)
+            else:
+                text = para
             parts.append(f"<p>{html_lib.escape(text, quote=False)}</p>")
     parts.append("<h3>Weekend or one week</h3>")
-    parts.append(f"<p>{html_lib.escape(TRIP_PARAGRAPH)}</p>")
+    trip = MANUAL_TRIP_PARAGRAPH if hand_checked else TRIP_PARAGRAPH
+    parts.append(f"<p>{html_lib.escape(trip)}</p>")
     for origin in origin_names:
-        parts.append(f"<p>{html_lib.escape(trip_fit_paragraph(origin, by_origin.get(origin, [])))}</p>")
+        parts.append(
+            f"<p>{html_lib.escape(trip_fit_paragraph(origin, by_origin.get(origin, []), hand_checked))}</p>"
+        )
     return "\n".join(parts)
 
 
@@ -1504,7 +1572,7 @@ def _fill_price(text, min_p, bold=False):
     return text.replace("€{price}", shown)
 
 
-def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
+def page_html(code, slug, city, country, blurb, rows, updated, fare_counts, hand_checked=False):
     prices = [r["price"] for r in rows if r["price"]]
     min_p = min(prices) if prices else None
     airlines = sorted({r["airline"] for r in rows if r["airline"] != "—"})
@@ -1512,12 +1580,18 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
     manual_only = bool(rows) and len(manual_rows) == len(rows)
     guide = GUIDES.get(code)
     head, h1 = SEARCH[code]
+    if hand_checked:
+        h1 = h1.replace(" in this scan", "")
+        if not min_p:
+            head = re.sub(r"\s*\|\s*Dublin fares$", "", head)
+            h1 = re.sub(r":\s*Dublin fares$", "", h1)
     title = f"{head} | Holiday Chasers"
     if len(title) > 60:
         raise SystemExit(f"title is {len(title)} characters, over 60: {title}")
     if "(2026)" in title or title.lower().startswith("cheap flights"):
         raise SystemExit(f"stale title pattern: {title}")
-    if guide and guide.get("desc") and not manual_rows and (min_p or "{price}" not in guide["desc"]):
+    if (guide and guide.get("desc") and not manual_rows and not (hand_checked and not min_p)
+            and (min_p or "{price}" not in guide["desc"])):
         desc = _fill_price(guide["desc"], min_p)
     elif min_p:
         desc = (
@@ -1525,7 +1599,11 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
             "Weekend and one-week trips from scanned fares."
         )
     else:
-        desc = f"{h1}. No fare in the current scan. No price is estimated."
+        desc = (
+            f"{h1}. No hand-checked fare yet. No price is estimated."
+            if hand_checked else
+            f"{h1}. No fare in the current scan. No price is estimated."
+        )
     desc = desc if len(desc) <= 160 else _clip(desc, 160)
 
     fare_rows = fare_tbody(rows)
@@ -1538,7 +1616,7 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
         )
         for k in related
     )
-    gap = empty_copy(code, city, updated)
+    gap = empty_copy(code, city, updated, hand_checked=hand_checked)
     if min_p:
         lead = (
             f"Direct returns from <b>€{min_p} per person</b> on our latest scan. "
@@ -1565,9 +1643,13 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
         ]
     else:
         lead = gap
-        note = f"Direct flights only · prices per person, return · last scanned {updated}"
+        if hand_checked:
+            note = f"Direct flights only · no bag · no hand-checked fare yet ({updated})"
+            cta_label = "See hand-checked Cork &amp; Dublin deals →"
+        else:
+            note = f"Direct flights only · prices per person, return · last scanned {updated}"
+            cta_label = "See Cork &amp; Dublin deals that are on the board →"
         related_heading = "Destinations with fares right now"
-        cta_label = "See Cork &amp; Dublin deals that are on the board →"
         if code in PAGE_ORIGINS:
             who = " and ".join(name for name, _ap in _page_origin_pairs(code))
             fare_q = f"How much are flights to {city} from {who} right now?"
@@ -1575,17 +1657,27 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
         else:
             fare_q = f"How much are flights to {city} from Ireland right now?"
             airline_q = f"Which airlines fly direct to {city} from Cork or Dublin?"
-        faq = [
-            (fare_q, gap),
-            (airline_q,
-             "None are in the latest scan, so this page doesn't name a carrier or a price."),
-            (f"Where can I see a fare while {city} has none?",
-             "The destinations linked below have direct returns in the latest scan. "
-             "The homepage board is the same data."),
-        ]
+        if hand_checked:
+            faq = [
+                (fare_q, gap),
+                (airline_q,
+                 "None have been hand-checked for this page, so it doesn't name a carrier or a price."),
+                (f"Where can I see a fare while {city} has none?",
+                 "The destinations linked below have a hand-checked return. "
+                 "The homepage board is the same file."),
+            ]
+        else:
+            faq = [
+                (fare_q, gap),
+                (airline_q,
+                 "None are in the latest scan, so this page doesn't name a carrier or a price."),
+                (f"Where can I see a fare while {city} has none?",
+                 "The destinations linked below have direct returns in the latest scan. "
+                 "The homepage board is the same data."),
+            ]
     note += checked_note(rows)
     assets = checked_assets(rows)
-    if guide and not manual_rows:
+    if guide and not manual_rows and not hand_checked:
         if guide.get("intro"):
             lead = _fill_price(guide["intro"], min_p, bold=True)
         if guide.get("fare_answer"):
@@ -1605,11 +1697,26 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
             _fare_host(r.get("source_url") or "") or "the airline site" for r in manual_rows
         }))
         if manual_only:
-            lead = (
-                f"Hand-checked {who} returns from <b>€{amount}</b>, no bags. "
-                "The table is the cheapest fare opened on the airline site for each origin. "
-                "It is not a price from the FlightAPI scan."
-            )
+            if hand_checked:
+                lead = (
+                    f"Hand-checked {who} returns from <b>€{amount}</b>, no bags. "
+                    "The table is the cheapest fare opened on the airline site for each date. "
+                    "The homepage board is the same hand-checked file."
+                )
+                same_board = (
+                    "Yes. Weekend and week fares from this file are on the homepage board. "
+                    "Other trip types are listed on this page."
+                )
+            else:
+                lead = (
+                    f"Hand-checked {who} returns from <b>€{amount}</b>, no bags. "
+                    "The table is the cheapest fare opened on the airline site for each origin. "
+                    "It is not a price from the FlightAPI scan."
+                )
+                same_board = (
+                    "No. The homepage board is the FlightAPI scan. This figure was read on the airline site "
+                    "because that scan has no fare for this trip."
+                )
             desc = f"{h1}. From €{amount} return, no bags. Hand-checked for {who}."
             note = f"Direct flights only · hand-checked return, no bags{checked_note(rows)}"
             faq = [
@@ -1620,9 +1727,7 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
                  (_name_list(airlines) + ". The price links to the page that was opened.")
                  if airlines else
                  "The price links to the airline page that was opened."),
-                (f"Is this the same figure as the homepage board?",
-                 "No. The homepage board is the FlightAPI scan. This figure was read on the airline site "
-                 "because that scan has no fare for this trip."),
+                ("Is this the same figure as the homepage board?", same_board),
             ]
         else:
             cheapest = min(rows, key=lambda r: r["price"])
@@ -1637,9 +1742,11 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
                     "Hand-checked where this scan has no fare."
                 )
         desc = desc if len(desc) <= 160 else _clip(desc, 160)
+    trip_copy = MANUAL_TRIP_PARAGRAPH if hand_checked else TRIP_PARAGRAPH
     faq.append((
-        f"What trip lengths does this scan search for {city}?",
-        TRIP_PARAGRAPH,
+        f"What trip lengths does this page list for {city}?" if hand_checked
+        else f"What trip lengths does this scan search for {city}?",
+        trip_copy,
     ))
     transport = TRANSPORT.get(code)
     if transport:
@@ -1682,7 +1789,7 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
         label=cta_label,
         dates=date_attrs,
     )
-    routes_html = route_section(code, city, rows)
+    routes_html = route_section(code, city, rows, hand_checked=hand_checked)
     routes_block = f'\n<div class="routes">\n{routes_html}\n</div>\n' if routes_html else ""
     place = PLACE_NOTES.get(code)
     notes_html = (
@@ -1708,8 +1815,13 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
             f"<p>{html_lib.escape(transport, quote=False)}</p>"
         )
     if rows:
+        table_heading = (
+            f"Hand-checked fares for {html_lib.escape(city)}"
+            if hand_checked else
+            f"Every scanned date for {html_lib.escape(city)}"
+        )
         fare_block = (
-            f"<h2>Every scanned date for {html_lib.escape(city)}</h2>\n"
+            f"<h2>{table_heading}</h2>\n"
             "<div class=\"table-wrap\">\n<table>\n"
             "<thead><tr><th>From</th><th>Trip</th><th>Dates</th><th>Per person</th><th>Airline</th></tr></thead>\n"
             f"<tbody>\n{fare_rows}\n</tbody>\n</table>\n</div>\n"
@@ -1718,25 +1830,12 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
         if manual_rows:
             fallback = (
                 "<template data-manual-fallback>\n"
-                "<div class=\"empty-fare\">\n"
-                "<h2>No fare in the current scan</h2>\n"
-                f"<p>No price is shown for {html_lib.escape(city)}. "
-                "A fare appears here only after a scan stores a real return. "
-                "Nothing on this page is an estimated price.</p>\n"
-                "</div>\n"
-                "</template>\n"
+                + empty_fare_block(city, hand_checked)
+                + "</template>\n"
             )
             fare_block = f"<div data-fare-block=\"1\">\n{fare_block}{fallback}</div>"
     else:
-        fare_block = (
-            "<div class=\"empty-fare\">\n"
-            "<h2>No fare in the current scan</h2>\n"
-            f"<p>No price is shown for {html_lib.escape(city)}. "
-            "A fare appears here only after a scan stores a real return. "
-            "Nothing on this page is an estimated price.</p>\n"
-            "</div>\n"
-            f"<p class=\"note\">{note}</p>"
-        )
+        fare_block = empty_fare_block(city, hand_checked) + f"\n<p class=\"note\">{note}</p>"
     h1_html = html_lib.escape(h1)
     title = html_lib.escape(title)
     desc = html_lib.escape(desc, quote=True)
@@ -1872,7 +1971,19 @@ def update_homepage_footer():
 
 def popular_routes_html():
     cards = []
+    intro = (
+        "Pages for the searches that already reach the site. "
+        "A card with no hand-checked fare says so."
+        if HAND_CHECKED_SITE else
+        "Pages for the searches that already reach the site. "
+        "Where this scan has no Cork fare, the card says so."
+    )
     for href, name, label, note in POPULAR_ROUTES:
+        if HAND_CHECKED_SITE and FARE_BY_HREF is not None:
+            if not FARE_BY_HREF.get(href):
+                note = "No hand-checked fare yet"
+            elif "scan" in note.lower():
+                note = "Hand-checked fare"
         cards.append(
             '<a href="{href}">'
             '<span class="pr-kicker">{name}</span>'
@@ -1887,8 +1998,7 @@ def popular_routes_html():
     inner = (
         '<section class="popular-routes" aria-label="Popular routes">\n'
         '  <h2>Popular routes</h2>\n'
-        '  <p>Pages for the searches that already reach the site. '
-        'Where this scan has no Cork fare, the card says so.</p>\n'
+        f'  <p>{intro}</p>\n'
         '  <div class="popular-grid">\n    '
         + "\n    ".join(cards)
         + "\n  </div>\n</section>"
@@ -2088,15 +2198,9 @@ def sitemap_entry(loc, freq, priority, lastmod):
             f"<priority>{priority}</priority>{last}</url>")
 
 
-def _fare_table(rows, empty_city):
+def _fare_table(rows, empty_city, hand_checked=False):
     if not rows:
-        return (
-            "<div class=\"empty-fare\">\n"
-            "<h2>No fare in the current scan</h2>\n"
-            f"<p>No price is shown for {html_lib.escape(empty_city)}. "
-            "A fare appears here only after a scan stores a real return.</p>\n"
-            "</div>"
-        )
+        return empty_fare_block(empty_city, hand_checked, with_estimate=False)
     body = fare_tbody(rows)
     table = (
         "<div class=\"table-wrap\">\n<table>\n"
@@ -2107,17 +2211,13 @@ def _fare_table(rows, empty_city):
         return table
     fallback = (
         "<template data-manual-fallback>\n"
-        "<div class=\"empty-fare\">\n"
-        "<h2>No fare in the current scan</h2>\n"
-        f"<p>No price is shown for {html_lib.escape(empty_city)}. "
-        "A fare appears here only after a scan stores a real return.</p>\n"
-        "</div>\n"
-        "</template>"
+        + empty_fare_block(empty_city, hand_checked, with_estimate=False)
+        + "</template>"
     )
     return f"<div data-fare-block=\"1\">\n{table}\n{fallback}\n</div>"
 
 
-def route_page_html(route, city, dest_slug, rows, updated):
+def route_page_html(route, city, dest_slug, rows, updated, hand_checked=False):
     """One airport, one city. Prices only from the rows passed in."""
     origin = route["origin"]
     mine = [r for r in rows if r["from"] == origin]
@@ -2132,10 +2232,16 @@ def route_page_html(route, city, dest_slug, rows, updated):
         amount = _format_price(min_p)
         host = _fare_host(mine[0].get("source_url") or "") or "the airline site"
         desc = f"{h1}. From €{amount} return, no bags, checked on {host}."
-        lead = (
-            f"A hand-checked {origin} to {city} return from <b>€{amount}</b>, no bags. "
-            "The FlightAPI scan has no fare for this route."
-        )
+        if hand_checked:
+            lead = (
+                f"A hand-checked {origin} to {city} return from <b>€{amount}</b>, no bags. "
+                "The homepage board uses the same hand-checked file."
+            )
+        else:
+            lead = (
+                f"A hand-checked {origin} to {city} return from <b>€{amount}</b>, no bags. "
+                "The FlightAPI scan has no fare for this route."
+            )
     elif min_p:
         desc = (
             f"{h1}. From €{min_p} return per person on the latest scan. "
@@ -2147,25 +2253,34 @@ def route_page_html(route, city, dest_slug, rows, updated):
             "wording, checked 13 November 2026, and the dates this scan actually stored."
         )
     else:
-        desc = f"{h1}. No fare in the current scan. No price is estimated."
-        lead = (
-            f"No {origin} to {city} fare is in the current scan, so no price is shown. "
-            "Nothing below is an estimated fare."
-        )
+        if hand_checked:
+            desc = f"{h1}. No hand-checked fare yet. No price is estimated."
+            lead = (
+                f"No hand-checked {origin} to {city} fare yet, so no price is shown. "
+                "Nothing below is an estimated fare."
+            )
+        else:
+            desc = f"{h1}. No fare in the current scan. No price is estimated."
+            lead = (
+                f"No {origin} to {city} fare is in the current scan, so no price is shown. "
+                "Nothing below is an estimated fare."
+            )
     desc = desc if len(desc) <= 160 else _clip(desc, 160)
     page_url = f"{SITE}/routes/{route['slug']}.html"
     dest_url = f"{SITE}/destinations/{dest_slug}.html"
     og_image = city_image(route["code"])
     paras = list(route["paragraphs"])
-    paras.append(TRIP_PARAGRAPH)
-    paras.append(trip_fit_paragraph(origin, mine))
+    trip_copy = MANUAL_TRIP_PARAGRAPH if hand_checked else TRIP_PARAGRAPH
+    paras.append(trip_copy)
+    paras.append(trip_fit_paragraph(origin, mine, hand_checked=hand_checked))
     body = "\n".join(f"<p>{html_lib.escape(p, quote=False)}</p>" for p in paras)
     transport = TRANSPORT.get(route["code"])
     transport_html = ""
     faqs = list(route["faqs"])
     faqs.append((
-        f"What trip lengths does this scan search on {origin} to {city}?",
-        TRIP_PARAGRAPH + " " + trip_fit_paragraph(origin, mine),
+        f"What trip lengths does this page list on {origin} to {city}?" if hand_checked
+        else f"What trip lengths does this scan search on {origin} to {city}?",
+        trip_copy + " " + trip_fit_paragraph(origin, mine, hand_checked=hand_checked),
     ))
     if transport:
         transport_html = (
@@ -2320,7 +2435,7 @@ footer a.ext{{color:var(--ink);font-weight:600;border-bottom:1px solid var(--gol
 {body}
 {transport_html}
 <h2>Fares on this route</h2>
-{_fare_table(mine, city)}
+{_fare_table(mine, city, hand_checked=hand_checked)}
 <p class="note">{note}</p>
 <h2>Good to know</h2>
 {faq_html}
@@ -2406,8 +2521,11 @@ def supplement_rows(code, flight_rows, deals):
 
 
 def main():
+    global HAND_CHECKED_SITE, FARE_BY_HREF
     with open(CACHE, encoding="utf-8") as f:
         cache = json.load(f)
+    hand_checked = cache.get("fare_source") == "manual"
+    HAND_CHECKED_SITE = hand_checked
     manual_deals, manual_report = manual_fares.supplement_deals()
     updated_iso = (cache.get("updated_utc") or "")[:10] or dt.date.today().isoformat()
     updated = fmt_date(updated_iso)
@@ -2427,7 +2545,9 @@ def main():
         body = fare_tbody(rows)
         url = f"{SITE}/destinations/{slug}.html"
         dest_lastmod[url] = destination_lastmod(slug, body, updated_iso, previous_lastmod)
-        html = page_html(code, slug, city, country, blurb, rows, updated, fare_counts)
+        html = page_html(
+            code, slug, city, country, blurb, rows, updated, fare_counts,
+            hand_checked=hand_checked)
         with open(os.path.join(OUT_DIR, f"{slug}.html"), "w", encoding="utf-8") as f:
             f.write(html)
         urls.append(url)
@@ -2449,13 +2569,20 @@ def main():
                 previous_lastmod.get(route_url) or git_file_date(route_path) or updated_iso)
         else:
             route_lastmod[route_url] = updated_iso
-        html = route_page_html(route, city, slug, rows, updated)
+        html = route_page_html(route, city, slug, rows, updated, hand_checked=hand_checked)
         with open(route_path, "w", encoding="utf-8") as f:
             f.write(html)
         route_urls.append(route_url)
         print(f"  wrote routes/{route['slug']}.html (lastmod {route_lastmod[route_url]})")
 
     # lastmod follows the page that changed. Route pages use the same rule.
+    FARE_BY_HREF = {}
+    for code, slug, _city, _country, _blurb, rows in collected:
+        FARE_BY_HREF[f"/destinations/{slug}.html"] = bool(rows)
+    for route in ROUTES:
+        _slug, _city, rows = by_code[route["code"]]
+        FARE_BY_HREF[f"/routes/{route['slug']}.html"] = any(
+            row["from"] == route["origin"] for row in rows)
     home_url = f"{SITE}/"
     home_last = static_lastmod(
         "index.html", home_url, updated_iso, previous_lastmod,

@@ -24,6 +24,15 @@ import manual_fares
 import refresh_deals
 
 NOW = dt.datetime(2026, 11, 14, 12, 0, tzinfo=dt.timezone.utc)
+
+
+def _without_relative_age(html):
+    """The '3 hours ago' phrase moves while a test runs. The Dublin stamp does not."""
+    return re.sub(
+        r"(Checked on [^<]*? )\d+ (?:minute|minutes|hour|hours|day|days) ago",
+        r"\1recently",
+        html,
+    )
 EXAMPLE = ROOT / "data" / "manual_fares.example.csv"
 LIVE = pathlib.Path(manual_fares.LIVE_CACHE)
 
@@ -228,17 +237,29 @@ class ManualFareTests(unittest.TestCase):
 
     def test_flightapi_page_is_unchanged_and_manual_row_is_labelled(self):
         cache = json.loads((ROOT / "deals_cache.json").read_text())
-        counts = {code: len(generate_pages.collect_fares(cache, code)) for code in generate_pages.CITIES}
-        rows = generate_pages.collect_fares(cache, "FAO")
+        hand = cache.get("fare_source") == "manual"
+        deals, _manual_report = manual_fares.supplement_deals(now=NOW)
+        counts = {}
+        for code in generate_pages.CITIES:
+            flight = generate_pages.collect_fares(cache, code)
+            counts[code] = len(generate_pages.supplement_rows(code, flight, deals))
+        flight = generate_pages.collect_fares(cache, "FAO")
+        rows = generate_pages.supplement_rows("FAO", flight, deals)
         disk = (ROOT / "destinations" / "faro.html").read_text()
         body = re.search(r"<tbody>\n(.*)\n</tbody>", disk, re.S).group(1)
-        self.assertEqual(generate_pages.fare_tbody(rows), body)
+        self.assertEqual(_without_relative_age(generate_pages.fare_tbody(rows)), _without_relative_age(body))
         slug, city, country, blurb = generate_pages.CITIES["FAO"]
         updated = generate_pages.fmt_date(cache["updated_utc"][:10])
-        page = generate_pages.page_html("FAO", slug, city, country, blurb, rows, updated, counts)
-        self.assertEqual(page, disk)
-        self.assertNotIn("from, no bags", page)
-        self.assertNotIn("data-checked-at", page)
+        page = generate_pages.page_html(
+            "FAO", slug, city, country, blurb, rows, updated, counts, hand_checked=hand)
+        self.assertEqual(_without_relative_age(page), _without_relative_age(disk))
+        if hand:
+            self.assertIn("from, no bags", page)
+            self.assertIn("No hand-checked fare yet", page)
+            self.assertNotIn("The homepage board is the FlightAPI scan", page)
+        else:
+            self.assertNotIn("from, no bags", page)
+            self.assertNotIn("data-checked-at", page)
 
         payload, _report = manual_fares.convert_file(EXAMPLE, now=NOW, allow_example=True)
         manual_rows = generate_pages.collect_fares(payload, "FAO")
@@ -306,13 +327,22 @@ class ManualFareTests(unittest.TestCase):
         self.assertEqual(edi["checked_at_utc"], "2026-11-14T00:28:20Z")
         self.assertEqual(edi["screenshot_ref"], "ba5e7516")
 
-        with self.assertRaises(manual_fares.ValidationError) as caught:
-            manual_fares.convert_file(path, now=NOW)
-        text = str(caught.exception)
+        payload, report = manual_fares.convert_file(path, now=NOW)
+        published_codes = {
+            deal["code"]
+            for airport in payload["airports"].values()
+            for slot in ("weekend_boards", "week_boards", "special_boards")
+            for board in airport.get(slot) or []
+            for deal in board.get("deals") or []
+        }
+        text = " ".join(report["excluded_messages"])
         for code in ("ARN", "BTS", "CGN", "DBV", "GDN", "HAM", "POZ", "RBA"):
             self.assertIn(code, text)
+            self.assertNotIn(code, published_codes)
         self.assertNotIn("Kerry", text)
         self.assertNotIn("Shannon", text)
+        self.assertGreater(report["published"], 0)
+        self.assertEqual(payload["fare_source"], "manual")
 
         deals, report = manual_fares.supplement_deals(path, now=NOW)
         rejected = {item["destination"] for item in report["rejected"]}
@@ -332,13 +362,11 @@ class ManualFareTests(unittest.TestCase):
 
     def test_supplement_fills_empty_origins_and_leaves_flightapi_fares(self):
         deals, _report = manual_fares.supplement_deals(now=NOW)
-        cache = json.loads((ROOT / "deals_cache.json").read_text())
 
-        def shown(code):
-            flight = generate_pages.collect_fares(cache, code)
-            return generate_pages.supplement_rows(code, flight, deals)
+        def shown(code, flight_rows):
+            return generate_pages.supplement_rows(code, flight_rows, deals)
 
-        beauvais = shown("BVA")
+        beauvais = shown("BVA", [])
         self.assertTrue(beauvais)
         self.assertTrue(all(row.get("checked_at") for row in beauvais))
         by_origin = {}
@@ -350,23 +378,23 @@ class ManualFareTests(unittest.TestCase):
         self.assertEqual(by_origin["Dublin"][0]["dep"], "2026-12-05")
         self.assertIn("ryanair.com", by_origin["Dublin"][0]["source_url"])
 
-        faro = shown("FAO")
-        self.assertTrue(faro)
+        faro = shown("FAO", [{"from": "Cork"}, {"from": "Dublin"}])
+        self.assertEqual([row["from"] for row in faro], ["Cork", "Dublin"])
         self.assertFalse(any(row.get("checked_at") for row in faro))
 
-        alicante = shown("ALC")
+        alicante = shown("ALC", [{"from": "Cork"}, {"from": "Dublin"}])
         self.assertFalse(any(row.get("source_url") for row in alicante))
 
         for code in ("GVA", "LYS", "MUC", "PRG"):
-            rows = shown(code)
+            rows = shown(code, [])
             self.assertFalse(any(row.get("checked_at") for row in rows))
 
-        athens = shown("ATH")
+        athens = shown("ATH", [])
         self.assertEqual({row["from"] for row in athens}, {"Dublin"})
         self.assertEqual(athens[0]["price"], 90.98)
         self.assertNotIn("Cork", [row["from"] for row in athens])
 
-        malpensa = shown("MXP")
+        malpensa = shown("MXP", [])
         self.assertEqual(malpensa[0]["from"], "Dublin")
         self.assertEqual(malpensa[0]["price"], 45.73)
 
@@ -394,14 +422,16 @@ class ManualFareTests(unittest.TestCase):
         self.assertNotIn("ryanair.com", body)
 
         slug, city, country, blurb = generate_pages.CITIES["MAD"]
-        madrid_rows = shown("MAD")
+        kept = shown("MAD", [{"from": "Dublin", "price": 80}])
+        self.assertTrue(any(not row.get("checked_at") for row in kept))
+        madrid_rows = shown("MAD", [])
         self.assertTrue(madrid_rows)
-        self.assertFalse(any(row.get("checked_at") for row in madrid_rows))
+        self.assertTrue(all(row.get("checked_at") for row in madrid_rows))
         self.assertEqual({row["from"] for row in madrid_rows}, {"Dublin"})
-        counts = {code: len(shown(code)) for code in generate_pages.CITIES}
+        counts = {code: len(shown(code, [])) for code in generate_pages.CITIES}
         html = generate_pages.page_html(
             "MAD", slug, city, country, blurb, madrid_rows,
-            generate_pages.fmt_date(cache["updated_utc"][:10]), counts)
+            "14 Nov", counts)
         title = re.search(r"<title>([^<]+)</title>", html).group(1)
         self.assertEqual(title, "Dublin to Madrid flights | Holiday Chasers")
         self.assertLessEqual(len(title), 60)
@@ -433,10 +463,48 @@ class ManualFareTests(unittest.TestCase):
             self.assertNotIn("data-manual", text)
             self.assertNotIn("manual_fares", text)
 
+    def test_merge_keeps_the_newest_check_and_the_incoming_tie(self):
+        older = dict(BASE)
+        newer = dict(BASE)
+        newer["checked_at_utc"] = "2026-11-14T09:00:00Z"
+        newer["total_pp_eur"] = "111.11"
+        newer["seats_note"] = "newer"
+        merged, stats = manual_fares.merge_fare_rows([older], [newer])
+        self.assertEqual(stats["replaced"], 1)
+        self.assertEqual(stats["total"], 1)
+        self.assertEqual(merged[0]["seats_note"], "newer")
+        same = dict(newer)
+        same["seats_note"] = "tie"
+        merged, stats = manual_fares.merge_fare_rows([newer], [same])
+        self.assertEqual(merged[0]["seats_note"], "tie")
+        kept, stats = manual_fares.merge_fare_rows([newer], [older])
+        self.assertEqual(stats["kept_existing"], 1)
+        self.assertEqual(kept[0]["seats_note"], "newer")
+
+    def test_unknown_airport_does_not_block_a_real_fare(self):
+        payload, report = self.convert([
+            {"destination": "ARN", "screenshot_ref": "checks/2026-11-13/arn.png"},
+            {"destination": "AGP", "screenshot_ref": "checks/2026-11-13/agp.png"},
+        ])
+        self.assertEqual(report["published"], 1)
+        self.assertIn("ARN", " ".join(report["excluded_messages"]))
+        codes = [
+            deal["code"]
+            for board in payload["airports"]["ORK"]["weekend_boards"]
+            for deal in board["deals"]
+        ]
+        self.assertEqual(codes, ["AGP"])
+
     def test_workflow_file_does_not_call_the_converter(self):
         text = (ROOT / ".github" / "workflows" / "refresh_deals.yml").read_text()
         self.assertNotIn("manual_fares", text)
         self.assertNotIn("FARE_SOURCE", text)
+        self.assertIn("refs/heads/staging-manual", text)
+        self.assertIn("Refusing to scan staging-manual", text)
+        for name in ("build_social.yml", "test_flightapi.yml", "test_dataforseo.yml"):
+            other = (ROOT / ".github" / "workflows" / name).read_text()
+            self.assertIn("refs/heads/staging-manual", other)
+            self.assertNotIn("git push origin HEAD:staging-manual", other)
 
 
 if __name__ == "__main__":

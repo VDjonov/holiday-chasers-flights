@@ -29,7 +29,7 @@ What each column means:
 
 There is no checker column. The scout's column list is fixed, and the screenshot id is the audit of who looked. A name can be added later. It should not be squeezed into another column.
 
-The whole file is rejected if any row fails. A bad line does not silently disappear from the board.
+A bad price, a Kerry or Shannon origin, a broken date, or an EXAMPLE row rejects the whole file. A bad line does not silently disappear from the board. An airport the site has no page for is different: the row stays in the CSV, the run names it, and it is not published. Marrakesh is that kind of skip. One extra airport must not throw away the fares that do have a page.
 
 ## 2. How this becomes the site, without turning FlightAPI off
 
@@ -121,10 +121,48 @@ Publishing the shortlist, and using a person only to confirm the fares that happ
 - Social posts. `social/generate_posts.py` will quote whatever `deals_cache.json` contains. This change does not rebuild posters and does not edit `social/p/`. Publish manual fares first, then decide whether the next poster run should use them.
 - Price accuracy. The number is the fare that was on the airline page at `checked_at`, without a bag. Someone who adds a cabin bag will pay more. The card has to keep saying "from, no bags", or the figure is misleading.
 
+## 5. Daily update, and the manual-only preview
+
+`staging-manual` is a long-lived branch from `staging`. It is the preview where every fare surface is built from `data/manual_fares.csv` and nothing is bought from FlightAPI. It is not merged into `staging` or `main`. The FlightAPI code is still in the repo. Unset `FARE_SOURCE` and the scanner is the paid path again.
+
+The daily command is:
+
+```
+python scripts/update_manual_fares.py path/to/scout.csv
+```
+
+More than one CSV can be passed. The script checks each row. A bad price, date, origin, or EXAMPLE row rejects the file and does not write. Rows that pass are merged into `data/manual_fares.csv`. The key is origin, destination, out_date, ret_date, and airline. The newest `checked_at_utc` is kept. If the timestamps are equal, the row from the file just passed is kept. It then runs `FARE_SOURCE=manual` with `FORCE_CACHE_WRITE=1`, because a hand-checked file is smaller than the FlightAPI cache, and `python generate_pages.py`. The child process does not receive `FLIGHTAPI_KEY` or a SerpApi key. The 48-hour stale flag and the 7-day drop still apply. The script prints how many destination pages, route pages, and homepage deal cards have a fare.
+
+On 14 November 2026 the two attached scout files were already in `data/manual_fares.csv` (113 rows). Seven rows in the dev sample were older than the committed check, so the newer committed row was kept. The shortlist matched. The file did not change. Nine rows have no destination page (ARN, BTS, CGN, DBV, GDN, HAM, POZ, RBA) and are not published. Marrakesh is not in the file. Origins are Cork and Dublin only.
+
+The rebuild published 104 fares, none of them stale, none dropped for age, none already departed. 66 of those are weekend or week trips, which is what the homepage board shows. The other 38 are other trip types and appear on the destination page only. Empty pages say "No hand-checked fare yet" and do not state a price.
+
+### Coverage against the FlightAPI cache on staging
+
+Counted on 14 November 2026 from `staging` at `450ad0c` (the FlightAPI `deals_cache.json`) and from this manual-only rebuild. A destination or route "with a fare" means the page table has at least one stored price. A homepage deal card is one weekend or week fare on the Cork or Dublin board.
+
+| | FlightAPI on staging | Manual only |
+| --- | --- | --- |
+| Destinations with a fare | 40 of 51 | 37 of 51 |
+| Route pages with a fare | 6 of 6 | 6 of 6 |
+| Homepage deal cards | 845 | 66 |
+| Distinct cities on those cards | 40 | 18 |
+
+The FlightAPI cache has 36 date boards and every one has fares. The manual file has 55 weekend and week boards, and every one has a fare, but a board is often a single city. The card count and the city count are the coverage comparison. The route pages that exist today (Edinburgh, Barcelona, and Fuerteventura, from both airports) all still have a hand-checked fare.
+
+Popular pages that have a FlightAPI fare and go empty on the manual board: Berlin, Budapest, and Nice.
+
+Other destination pages that lose the FlightAPI fare and have no hand-checked replacement: Birmingham, Bristol, Glasgow, Liverpool, London, Manchester, Valencia, Vienna, Warsaw, and Zurich. Izmir was already empty.
+
+Pages that are empty in the FlightAPI cache and now have a hand-checked fare: Agadir, Athens, Brussels Airport, Funchal, Luxembourg, Milan Malpensa, Palma, Paris Beauvais, Rhodes, and Zadar. On current staging those ten are already filled from this same CSV where the scan had no fare. The table above compares the subscription cache with a site that uses the hand-checked file for every page, not the gap-fill on top of FlightAPI.
+
+`.github/workflows/refresh_deals.yml` on this branch refuses `staging-manual`. A dispatch on this branch does not scan and does not push. The push target is still `main`, and the job exits before that if the branch is `staging-manual`. The scheduled run uses the workflow on the default branch, so it does not check out this branch. The social, FlightAPI test, and DataForSEO workflows also refuse this branch. Nothing here turns `FARE_SOURCE` on in a workflow.
+
 ## What is deliberately not in this change
 
-- The scheduled workflow, and any spend on FlightAPI.
+- Any spend on FlightAPI, and any switch of the scheduled workflow onto the manual file. The workflow file on this branch only refuses to run on `staging-manual`.
 - A client that fetches Ryanair or Aer Lingus fares.
-- Real prices. The only filled CSV is the EXAMPLE fixture, and it cannot be written to the live cache.
+- EXAMPLE fixtures in the live cache. The prices on this branch are the scout rows already in `data/manual_fares.csv`.
 - Edits under `social/p/`.
 - Any change to the consent gate around GA4.
+- Kerry, Shannon, or a Marrakesh page.

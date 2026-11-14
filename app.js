@@ -1207,8 +1207,22 @@ function manualFlightBit(deal, leg) {
   return " · " + esc([number, time].filter(Boolean).join(" "));
 }
 
+function manualBoard() {
+  return !!(cachedDeals && cachedDeals.fare_source === "manual");
+}
+
 function applyManualSubtitle() {
   if (!cachedDeals || !cachedDeals.fare_label) return;
+  if (manualBoard()) {
+    const trust = document.querySelector(".trust-line");
+    if (trust) {
+      trust.textContent = "Fares on this board were read on the airline site, from Cork and Dublin, with no bag. A price can move before you book.";
+    }
+    const signup = document.querySelector(".signup-copy p");
+    if (signup) {
+      signup.textContent = "The deals on this page come from fares checked on the airline site. They are not an automatic scan.";
+    }
+  }
   const el = document.getElementById("boardSubtitle");
   if (!el) return;
   const marker = " · " + cachedDeals.fare_label;
@@ -1248,7 +1262,8 @@ function renderDeals() {
     : (list[idx] || list[0] || null);
 
   if (!board || !board.deals) {
-    empty.style.display = "block"; empty.textContent = "No deals available for this trip type.";
+    empty.style.display = "block";
+    empty.textContent = manualBoard() ? "No hand-checked fare yet." : "No deals available for this trip type.";
     grid.innerHTML = ""; return;
   }
 
@@ -1339,7 +1354,11 @@ function renderDeals() {
 
   if (!deals.length) {
     empty.style.display = "block";
-    empty.textContent = budgetMax ? `No deals under €${budgetMax} per person. Try a higher budget.` : "No deals available.";
+    empty.textContent = budgetMax
+      ? (manualBoard()
+        ? `No hand-checked fare under €${budgetMax} per person. Try a higher budget.`
+        : `No deals under €${budgetMax} per person. Try a higher budget.`)
+      : (manualBoard() ? "No hand-checked fare yet." : "No deals available.");
     grid.innerHTML = ""; return;
   }
   empty.style.display = "none";

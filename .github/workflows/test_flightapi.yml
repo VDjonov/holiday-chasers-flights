@@ -8,6 +8,7 @@ on:
 
 jobs:
   test:
+    if: github.ref != 'refs/heads/staging-manual'
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo

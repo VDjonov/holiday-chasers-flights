@@ -52,8 +52,10 @@ class DestinationPageTests(unittest.TestCase):
     def page(self, code):
         slug, city, country, blurb = generate_pages.CITIES[code]
         rows = generate_pages.collect_fares(self.cache, code)
+        hand = self.cache.get("fare_source") == "manual"
         html = generate_pages.page_html(
-            code, slug, city, country, blurb, rows, self.updated, self.counts)
+            code, slug, city, country, blurb, rows, self.updated, self.counts,
+            hand_checked=hand)
         return html, rows
 
     def test_scanner_route_list_does_not_gain_the_new_airports(self):
@@ -120,7 +122,13 @@ class DestinationPageTests(unittest.TestCase):
             self.assertIn("<h2>What to see</h2>", html)
             self.assertIn("<h2>Airport to the city</h2>", html)
             if not rows:
-                self.assertIn("No fare in the current scan", html)
+                if self.cache.get("fare_source") == "manual":
+                    self.assertIn("No hand-checked fare yet", html)
+                else:
+                    self.assertIn("No fare in the current scan", html)
                 self.assertNotRegex(html, r"€\d")
+            elif self.cache.get("fare_source") == "manual":
+                self.assertTrue(all(row.get("checked_at") for row in rows))
+                self.assertNotIn("The homepage board is the FlightAPI scan", html)
             else:
                 self.fail(f"{code} unexpectedly has scanned fares")

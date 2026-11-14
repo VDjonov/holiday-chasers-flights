@@ -387,7 +387,12 @@ def exclusion_message(line_no, dest):
 
 
 def _partition_rows(rows):
-    """Drop soft-excluded destinations. A rejected origin is still validated."""
+    """Drop destinations the site cannot show. A rejected origin is still validated.
+
+    Marrakesh and any other airport with no page stay in the CSV. They are
+    named and left unpublished, so one extra airport does not reject the
+    fares that do have a page. Kerry and Shannon are not handled here.
+    """
     kept = []
     notes = []
     for line_no, row in rows:
@@ -396,8 +401,70 @@ def _partition_rows(rows):
         if origin not in REJECTED_ORIGINS and dest in EXCLUDED_DESTINATIONS:
             notes.append(exclusion_message(line_no, dest))
             continue
+        if (origin not in REJECTED_ORIGINS and re.fullmatch(r"[A-Z]{3}", dest)
+                and dest not in DESTINATIONS):
+            notes.append(
+                f"line {line_no}: {dest} has no Holiday Chasers page, so it is not published"
+            )
+            continue
         kept.append((line_no, row))
     return kept, notes
+
+
+def fare_key(row):
+    """Identity of one checked trip. Airline spelling is not part of the identity."""
+    return (
+        (row.get("origin") or "").strip().upper(),
+        (row.get("destination") or "").strip().upper(),
+        (row.get("out_date") or "").strip(),
+        (row.get("ret_date") or "").strip(),
+        (row.get("airline") or "").strip().lower(),
+    )
+
+
+def merge_fare_rows(existing, incoming):
+    """Combine scout rows. Newest checked_at_utc wins.
+
+    existing and incoming are lists of column dicts, existing first.
+    An equal timestamp keeps the incoming row, so a re-export can replace
+    a note without moving the clock. Returns (rows, stats). rows are sorted
+    by fare_key.
+    """
+    chosen = {}
+    added = replaced = kept_existing = 0
+    for source, rows in (("existing", existing), ("incoming", incoming)):
+        for row in rows:
+            key = fare_key(row)
+            current = chosen.get(key)
+            if current is None:
+                chosen[key] = dict(row)
+                if source == "incoming":
+                    added += 1
+                continue
+            old_at = parse_checked(current.get("checked_at_utc") or "")
+            new_at = parse_checked(row.get("checked_at_utc") or "")
+            take_incoming = False
+            if source == "incoming":
+                if not isinstance(old_at, dt.datetime):
+                    take_incoming = True
+                elif isinstance(new_at, dt.datetime) and new_at >= old_at:
+                    take_incoming = True
+            if take_incoming:
+                previous = {key: current.get(key, "") for key in COLUMNS}
+                incoming_values = {key: row.get(key, "") for key in COLUMNS}
+                if previous != incoming_values:
+                    replaced += 1
+                chosen[key] = dict(row)
+            elif source == "incoming":
+                kept_existing += 1
+    merged = [chosen[key] for key in sorted(chosen)]
+    stats = {
+        "added": added,
+        "replaced": replaced,
+        "kept_existing": kept_existing,
+        "total": len(merged),
+    }
+    return merged, stats
 
 
 def convert_rows(rows, now, allow_example=False):
