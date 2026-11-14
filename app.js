@@ -488,6 +488,25 @@ function guideQuery(code, origin, dep, ret) {
   if (back) q.set("ret", back);
   return "?" + q.toString();
 }
+
+// Keep campaign parameters that are already on the URL. Do not add any.
+const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
+
+function withExistingUtms(url, currentSearch) {
+  const search = currentSearch == null ? location.search : currentSearch;
+  const current = new URLSearchParams(String(search || "").replace(/^\?/, ""));
+  const raw = String(url);
+  const qIndex = raw.indexOf("?");
+  const path = qIndex === -1 ? raw : raw.slice(0, qIndex);
+  const next = new URLSearchParams(qIndex === -1 ? "" : raw.slice(qIndex + 1));
+  for (const key of UTM_KEYS) {
+    if (next.has(key)) continue;
+    const value = current.get(key);
+    if (value) next.append(key, value);
+  }
+  const qs = next.toString();
+  return qs ? path + "?" + qs : path;
+}
 let currentBoard = "week";  // default landing view: one-week deals
 let selectedAirport = "ORK";  // ORK, DUB, or BEST (best of both)
 
@@ -687,6 +706,39 @@ function dateAttrs(dep, ret) {
   return (out ? ` data-hc-out="${out}"` : "") + (back ? ` data-hc-ret="${back}"` : "");
 }
 
+function tripAttrs(from, dest, airline, dep, ret) {
+  const clean = (value) => String(value || "").replace(/["<>&]/g, "").trim();
+  const fromCode = clean(from).toUpperCase();
+  const destCode = clean(String(dest || "").split(",")[0]).toUpperCase();
+  const carrier = clean(String(airline || "").split(/[,/]/)[0]);
+  return dateAttrs(dep, ret)
+    + (fromCode ? ` data-hc-from="${fromCode}"` : "")
+    + (destCode ? ` data-hc-dest="${destCode}"` : "")
+    + (carrier ? ` data-hc-airline="${carrier}"` : "");
+}
+
+// Slugs match generate_pages.py. A deal with no page gets no link.
+const DEST_SLUG = {
+  ALC:"alicante", BCN:"barcelona", AGP:"malaga", PMI:"palma-mallorca", MAD:"madrid",
+  TFS:"tenerife", ACE:"lanzarote", FAO:"faro", LIS:"lisbon", OPO:"porto", FCO:"rome",
+  BGY:"milan", CDG:"paris", BVA:"paris", NCE:"nice", AMS:"amsterdam", BER:"berlin", MUC:"munich",
+  BUD:"budapest", KRK:"krakow", WMI:"warsaw", PRG:"prague", EDI:"edinburgh", STN:"london",
+  MAN:"manchester", GVA:"geneva", MLA:"malta", VIE:"vienna", ATH:"athens", VLC:"valencia",
+  CPH:"copenhagen", SVQ:"seville", VCE:"venice", PSA:"pisa", ZAD:"zadar", RHO:"rhodes",
+  FUE:"fuerteventura", LPA:"las-palmas", ZRH:"zurich", BHX:"birmingham", BRS:"bristol",
+  LPL:"liverpool", GLA:"glasgow", CRL:"brussels", LYS:"lyon", ADB:"izmir"
+};
+
+function destPageLink(code, city) {
+  const key = String(code || "").split(",")[0].trim().toUpperCase();
+  const slug = DEST_SLUG[key];
+  if (!slug) return "";
+  const name = String(city || "This city").replace(/[&<>"]/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"
+  }[c]));
+  return `<a class="deal-dest-link" href="/destinations/${slug}.html">${name} destination page</a>`;
+}
+
 function flightBtnLabel(airlinesStr, fallback="Search flights") {
   const primary = (airlinesStr || "").split(/[,/]/)[0].trim();
   if (!primary) return fallback;
@@ -708,7 +760,7 @@ document.querySelectorAll(".tab-btn").forEach(btn => {
     activateTab(btn.dataset.tab);
     // Shareable URL per tab (Deal Board stays clean "/")
     const url = btn.dataset.tab === "deals" ? location.pathname : `?tab=${btn.dataset.tab}`;
-    history.replaceState({ hcTab: btn.dataset.tab }, "", url);
+    history.replaceState({ hcTab: btn.dataset.tab }, "", withExistingUtms(url));
   });
 });
 
@@ -914,14 +966,15 @@ document.querySelectorAll(".filter-btn").forEach(btn => {
 // Consent-gated GA4 lives in consent.js, shared with destination pages.
 // track() uses window.gtag once that loader has run.
 
-function track(name, params){
-  if (window.gtag) gtag("event", name, params || {});
+function track(name, params, beacon){
+  if (!window.gtag) return;
+  const payload = Object.assign({}, params || {});
+  if (beacon) payload.transport_type = "beacon";
+  gtag("event", name, payload);
 }
 
-// Dates for a flight_click. Prefer the scanned dates stamped on the link.
-// Otherwise read the airline query (Ryanair dateOut/dateIn, Aer Lingus
-// departureDate_0/_1, or our own out/ret). Aviasales keeps dates in the path,
-// so those anchors set data-hc-out/ret when the dates are known.
+// Dates for a non-flight click that still carries scanned dates on the link.
+// Aviasales keeps dates in the path, so those anchors set data-hc-out/ret.
 function trackedDates(a) {
   let out = isoDay(a.getAttribute && a.getAttribute("data-hc-out"));
   let ret = isoDay(a.getAttribute && a.getAttribute("data-hc-ret"));
@@ -934,17 +987,68 @@ function trackedDates(a) {
   return { out, ret };
 }
 
-// Affiliate & booking click events — delegated, covers every board and page
+// A real booking click: Ryanair, Aer Lingus, or Aviasales. Car hire, hotels,
+// and in-page guide buttons are not this.
+function outboundClickParams(a) {
+  const href = (a.getAttribute && a.getAttribute("href")) || "";
+  if (!href || href.charAt(0) === "#") return null;
+  let url;
+  try { url = new URL(href, "https://holidaychasers.ie"); }
+  catch (e) { return null; }
+  const host = url.hostname.toLowerCase();
+  const domain = host === "ryanair.com" || host === "www.ryanair.com" ? "ryanair.com"
+    : host === "aerlingus.com" || host === "www.aerlingus.com" ? "aerlingus.com"
+    : host === "aviasales.com" || host === "www.aviasales.com" ? "aviasales.com"
+    : "";
+  if (!domain) return null;
+  const attr = (name) => {
+    const value = a.getAttribute && a.getAttribute(name);
+    return value == null ? "" : String(value).trim();
+  };
+  let destination = "", from = "", airline = attr("data-hc-airline"), out = "", ret = "";
+  if (domain === "ryanair.com") {
+    destination = url.searchParams.get("destinationIata") || "";
+    from = url.searchParams.get("originIata") || "";
+    airline = airline || "Ryanair";
+    out = isoDay(url.searchParams.get("dateOut"));
+    ret = isoDay(url.searchParams.get("dateIn"));
+  } else if (domain === "aerlingus.com") {
+    destination = url.searchParams.get("destinationAirportCode_0") || "";
+    from = url.searchParams.get("sourceAirportCode_0") || "";
+    airline = airline || "Aer Lingus";
+    out = isoDay(url.searchParams.get("departureDate_0"));
+    ret = isoDay(url.searchParams.get("departureDate_1"));
+  }
+  destination = destination || attr("data-hc-dest");
+  from = from || attr("data-hc-from");
+  out = out || isoDay(attr("data-hc-out"));
+  ret = ret || isoDay(attr("data-hc-ret"));
+  const params = { link_domain: domain };
+  if (destination) params.destination = destination;
+  if (from) params.from = from;
+  if (airline) params.airline = airline;
+  if (out) params.out = out;
+  if (ret) params.ret = ret;
+  return params;
+}
+
+// Affiliate and booking clicks. The airline or Aviasales click is outbound_click,
+// once. deal-book is only a style: car hire and in-page guide buttons use it too.
 document.addEventListener("click", (e) => {
-  const a = e.target.closest("a");
+  const raw = e.target;
+  const el = raw && raw.nodeType === 1 ? raw : (raw && raw.parentElement);
+  const a = el && el.closest ? el.closest("a") : null;
   if (!a) return;
+  const outbound = outboundClickParams(a);
+  if (outbound) {
+    track("outbound_click", outbound, true);
+    return;
+  }
   let kind = null;
-  if (a.classList.contains("deal-book")) kind = "flight_click";
-  else if (a.classList.contains("stay-btn")) kind = "stay_click";
+  if (a.classList.contains("stay-btn")) kind = "stay_click";
   else if (a.classList.contains("tc-row")) kind = "trip_calc_click";
   else if (a.classList.contains("rest-row")) kind = "restaurant_click";
   if (!kind) return;
-  // Work out which destination the click belongs to
   let dest = "";
   const card = a.closest(".deal-card");
   if (card){
@@ -1305,8 +1409,9 @@ function renderDeals() {
         <div class="deal-weather" id="weather-${d.code}-${i}"><span class="wx-loading">Checking weather…</span></div>
         <div class="deal-viewmore">View full details &amp; guide →</div>
       </button>
+      ${destPageLink(d.code, d.city)}
       <div class="deal-actions">
-        <a class="deal-book primary" href="${flightUrl(d.airlines, flightOrigin, d.code, d.depart_date || dep, d.return_date || ret, selAdults, selChildren)}"${dateAttrs(d.depart_date || dep, d.return_date || ret)} target="_blank" rel="noopener noreferrer">${flightBtnLabel(d.airlines)}</a>
+        <a class="deal-book primary" href="${flightUrl(d.airlines, flightOrigin, d.code, d.depart_date || dep, d.return_date || ret, selAdults, selChildren)}"${tripAttrs(flightOrigin, d.code, d.airlines, d.depart_date || dep, d.return_date || ret)} target="_blank" rel="noopener noreferrer">${flightBtnLabel(d.airlines)}</a>
         <a class="deal-book secondary" href="${carUrl(d.city, d.depart_date || dep, d.return_date || ret)}" target="_blank" rel="noopener">🚗 ${BRAND.discovercars}</a>
       </div>
       <div class="deal-stays">
@@ -1477,8 +1582,7 @@ function guideLiveInit(d, dep, ret, hasPrice){
   const origin = d.origin_airport || "ORK";
   if (!backendOnline) {
     const avia = aviasalesUrl(origin, d.code, dep, ret);
-    box.innerHTML = `<a class="deal-book primary" href="${avia}"${dateAttrs(dep, ret)} target="_blank" rel="noopener noreferrer sponsored"
-        onclick="track('flight_click',{source:'guide_aviasales',dest:'${d.code}'})">🔎 Search live prices on Aviasales →</a>`;
+    box.innerHTML = `<a class="deal-book primary" href="${avia}"${tripAttrs(origin, d.code, "", dep, ret)} target="_blank" rel="noopener noreferrer sponsored">🔎 Search live prices on Aviasales →</a>`;
     return;
   }
   if (window._gAutoSearch) {
@@ -1601,7 +1705,7 @@ async function guideGrids(){
   if (prog) prog.textContent = "Prices are per person · tap a departure and a return to build your booking.";
   if (!Object.keys(window._gPrices.out).length && !Object.keys(window._gPrices.ret).length) {
     box.innerHTML = `<p style="font-size:14px;color:var(--muted)">No live fares found around these dates.</p>
-      <a class="deal-book primary" href="${aviasalesUrl(origin, code, g.dep, g.ret)}"${dateAttrs(g.dep, g.ret)} target="_blank" rel="noopener noreferrer sponsored">🔎 Try Aviasales for these dates →</a>`;
+      <a class="deal-book primary" href="${aviasalesUrl(origin, code, g.dep, g.ret)}"${tripAttrs(origin, code, "", g.dep, g.ret)} target="_blank" rel="noopener noreferrer sponsored">🔎 Try Aviasales for these dates →</a>`;
   }
 }
 
@@ -1659,12 +1763,9 @@ function guideSelect(bucket, date){
   const sameAir = outAir && outAir.toLowerCase() === retAir.toLowerCase()
                   && ["ryanair","aer lingus"].includes(outAir.toLowerCase());
   const buttons = sameAir
-    ? `<a class="deal-book primary" href="${flightUrl(outAir, origin, code, s.out.date, s.ret.date, selAdults, selChildren)}"${dateAttrs(s.out.date, s.ret.date)} target="_blank" rel="noopener noreferrer"
-         onclick="track('flight_click',{source:'guide_roundtrip',dest:'${code}'})">✈ Book both flights on ${outAir} · €${pp} →</a>`
-    : `<a class="deal-book primary" href="${outUrl}"${dateAttrs(s.out.date, "")} target="_blank" rel="noopener noreferrer"
-         onclick="track('flight_click',{source:'guide_leg_out',dest:'${code}'})">Book departure · €${s.out.price} →</a>
-       <a class="deal-book secondary" href="${retUrl}"${dateAttrs(s.ret.date, "")} target="_blank" rel="noopener noreferrer"
-         onclick="track('flight_click',{source:'guide_leg_ret',dest:'${code}'})">Book return · €${s.ret.price} →</a>`;
+    ? `<a class="deal-book primary" href="${flightUrl(outAir, origin, code, s.out.date, s.ret.date, selAdults, selChildren)}"${tripAttrs(origin, code, outAir, s.out.date, s.ret.date)} target="_blank" rel="noopener noreferrer">✈ Book both flights on ${outAir} · €${pp} →</a>`
+    : `<a class="deal-book primary" href="${outUrl}"${tripAttrs(origin, code, outAir, s.out.date, "")} target="_blank" rel="noopener noreferrer">Book departure · €${s.out.price} →</a>
+       <a class="deal-book secondary" href="${retUrl}"${tripAttrs(code, origin, retAir, s.ret.date, "")} target="_blank" rel="noopener noreferrer">Book return · €${s.ret.price} →</a>`;
   pick.innerHTML = `
     <div style="border:1px solid var(--line);border-radius:14px;padding:16px">
       <div style="font-weight:800;font-size:18px">Your trip: €${pp} <span style="font-weight:400;font-size:13px;color:var(--muted)">per person · €${groupTot} for ${g.groupSize}</span></div>
@@ -1813,8 +1914,7 @@ function renderDirectTimeline(){
   const avia = aviasalesUrl(apCode, code, scannedDep, scannedRet);
   const aviaCta = `
     <div style="margin-top:18px;text-align:center">
-      <a class="deal-book primary" href="${avia}"${dateAttrs(scannedDep, scannedRet)} target="_blank" rel="noopener noreferrer sponsored"
-         onclick="track('flight_click',{source:'timeline_aviasales',dest:'${code}'})"
+      <a class="deal-book primary" href="${avia}"${tripAttrs(apCode, code, "", scannedDep, scannedRet)} target="_blank" rel="noopener noreferrer sponsored"
          style="display:inline-flex;padding:12px 22px">🔎 Need different dates? Search live on Aviasales →</a>
       <div style="font-size:11px;color:var(--muted);margin-top:8px">Opens our partner Aviasales — comparing all airlines and dates.</div>
     </div>`;
@@ -1842,9 +1942,9 @@ function renderDirectTimeline(){
           <td class="price-cell">€${fmtMoney(r.pp)}${r.pp === minPP ? " ⭐" : ""}</td>
           <td>${r.d.airlines || "—"}</td>
           <td><a class="deal-book secondary" style="padding:6px 12px;font-size:12px"
-                 href="${flightUrl(r.d.airlines || "", apCode, r.d.code, r.d.depart_date || r.b.depart_date, r.d.return_date || r.b.return_date, 1, 0)}"${dateAttrs(r.d.depart_date || r.b.depart_date, r.d.return_date || r.b.return_date)}
+                 href="${flightUrl(r.d.airlines || "", apCode, r.d.code, r.d.depart_date || r.b.depart_date, r.d.return_date || r.b.return_date, 1, 0)}"${tripAttrs(apCode, r.d.code, r.d.airlines, r.d.depart_date || r.b.depart_date, r.d.return_date || r.b.return_date)}
                  target="_blank" rel="noopener noreferrer"
-                 onclick="event.stopPropagation();track('flight_click',{source:'timeline',dest:'${code}'})">Book</a></td>
+                 onclick="event.stopPropagation()">Book</a></td>
         </tr>`;}).join("")}</tbody>
     </table>
     <div style="font-size:12px;color:var(--muted);margin-top:8px">💡 Tap any row for the full trip guide — hotels, car hire, food and sights for those dates.</div>` + aviaCta;
@@ -1926,9 +2026,9 @@ function searchEuropeFromCache(){
           <td class="price-cell">€${fmtMoney(r.pp)}</td>
           <td>${r.d.airlines || "—"}</td>
           <td><a class="deal-book secondary" style="padding:6px 12px;font-size:12px"
-                 href="${flightUrl(r.d.airlines || "", r.apCode, r.d.code, r.d.depart_date || r.b.depart_date, r.d.return_date || r.b.return_date, 1, 0)}"${dateAttrs(r.d.depart_date || r.b.depart_date, r.d.return_date || r.b.return_date)}
+                 href="${flightUrl(r.d.airlines || "", r.apCode, r.d.code, r.d.depart_date || r.b.depart_date, r.d.return_date || r.b.return_date, 1, 0)}"${tripAttrs(r.apCode, r.d.code, r.d.airlines, r.d.depart_date || r.b.depart_date, r.d.return_date || r.b.return_date)}
                  target="_blank" rel="noopener noreferrer"
-                 onclick="event.stopPropagation();track('flight_click',{source:'europe_cache',dest:'${code}'})">Book</a></td>
+                 onclick="event.stopPropagation()">Book</a></td>
         </tr>`;}).join("")}</tbody>
     </table>
     <div style="font-size:12px;color:var(--muted);margin-top:8px">💡 Tap any row for the full trip guide for those dates.</div>` + buildBtns + cta;
@@ -2801,7 +2901,7 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = fal
     || (selectedAirport === "BEST" ? "ORK" : (selectedAirport || "ORK"));
   // Keep the scanned trip in the address bar so a refresh opens the same fare.
   try {
-    const url = guideQuery(d.code, flightOrigin, dep, ret);
+    const url = withExistingUtms(guideQuery(d.code, flightOrigin, dep, ret));
     if (history.state && history.state.hcGuide) history.replaceState({ hcGuide: d.code }, "", url);
     else history.pushState({ hcGuide: d.code }, "", url);
   } catch (e) {}
@@ -2826,7 +2926,7 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = fal
       </div>
     </div>
     <div class="dt-pricestrip">
-      <div class="dt-priceitem"><div class="lbl">${d.fare_label ? esc(d.fare_label) : "Per person"}</div><div class="val" id="dtPP">${hasPrice ? '€'+fmtMoney(perP) : '<a href="'+liveFlightUrl+'" target="_blank" rel="noopener noreferrer sponsored" style="font-size:15px">Check live →</a>'}</div></div>
+      <div class="dt-priceitem"><div class="lbl">${d.fare_label ? esc(d.fare_label) : "Per person"}</div><div class="val" id="dtPP">${hasPrice ? '€'+fmtMoney(perP) : '<a href="'+liveFlightUrl+'"'+tripAttrs(flightOrigin, d.code, d.airlines, dep, ret)+' target="_blank" rel="noopener noreferrer sponsored" style="font-size:15px">Check live →</a>'}</div></div>
       <div class="dt-priceitem"><div class="lbl">${groupLbl}</div><div class="val" id="dtGroupTot">${hasPrice ? '€'+fmtMoney(groupTot) : '—'}</div></div>
       <div class="dt-priceitem"><div class="lbl">Flight</div><div class="val">${d.stops==null ? '<small>' + (dep && ret ? new Date(dep+"T12:00:00").toLocaleDateString("en-IE",{day:"numeric",month:"short"}) + " – " + new Date(ret+"T12:00:00").toLocaleDateString("en-IE",{day:"numeric",month:"short"}) : "your dates") + '</small>' : (d.stops===0?'Direct':d.stops+' stop'+(d.stops>1?'s':'')) + ' <small>'+(d.total_time||'')+'</small>'}</div></div>
       <div class="dt-priceitem"><div class="lbl">Airline</div><div class="val" style="font-size:16px">${d.airlines||'—'}</div></div>
@@ -2855,8 +2955,7 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = fal
       <h2>✈️ Flights for your dates</h2>
       <div class="dt-sub">Pick a departure and a return below — real prices per person, book each leg directly.</div>
       <div id="dtLive"><span class="dt-loading">Preparing flight search…</span></div>
-      <a href="${liveFlightUrl}"${dateAttrs(dep, ret)} target="_blank" rel="noopener noreferrer sponsored"
-         onclick="track('flight_click',{source:'guide_aviasales_more',dest:'${d.code}'${isoDay(dep) ? `,out:'${isoDay(dep)}'` : ''}${isoDay(ret) ? `,ret:'${isoDay(ret)}'` : ''}})"
+      <a href="${liveFlightUrl}"${tripAttrs(flightOrigin, d.code, "", dep, ret)} target="_blank" rel="noopener noreferrer sponsored"
          style="display:flex;align-items:center;gap:12px;margin-top:14px;padding:12px 16px;border:1px dashed var(--gold);border-radius:12px;background:var(--cream);text-decoration:none;color:var(--ink)">
         <span style="font-size:22px;flex:none">🔀</span>
         <span style="flex:1;min-width:0">
@@ -2873,7 +2972,7 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = fal
       <h2>🧳 Complete the trip</h2>
       <div class="dt-sub">Everything for ${nights} night${nights>1?'s':''} in ${d.city} — tap any line to compare live prices.</div>
       <div class="trip-calc">
-        <a class="tc-row tc-flight" id="tcFlightRow" href="${hasPrice ? flightUrl(d.airlines, flightOrigin, d.code, dep, ret, selAdults, selChildren) : liveFlightUrl}"${dateAttrs(dep, ret)} target="_blank" rel="noopener noreferrer${hasPrice ? '' : ' sponsored'}">
+        <a class="tc-row tc-flight" id="tcFlightRow" href="${hasPrice ? flightUrl(d.airlines, flightOrigin, d.code, dep, ret, selAdults, selChildren) : liveFlightUrl}"${tripAttrs(flightOrigin, d.code, d.airlines, dep, ret)} target="_blank" rel="noopener noreferrer${hasPrice ? '' : ' sponsored'}">
           <span class="tc-ic">✈️</span><span class="tc-lbl" id="tcFlightLbl">Flights · ${groupLbl}${hasPrice ? '' : ' · live on Aviasales'}</span>
           <span class="tc-val" id="tcFlightVal">${hasPrice ? '€'+groupTot : 'Check →'}</span>
         </a>
@@ -2923,7 +3022,7 @@ async function openDetail(d, dep, ret, groupSize, cacheTravellers, planner = fal
         </div>
       </div>
       <div style="margin-top:18px">
-        <a class="deal-book primary" style="display:inline-flex;padding:12px 24px;border-radius:10px" href="${flightUrl(d.airlines, flightOrigin||'ORK', d.code, dep, ret, selAdults, selChildren)}"${dateAttrs(dep, ret)} target="_blank" rel="noopener noreferrer">${flightBtnLabel(d.airlines, 'Search flights')} →</a>
+        <a class="deal-book primary" style="display:inline-flex;padding:12px 24px;border-radius:10px" href="${flightUrl(d.airlines, flightOrigin||'ORK', d.code, dep, ret, selAdults, selChildren)}"${tripAttrs(flightOrigin, d.code, d.airlines, dep, ret)} target="_blank" rel="noopener noreferrer">${flightBtnLabel(d.airlines, 'Search flights')} →</a>
       </div>
     </div>` : ""}
 

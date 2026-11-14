@@ -34,11 +34,10 @@ function hcConsent(accepted){
   }
 })();
 
-// Click events for pages that do not load app.js (the destination pages).
-// app.js already records these same event names on the homepage — if its
-// track() is present, do nothing here so a homepage click is not sent twice.
-// Parameter names match app.js: destination + label from the delegated
-// listener, and source + dest (IATA code) from the explicit flight_click calls.
+// Click events for pages that do not load app.js (destination and route pages).
+// The homepage records its own clicks in app.js. If track() is already there,
+// do nothing here so a homepage click is not sent twice.
+// flight_click on these pages is the internal deal button, not the airline click.
 // origin is included only when the link carries data-hc-origin (DUB/ORK).
 const HC_CLICK_EVENTS = {
   flight_click: true,
