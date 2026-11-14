@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://holidaychasers.ie/schemas/manual-fares.schema.json",
+  "title": "Holiday Chasers manual fare row",
+  "description": "One row of data/manual_fares.csv. Column order in the file is the order of required. Prices are EUR per person for 1 adult, taxes included, no bags. Rows whose screenshot_ref starts with EXAMPLE are fixtures and must not be published.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "origin",
+    "destination",
+    "out_date",
+    "ret_date",
+    "nights",
+    "trip_type",
+    "airline",
+    "out_flight",
+    "out_time",
+    "ret_flight",
+    "ret_time",
+    "out_fare_eur",
+    "ret_fare_eur",
+    "total_pp_eur",
+    "source_url",
+    "checked_at_utc",
+    "matched_shortlist",
+    "seats_note",
+    "screenshot_ref"
+  ],
+  "properties": {
+    "origin": {
+      "type": "string",
+      "description": "Departure airport. Cork or Dublin only. Kerry (KIR) and Shannon (SNN) are rejected.",
+      "pattern": "^(ORK|DUB)$"
+    },
+    "destination": {
+      "type": "string",
+      "description": "Arrival IATA code that already has a Holiday Chasers page, or BVA for Paris Beauvais. Marrakesh (RAK) is rejected.",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "out_date": {
+      "type": "string",
+      "description": "Outbound departure date, YYYY-MM-DD. Must not be in the past, and must be before or on the return date.",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "ret_date": {
+      "type": "string",
+      "description": "Return departure date, YYYY-MM-DD.",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "nights": {
+      "type": "string",
+      "description": "Whole nights away. Must equal ret_date minus out_date.",
+      "pattern": "^[1-9]\\d*$"
+    },
+    "trip_type": {
+      "type": "string",
+      "description": "weekend and week fill the existing homepage boards. Any other slug, such as christmas, is kept for the destination page.",
+      "pattern": "^[A-Za-z][A-Za-z0-9_ -]{0,31}$"
+    },
+    "airline": {
+      "type": "string",
+      "description": "Ryanair or Aer Lingus. The source URL host must match.",
+      "enum": ["Ryanair", "Aer Lingus"]
+    },
+    "out_flight": {
+      "type": "string",
+      "description": "Outbound flight number, such as FR1234.",
+      "pattern": "^[A-Za-z]{2,3}\\s?\\d{1,4}$"
+    },
+    "out_time": {
+      "type": "string",
+      "description": "Outbound departure time, 24-hour HH:MM, as shown on the airline page.",
+      "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+    },
+    "ret_flight": {
+      "type": "string",
+      "pattern": "^[A-Za-z]{2,3}\\s?\\d{1,4}$"
+    },
+    "ret_time": {
+      "type": "string",
+      "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+    },
+    "out_fare_eur": {
+      "type": "string",
+      "description": "Outbound Basic Fare in EUR, greater than 0. Dot decimal, no thousands separator.",
+      "pattern": "^(?:0|[1-9]\\d*)(?:\\.\\d{1,2})?$"
+    },
+    "ret_fare_eur": {
+      "type": "string",
+      "description": "Return Basic Fare in EUR, greater than 0.",
+      "pattern": "^(?:0|[1-9]\\d*)(?:\\.\\d{1,2})?$"
+    },
+    "total_pp_eur": {
+      "type": "string",
+      "description": "Return total per person. Must equal the two Basic Fares within 0.50 EUR.",
+      "pattern": "^(?:0|[1-9]\\d*)(?:\\.\\d{1,2})?$"
+    },
+    "source_url": {
+      "type": "string",
+      "description": "https URL of the airline page that was opened. ryanair.com for Ryanair, aerlingus.com for Aer Lingus.",
+      "pattern": "^https://(www\\.)?(ryanair\\.com|aerlingus\\.com)/"
+    },
+    "checked_at_utc": {
+      "type": "string",
+      "description": "When the fare was read, ISO 8601 with a timezone. Stored as UTC. Must not be in the future. Displayed in Europe/Dublin.",
+      "format": "date-time"
+    },
+    "matched_shortlist": {
+      "type": "string",
+      "description": "true when the Basic Fare total was within 0.50 EUR of the shortlist figure. The shortlist itself is not published.",
+      "enum": ["true", "false"]
+    },
+    "seats_note": {
+      "type": "string",
+      "description": "Optional. A seats-left note from the airline page. Empty if none. The word EXAMPLE marks a fixture.",
+      "maxLength": 160
+    },
+    "screenshot_ref": {
+      "type": "string",
+      "description": "Audit id for the saved screenshot. Not copied into deals_cache.json. A value starting with EXAMPLE is a fixture and cannot be published.",
+      "minLength": 1,
+      "maxLength": 180
+    }
+  }
+}

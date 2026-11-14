@@ -16,7 +16,7 @@ Zero API credits — everything renders from data already paid for.
 
 import html as html_lib
 import json, os, re, subprocess, datetime as dt
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse
 
 import refresh_deals
 
@@ -829,16 +829,31 @@ def fmt_date_year(iso):
         return iso or ""
 
 
+# Paris Beauvais is a separate airport. Its fares belong on the Paris page.
+PAGE_AIRPORTS = {"CDG": ("CDG", "BVA")}
+
+
+def _page_airports(code):
+    return PAGE_AIRPORTS.get(code, (code,))
+
+
 def collect_fares(cache, code):
     """All scanned direct fares for one destination, both airports."""
+    wanted = {c.upper() for c in _page_airports(code)}
     rows = []
     for ap_code, ap_name in (("ORK", "Cork"), ("DUB", "Dublin")):
         ap = (cache.get("airports") or {}).get(ap_code) or {}
-        for kind, boards in (("Weekend", ap.get("weekend_boards") or []),
-                             ("Week", ap.get("week_boards") or [])):
+        groups = [
+            ("Weekend", ap.get("weekend_boards") or []),
+            ("Week", ap.get("week_boards") or []),
+        ]
+        for board in ap.get("special_boards") or []:
+            label = str(board.get("trip_type") or "trip").replace("_", " ").strip().title() or "Trip"
+            groups.append((label, [board]))
+        for kind, boards in groups:
             for b in boards:
                 deal = next((d for d in (b.get("deals") or [])
-                             if (d.get("code") or "").upper() == code), None)
+                             if (d.get("code") or "").upper() in wanted), None)
                 if not deal:
                     continue
                 rows.append({
@@ -850,6 +865,13 @@ def collect_fares(cache, code):
                     "price": deal.get("price"),
                     "airline": (deal.get("airlines") or "—").split(",")[0].strip(),
                     "saver": bool(deal.get("midweek_saver")),
+                    "code": (deal.get("code") or "").upper(),
+                    "checked_at": deal.get("checked_at") or "",
+                    "checked_at_dublin": deal.get("checked_at_dublin") or "",
+                    "source_url": deal.get("source_url") or "",
+                    "fare_label": deal.get("fare_label") or "",
+                    "stale": bool(deal.get("stale")),
+                    "airport_label": deal.get("airport_label") or "",
                 })
     rows.sort(key=lambda r: r["dep"])
     return rows
@@ -969,11 +991,99 @@ def featured_fare(rows):
         price = row.get("price")
         if not ap or not dep or not ret or price in (None, ""):
             continue
-        priced.append((price, dep, 0 if ap == "ORK" else 1, ap, ret))
+        priced.append((price, dep, 0 if ap == "ORK" else 1, ap, ret, row.get("code") or ""))
     if not priced:
         return None
-    price, dep, _order, ap, ret = min(priced)
-    return {"from": ap, "dep": dep, "ret": ret, "price": price}
+    # The code is not part of the ordering, so a tie still picks the first row.
+    price, dep, _order, ap, ret, deal_code = min(priced, key=lambda item: item[:5])
+    return {"from": ap, "dep": dep, "ret": ret, "price": price, "code": deal_code}
+
+
+CHECKED_ASSETS = """<style>
+.basis{font-weight:600;font-size:11px;color:var(--muted)}
+.checked{display:block;font-weight:500;font-size:11px;color:var(--muted);margin-top:4px}
+.checked[data-stale="1"]{color:#9A3412}
+</style>
+<script>
+(function () {
+  function rel(then) {
+    var mins = Math.round((Date.now() - then.getTime()) / 60000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return mins + " minute" + (mins === 1 ? "" : "s") + " ago";
+    var hours = Math.round(mins / 60);
+    if (hours < 48) return hours + " hour" + (hours === 1 ? "" : "s") + " ago";
+    var days = Math.round(hours / 24);
+    return days + " day" + (days === 1 ? "" : "s") + " ago";
+  }
+  var nodes = document.querySelectorAll(".checked[data-checked-at]");
+  for (var i = 0; i < nodes.length; i++) {
+    var el = nodes[i];
+    var then = new Date(el.getAttribute("data-checked-at"));
+    if (isNaN(then.getTime())) continue;
+    var host = el.getAttribute("data-host") || "the airline site";
+    var dublin = el.getAttribute("data-dublin") || "";
+    var stale = el.getAttribute("data-stale") ? " · fare may have changed" : "";
+    var when = dublin ? " (" + dublin + " Dublin)" : "";
+    el.textContent = "Checked on " + host + " " + rel(then) + when + stale;
+  }
+})();
+</script>
+"""
+
+
+def checked_note(rows):
+    if not any(row.get("checked_at") for row in rows):
+        return ""
+    return " · from, no bags · Dublin time is when that fare was checked"
+
+
+def checked_assets(rows):
+    if not any(row.get("checked_at") for row in rows):
+        return ""
+    return CHECKED_ASSETS
+
+
+def _fare_host(url):
+    host = (urlparse(url or "").hostname or "").lower()
+    if host.startswith("www."):
+        host = host[4:]
+    return host
+
+
+def checked_price_extra(row):
+    """Empty unless this fare was read by the scout. FlightAPI rows stay as they are."""
+    checked = row.get("checked_at") or ""
+    if not checked:
+        return ""
+    host = _fare_host(row.get("source_url") or "") or "the airline site"
+    basis = html_lib.escape(row.get("fare_label") or "from, no bags")
+    dublin = row.get("checked_at_dublin") or ""
+    stale_attr = ' data-stale="1"' if row.get("stale") else ""
+    fallback = f"Checked on {html_lib.escape(host)}"
+    if dublin:
+        fallback += f" · {html_lib.escape(dublin)} Dublin"
+    if row.get("stale"):
+        fallback += " · fare may have changed"
+    return (
+        f" <span class=\"basis\">{basis}</span>"
+        f"<div class=\"checked\" data-checked-at=\"{html_lib.escape(checked, quote=True)}\""
+        f" data-host=\"{html_lib.escape(host, quote=True)}\""
+        f" data-dublin=\"{html_lib.escape(dublin, quote=True)}\"{stale_attr}>{fallback}</div>"
+    )
+
+
+def fare_row(row):
+    origin = row["from"]
+    if row.get("airport_label"):
+        origin = f"{row['from']} → {html_lib.escape(row['airport_label'])}"
+    nights = f" · {row['nights']}n" if row["nights"] else ""
+    saver = " 💡" if row["saver"] else ""
+    return (
+        f"<tr><td>{origin}</td><td>{row['kind']}</td>"
+        f"<td>{fmt_date(row['dep'])} → {fmt_date(row['ret'])}{nights}</td>"
+        f"<td class='p'>€{row['price']}{saver}{checked_price_extra(row)}</td>"
+        f"<td>{html_lib.escape(row['airline'])}</td></tr>"
+    )
 
 
 def fare_tbody(rows):
@@ -984,13 +1094,7 @@ def fare_tbody(rows):
     """
     if not rows:
         return ""
-    return "\n".join(
-        f"<tr><td>{r['from']}</td><td>{r['kind']}</td>"
-        f"<td>{fmt_date(r['dep'])} → {fmt_date(r['ret'])}"
-        + (f" · {r['nights']}n" if r["nights"] else "") + "</td>"
-        f"<td class='p'>€{r['price']}" + (" 💡" if r["saver"] else "") + "</td>"
-        f"<td>{html_lib.escape(r['airline'])}</td></tr>"
-        for r in rows)
+    return "\n".join(fare_row(row) for row in rows)
 
 
 def _name_list(names):
@@ -1203,6 +1307,8 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
              "The destinations linked below have direct returns in the latest scan. "
              "The homepage board is the same data."),
         ]
+    note += checked_note(rows)
+    assets = checked_assets(rows)
     if guide and guide.get("intro"):
         lead = _fill_price(guide["intro"], min_p, bold=True)
     if guide:
@@ -1235,9 +1341,10 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
     # booking-funnel link. With a stored fare, /?dest=&from=&out=&ret= opens
     # that exact trip. With none, the same hook points at the homepage board.
     fare = featured_fare(rows)
+    dest_code = (fare.get("code") if fare else "") or code
     if fare:
         cta_href = "/?" + urlencode((
-            ("dest", code), ("from", fare["from"]), ("out", fare["dep"]), ("ret", fare["ret"]),
+            ("dest", dest_code), ("from", fare["from"]), ("out", fare["dep"]), ("ret", fare["ret"]),
         ))
         date_attrs = (
             f' data-hc-origin="{html_lib.escape(fare["from"], quote=True)}"'
@@ -1255,7 +1362,7 @@ def page_html(code, slug, city, country, blurb, rows, updated, fare_counts):
         ' data-hc-source="destination_page"{dates}>{label}</a>'
     ).format(
         href=html_lib.escape(cta_href, quote=True),
-        code=html_lib.escape(code, quote=True),
+        code=html_lib.escape(dest_code, quote=True),
         city=html_lib.escape(city, quote=True),
         label=cta_label,
         dates=date_attrs,
@@ -1384,7 +1491,7 @@ footer a.ext{{color:var(--ink);font-weight:600;border-bottom:1px solid var(--gol
     <button class="consent-btn consent-accept" onclick="hcConsent(true)">That's fine</button>
   </div>
 </div>
-<script src="/consent.js" defer></script>
+{assets}<script src="/consent.js" defer></script>
 </body>
 </html>"""
 
@@ -1644,14 +1751,7 @@ def _fare_table(rows, empty_city):
             "A fare appears here only after a scan stores a real return.</p>\n"
             "</div>"
         )
-    body = "\n".join(
-        f"<tr><td>{r['from']}</td><td>{r['kind']}</td>"
-        f"<td>{fmt_date(r['dep'])} → {fmt_date(r['ret'])}"
-        + (f" · {r['nights']}n" if r["nights"] else "") + "</td>"
-        f"<td class='p'>€{r['price']}" + (" 💡" if r["saver"] else "") + "</td>"
-        f"<td>{html_lib.escape(r['airline'])}</td></tr>"
-        for r in rows
-    )
+    body = fare_tbody(rows)
     return (
         "<div class=\"table-wrap\">\n<table>\n"
         "<thead><tr><th>From</th><th>Trip</th><th>Dates</th><th>Per person</th><th>Airline</th></tr></thead>\n"
@@ -1740,9 +1840,10 @@ def route_page_html(route, city, dest_slug, rows, updated):
             f'{html_lib.escape(sib["link"])}</a>'
         ))
     fare = featured_fare(mine)
+    dest_code = (fare.get("code") if fare else "") or route["code"]
     if fare:
         cta_href = "/?" + urlencode((
-            ("dest", route["code"]), ("from", fare["from"]),
+            ("dest", dest_code), ("from", fare["from"]),
             ("out", fare["dep"]), ("ret", fare["ret"]),
         ))
         date_attrs = (
@@ -1761,7 +1862,7 @@ def route_page_html(route, city, dest_slug, rows, updated):
     ).format(
         href=html_lib.escape(cta_href, quote=True),
         city=html_lib.escape(city, quote=True),
-        code=html_lib.escape(route["code"], quote=True),
+        code=html_lib.escape(dest_code, quote=True),
         origin=html_lib.escape(origin_code, quote=True),
         dates=date_attrs,
         label=html_lib.escape(
@@ -1781,6 +1882,8 @@ def route_page_html(route, city, dest_slug, rows, updated):
         f"Direct flights only · prices per person, return · last scanned {updated}"
         + (" · 💡 = midweek saver" if mine else "")
     )
+    note += checked_note(mine)
+    assets = checked_assets(mine)
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1861,7 +1964,7 @@ footer a.ext{{color:var(--ink);font-weight:600;border-bottom:1px solid var(--gol
     <button class="consent-btn consent-accept" onclick="hcConsent(true)">That's fine</button>
   </div>
 </div>
-<script src="/consent.js" defer></script>
+{assets}<script src="/consent.js" defer></script>
 </body>
 </html>"""
 
