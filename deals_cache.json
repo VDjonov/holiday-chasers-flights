@@ -1,5 +1,5 @@
 {
-  "updated_utc": "2026-11-14T01:03:21Z",
+  "updated_utc": "2026-11-16T07:21:00Z",
   "travellers": 1,
   "passenger_label": "per person (1 adult, return, from, no bags)",
   "fare_source": "manual",
@@ -39,7 +39,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:57",
               "matched_shortlist": true,
               "trip_type": "weekend",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "out 1 left; return 4 left"
             }
@@ -58,25 +58,61 @@
               "depart_date": "2026-12-04",
               "return_date": "2026-12-06",
               "nights": 2,
-              "price": 41.98,
+              "price": 42.98,
               "stops": 0,
               "total_time": "—",
               "airlines": "Ryanair",
               "source": "manual",
               "fare_label": "from, no bags",
               "out_fare_eur": 21.99,
-              "ret_fare_eur": 19.99,
+              "ret_fare_eur": 20.99,
               "out_flight": "FR361",
               "out_time": "18:15",
               "ret_flight": "FR362",
               "ret_time": "07:25",
               "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-04&dateIn=2026-12-06&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=FAO&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-04&tpEndDate=2026-12-06&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=FAO",
-              "checked_at": "2026-11-14T00:59:45Z",
-              "checked_at_dublin": "14 Nov 2026, 00:59",
-              "matched_shortlist": true,
+              "checked_at": "2026-11-16T07:11:00Z",
+              "checked_at_dublin": "16 Nov 2026, 07:11",
+              "matched_shortlist": false,
               "trip_type": "weekend",
               "stale": false,
               "origin_airport": "ORK"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-05",
+          "return_date": "2026-12-08",
+          "nights": 3,
+          "label": "Sat 05 Dec – Tue 08 Dec",
+          "deals": [
+            {
+              "city": "Manchester",
+              "country": "England",
+              "code": "MAN",
+              "depart_date": "2026-12-05",
+              "return_date": "2026-12-08",
+              "nights": 3,
+              "price": 29.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 14.99,
+              "ret_fare_eur": 14.99,
+              "out_flight": "FR1862",
+              "out_time": "22:40",
+              "ret_flight": "FR767",
+              "ret_time": "06:55",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-05&dateIn=2026-12-08&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=MAN&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-05&tpEndDate=2026-12-08&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=MAN",
+              "checked_at": "2026-11-16T06:32:36Z",
+              "checked_at_dublin": "16 Nov 2026, 06:32",
+              "matched_shortlist": false,
+              "trip_type": "weekend",
+              "stale": false,
+              "origin_airport": "ORK",
+              "seats_note": "return: 2 seats left"
             }
           ]
         },
@@ -110,7 +146,7 @@
               "checked_at_dublin": "14 Nov 2026, 01:02",
               "matched_shortlist": false,
               "trip_type": "weekend",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "outbound fare card showed a whole-euro figure of 271; total is about 532.60"
             }
@@ -146,9 +182,115 @@
               "checked_at_dublin": "14 Nov 2026, 00:56",
               "matched_shortlist": true,
               "trip_type": "weekend",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "out 5 left; return 4 left"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-13",
+          "return_date": "2026-12-15",
+          "nights": 2,
+          "label": "Sun 13 Dec – Tue 15 Dec",
+          "deals": [
+            {
+              "city": "Lanzarote",
+              "country": "Spain",
+              "code": "ACE",
+              "depart_date": "2026-12-13",
+              "return_date": "2026-12-15",
+              "nights": 2,
+              "price": 41.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 16.99,
+              "ret_fare_eur": 24.99,
+              "out_flight": "FR7725",
+              "out_time": "19:55",
+              "ret_flight": "FR7726",
+              "ret_time": "08:00",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-13&dateIn=2026-12-15&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=ACE&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-13&tpEndDate=2026-12-15&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=ACE",
+              "checked_at": "2026-11-16T07:03:00Z",
+              "checked_at_dublin": "16 Nov 2026, 07:03",
+              "matched_shortlist": false,
+              "trip_type": "weekend",
+              "stale": false,
+              "origin_airport": "ORK"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-13",
+          "return_date": "2026-12-16",
+          "nights": 3,
+          "label": "Sun 13 Dec – Wed 16 Dec",
+          "deals": [
+            {
+              "city": "Fuerteventura",
+              "country": "Spain",
+              "code": "FUE",
+              "depart_date": "2026-12-13",
+              "return_date": "2026-12-16",
+              "nights": 3,
+              "price": 45.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 21.99,
+              "ret_fare_eur": 23.99,
+              "out_flight": "FR9827",
+              "out_time": "06:05",
+              "ret_flight": "FR9826",
+              "ret_time": "17:55",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-13&dateIn=2026-12-16&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=FUE&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-13&tpEndDate=2026-12-16&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=FUE",
+              "checked_at": "2026-11-16T07:19:00Z",
+              "checked_at_dublin": "16 Nov 2026, 07:19",
+              "matched_shortlist": false,
+              "trip_type": "weekend",
+              "stale": false,
+              "origin_airport": "ORK",
+              "seats_note": "return: 2 seats left"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-15",
+          "return_date": "2026-12-17",
+          "nights": 2,
+          "label": "Tue 15 Dec – Thu 17 Dec",
+          "deals": [
+            {
+              "city": "London",
+              "country": "England",
+              "code": "STN",
+              "depart_date": "2026-12-15",
+              "return_date": "2026-12-17",
+              "nights": 2,
+              "price": 29.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 14.99,
+              "ret_fare_eur": 14.99,
+              "out_flight": "FR906",
+              "out_time": "08:00",
+              "ret_flight": "FR901",
+              "ret_time": "06:00",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-15&dateIn=2026-12-17&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=STN&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-15&tpEndDate=2026-12-17&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=STN",
+              "checked_at": "2026-11-16T06:32:36Z",
+              "checked_at_dublin": "16 Nov 2026, 06:32",
+              "matched_shortlist": false,
+              "trip_type": "weekend",
+              "stale": false,
+              "origin_airport": "ORK"
             }
           ]
         },
@@ -182,7 +324,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:19",
               "matched_shortlist": true,
               "trip_type": "weekend",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "Outbound: 1 seats left"
             }
@@ -218,7 +360,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:54",
               "matched_shortlist": true,
               "trip_type": "weekend",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "return 2 left"
             }
@@ -254,9 +396,80 @@
               "checked_at_dublin": "14 Nov 2026, 00:55",
               "matched_shortlist": true,
               "trip_type": "weekend",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "out 4 left; return 2 left"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-20",
+          "return_date": "2026-12-24",
+          "nights": 4,
+          "label": "Sun 20 Dec – Thu 24 Dec",
+          "deals": [
+            {
+              "city": "Birmingham",
+              "country": "England",
+              "code": "BHX",
+              "depart_date": "2026-12-20",
+              "return_date": "2026-12-24",
+              "nights": 4,
+              "price": 34.06,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 16.99,
+              "ret_fare_eur": 17.07,
+              "out_flight": "FR3737",
+              "out_time": "23:35",
+              "ret_flight": "FR2993",
+              "ret_time": "13:10",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-20&dateIn=2026-12-24&isConnectedFlight=false&isReturn=true&discount=0&originIata=ORK&destinationIata=BHX",
+              "checked_at": "2026-11-16T05:47:01Z",
+              "checked_at_dublin": "16 Nov 2026, 05:47",
+              "matched_shortlist": false,
+              "trip_type": "weekend",
+              "stale": false,
+              "origin_airport": "ORK",
+              "seats_note": "out: 5 seats left; return: 2 seats left"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-21",
+          "return_date": "2026-12-24",
+          "nights": 3,
+          "label": "Mon 21 Dec – Thu 24 Dec",
+          "deals": [
+            {
+              "city": "Liverpool",
+              "country": "England",
+              "code": "LPL",
+              "depart_date": "2026-12-21",
+              "return_date": "2026-12-24",
+              "nights": 3,
+              "price": 39.48,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 21.99,
+              "ret_fare_eur": 17.49,
+              "out_flight": "FR6589",
+              "out_time": "13:50",
+              "ret_flight": "FR6588",
+              "ret_time": "15:20",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-21&dateIn=2026-12-24&isConnectedFlight=false&isReturn=true&discount=0&originIata=ORK&destinationIata=LPL",
+              "checked_at": "2026-11-16T05:47:01Z",
+              "checked_at_dublin": "16 Nov 2026, 05:47",
+              "matched_shortlist": false,
+              "trip_type": "weekend",
+              "stale": false,
+              "origin_airport": "ORK"
             }
           ]
         },
@@ -289,6 +502,41 @@
               "checked_at": "2026-11-14T00:40:05Z",
               "checked_at_dublin": "14 Nov 2026, 00:40",
               "matched_shortlist": true,
+              "trip_type": "weekend",
+              "stale": true,
+              "origin_airport": "ORK"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-23",
+          "return_date": "2026-12-27",
+          "nights": 4,
+          "label": "Wed 23 Dec – Sun 27 Dec",
+          "deals": [
+            {
+              "city": "Edinburgh",
+              "country": "Scotland",
+              "code": "EDI",
+              "depart_date": "2026-12-23",
+              "return_date": "2026-12-27",
+              "nights": 4,
+              "price": 33.86,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 18.07,
+              "ret_fare_eur": 15.79,
+              "out_flight": "FR320",
+              "out_time": "22:20",
+              "ret_flight": "FR3732",
+              "ret_time": "05:55",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-23&dateIn=2026-12-27&isConnectedFlight=false&isReturn=true&discount=0&originIata=ORK&destinationIata=EDI",
+              "checked_at": "2026-11-16T05:47:01Z",
+              "checked_at_dublin": "16 Nov 2026, 05:47",
+              "matched_shortlist": false,
               "trip_type": "weekend",
               "stale": false,
               "origin_airport": "ORK"
@@ -325,7 +573,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:57",
               "matched_shortlist": true,
               "trip_type": "weekend",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "out 5 left"
             }
@@ -361,7 +609,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:54",
               "matched_shortlist": true,
               "trip_type": "weekend",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK"
             }
           ]
@@ -396,7 +644,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:54",
               "matched_shortlist": true,
               "trip_type": "weekend",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "return 1 left"
             }
@@ -432,9 +680,46 @@
               "checked_at_dublin": "14 Nov 2026, 00:56",
               "matched_shortlist": true,
               "trip_type": "weekend",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "out 5 left; return 4 left"
+            }
+          ]
+        },
+        {
+          "depart_date": "2027-01-22",
+          "return_date": "2027-01-24",
+          "nights": 2,
+          "label": "Fri 22 Jan – Sun 24 Jan",
+          "deals": [
+            {
+              "city": "Paris",
+              "country": "France",
+              "code": "BVA",
+              "depart_date": "2027-01-22",
+              "return_date": "2027-01-24",
+              "nights": 2,
+              "price": 45.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 25.99,
+              "ret_fare_eur": 19.99,
+              "out_flight": "FR3054",
+              "out_time": "13:55",
+              "ret_flight": "FR3053",
+              "ret_time": "11:45",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2027-01-22&dateIn=2027-01-24&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=BVA&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2027-01-22&tpEndDate=2027-01-24&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=BVA",
+              "checked_at": "2026-11-16T07:19:00Z",
+              "checked_at_dublin": "16 Nov 2026, 07:19",
+              "matched_shortlist": false,
+              "trip_type": "weekend",
+              "stale": false,
+              "origin_airport": "ORK",
+              "airport_label": "Beauvais",
+              "seats_note": "return: 5 seats left"
             }
           ]
         },
@@ -468,7 +753,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:55",
               "matched_shortlist": true,
               "trip_type": "weekend",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "out 3 left; return 5 left"
             }
@@ -504,7 +789,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:54",
               "matched_shortlist": true,
               "trip_type": "weekend",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK"
             }
           ]
@@ -539,7 +824,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:56",
               "matched_shortlist": true,
               "trip_type": "weekend",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "out 3 left"
             }
@@ -575,7 +860,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:55",
               "matched_shortlist": true,
               "trip_type": "weekend",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "return 5 left"
             },
@@ -603,7 +888,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:58",
               "matched_shortlist": true,
               "trip_type": "weekend",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "return 5 left"
             }
@@ -639,7 +924,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:57",
               "matched_shortlist": true,
               "trip_type": "weekend",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "out 3 left; return 5 left; return briefly showed 79.99"
             }
@@ -647,6 +932,112 @@
         }
       ],
       "week_boards": [
+        {
+          "depart_date": "2026-11-25",
+          "return_date": "2026-12-02",
+          "nights": 7,
+          "label": "Wed 25 Nov – Wed 02 Dec",
+          "deals": [
+            {
+              "city": "Manchester",
+              "country": "England",
+              "code": "MAN",
+              "depart_date": "2026-11-25",
+              "return_date": "2026-12-02",
+              "nights": 7,
+              "price": 29.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 14.99,
+              "ret_fare_eur": 14.99,
+              "out_flight": "FR768",
+              "out_time": "06:10",
+              "ret_flight": "FR767",
+              "ret_time": "07:50",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-11-25&dateIn=2026-12-02&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=MAN&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-11-25&tpEndDate=2026-12-02&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=MAN",
+              "checked_at": "2026-11-16T06:32:36Z",
+              "checked_at_dublin": "16 Nov 2026, 06:32",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "ORK",
+              "seats_note": "return: 4 seats left"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-11-25",
+          "return_date": "2026-12-03",
+          "nights": 8,
+          "label": "Wed 25 Nov – Thu 03 Dec",
+          "deals": [
+            {
+              "city": "London",
+              "country": "England",
+              "code": "STN",
+              "depart_date": "2026-11-25",
+              "return_date": "2026-12-03",
+              "nights": 8,
+              "price": 29.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 14.99,
+              "ret_fare_eur": 14.99,
+              "out_flight": "FR906",
+              "out_time": "21:40",
+              "ret_flight": "FR901",
+              "ret_time": "06:00",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-11-25&dateIn=2026-12-03&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=STN&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-11-25&tpEndDate=2026-12-03&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=STN",
+              "checked_at": "2026-11-16T06:32:36Z",
+              "checked_at_dublin": "16 Nov 2026, 06:32",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "ORK"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-11-28",
+          "return_date": "2026-12-06",
+          "nights": 8,
+          "label": "Sat 28 Nov – Sun 06 Dec",
+          "deals": [
+            {
+              "city": "Edinburgh",
+              "country": "Scotland",
+              "code": "EDI",
+              "depart_date": "2026-11-28",
+              "return_date": "2026-12-06",
+              "nights": 8,
+              "price": 29.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 14.99,
+              "ret_fare_eur": 14.99,
+              "out_flight": "FR320",
+              "out_time": "18:35",
+              "ret_flight": "FR3732",
+              "ret_time": "05:55",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-11-28&dateIn=2026-12-06&isConnectedFlight=false&isReturn=true&discount=0&originIata=ORK&destinationIata=EDI",
+              "checked_at": "2026-11-16T05:47:01Z",
+              "checked_at_dublin": "16 Nov 2026, 05:47",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "ORK"
+            }
+          ]
+        },
         {
           "depart_date": "2026-12-03",
           "return_date": "2026-12-10",
@@ -677,7 +1068,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:57",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "out 1 left"
             }
@@ -713,7 +1104,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:52",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "out 2 left"
             }
@@ -725,6 +1116,34 @@
           "nights": 7,
           "label": "Sat 05 Dec – Sat 12 Dec",
           "deals": [
+            {
+              "city": "Birmingham",
+              "country": "England",
+              "code": "BHX",
+              "depart_date": "2026-12-05",
+              "return_date": "2026-12-12",
+              "nights": 7,
+              "price": 30.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 14.99,
+              "ret_fare_eur": 15.99,
+              "out_flight": "FR2994",
+              "out_time": "19:50",
+              "ret_flight": "FR2993",
+              "ret_time": "21:30",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-05&dateIn=2026-12-12&isConnectedFlight=false&isReturn=true&discount=0&originIata=ORK&destinationIata=BHX",
+              "checked_at": "2026-11-16T05:47:01Z",
+              "checked_at_dublin": "16 Nov 2026, 05:47",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "ORK",
+              "seats_note": "return: 2 seats left"
+            },
             {
               "city": "Tenerife",
               "country": "Spain",
@@ -749,7 +1168,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:53",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK"
             },
             {
@@ -776,7 +1195,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:55",
               "matched_shortlist": false,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "out 2 left"
             }
@@ -812,7 +1231,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:28",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "out 4 left"
             }
@@ -831,22 +1250,57 @@
               "depart_date": "2026-12-06",
               "return_date": "2026-12-13",
               "nights": 7,
-              "price": 35.98,
+              "price": 38.98,
               "stops": 0,
               "total_time": "—",
               "airlines": "Ryanair",
               "source": "manual",
               "fare_label": "from, no bags",
               "out_fare_eur": 14.99,
-              "ret_fare_eur": 20.99,
+              "ret_fare_eur": 23.99,
               "out_flight": "FR361",
               "out_time": "10:30",
               "ret_flight": "FR362",
               "ret_time": "07:25",
-              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-06&dateIn=2026-12-13&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=FAO&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-06&tpEndDate=2026-12-13&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=FAO",
-              "checked_at": "2026-11-14T00:49:38Z",
-              "checked_at_dublin": "14 Nov 2026, 00:49",
-              "matched_shortlist": true,
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-06&dateIn=2026-12-13&isConnectedFlight=false&isReturn=true&discount=0&originIata=ORK&destinationIata=FAO",
+              "checked_at": "2026-11-16T05:47:01Z",
+              "checked_at_dublin": "16 Nov 2026, 05:47",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "ORK"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-11",
+          "return_date": "2026-12-17",
+          "nights": 6,
+          "label": "Fri 11 Dec – Thu 17 Dec",
+          "deals": [
+            {
+              "city": "Tenerife",
+              "country": "Spain",
+              "code": "TFS",
+              "depart_date": "2026-12-11",
+              "return_date": "2026-12-17",
+              "nights": 6,
+              "price": 45.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 20.99,
+              "ret_fare_eur": 24.99,
+              "out_flight": "FR526",
+              "out_time": "11:40",
+              "ret_flight": "FR527",
+              "ret_time": "06:25",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-11&dateIn=2026-12-17&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=TFS&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-11&tpEndDate=2026-12-17&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=TFS",
+              "checked_at": "2026-11-16T07:19:00Z",
+              "checked_at_dublin": "16 Nov 2026, 07:19",
+              "matched_shortlist": false,
               "trip_type": "week",
               "stale": false,
               "origin_airport": "ORK"
@@ -883,7 +1337,7 @@
               "checked_at_dublin": "13 Nov 2026, 23:12",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "5 seats left at this price each leg"
             }
@@ -902,22 +1356,22 @@
               "depart_date": "2026-12-13",
               "return_date": "2026-12-20",
               "nights": 7,
-              "price": 37.48,
+              "price": 33.66,
               "stops": 0,
               "total_time": "—",
               "airlines": "Ryanair",
               "source": "manual",
               "fare_label": "from, no bags",
               "out_fare_eur": 14.99,
-              "ret_fare_eur": 22.49,
+              "ret_fare_eur": 18.67,
               "out_flight": "FR3054",
               "out_time": "12:50",
               "ret_flight": "FR3053",
               "ret_time": "11:45",
-              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-13&dateIn=2026-12-20&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=BVA&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-13&tpEndDate=2026-12-20&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=BVA",
-              "checked_at": "2026-11-14T00:52:21Z",
-              "checked_at_dublin": "14 Nov 2026, 00:52",
-              "matched_shortlist": true,
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-13&dateIn=2026-12-20&isConnectedFlight=false&isReturn=true&discount=0&originIata=ORK&destinationIata=BVA",
+              "checked_at": "2026-11-16T05:47:01Z",
+              "checked_at_dublin": "16 Nov 2026, 05:47",
+              "matched_shortlist": false,
               "trip_type": "week",
               "stale": false,
               "origin_airport": "ORK",
@@ -955,9 +1409,45 @@
               "checked_at_dublin": "14 Nov 2026, 00:58",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "out 1 left; return 5 left"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-14",
+          "return_date": "2026-12-22",
+          "nights": 8,
+          "label": "Mon 14 Dec – Tue 22 Dec",
+          "deals": [
+            {
+              "city": "Lanzarote",
+              "country": "Spain",
+              "code": "ACE",
+              "depart_date": "2026-12-14",
+              "return_date": "2026-12-22",
+              "nights": 8,
+              "price": 43.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 18.99,
+              "ret_fare_eur": 24.99,
+              "out_flight": "FR7725",
+              "out_time": "06:30",
+              "ret_flight": "FR7726",
+              "ret_time": "08:00",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-14&dateIn=2026-12-22&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=ACE&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-14&tpEndDate=2026-12-22&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=ACE",
+              "checked_at": "2026-11-16T07:11:00Z",
+              "checked_at_dublin": "16 Nov 2026, 07:11",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "ORK",
+              "seats_note": "return: 4 seats left"
             }
           ]
         },
@@ -991,7 +1481,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:53",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK"
             },
             {
@@ -1018,7 +1508,7 @@
               "checked_at_dublin": "14 Nov 2026, 01:03",
               "matched_shortlist": false,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "fare cards showed 90/53 vs 92.27/54.95; small unexplained gap, recheck"
             }
@@ -1054,7 +1544,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:53",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "return 5 left"
             },
@@ -1082,7 +1572,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:53",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "out 1 left; return 5 left"
             },
@@ -1110,7 +1600,7 @@
               "checked_at_dublin": "14 Nov 2026, 01:02",
               "matched_shortlist": false,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK"
             }
           ]
@@ -1145,7 +1635,7 @@
               "checked_at_dublin": "14 Nov 2026, 01:03",
               "matched_shortlist": false,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK"
             },
             {
@@ -1172,7 +1662,7 @@
               "checked_at_dublin": "14 Nov 2026, 01:03",
               "matched_shortlist": false,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "2 fares left"
             },
@@ -1200,9 +1690,45 @@
               "checked_at_dublin": "14 Nov 2026, 01:03",
               "matched_shortlist": false,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "4 fares left on return"
+            }
+          ]
+        },
+        {
+          "depart_date": "2027-01-03",
+          "return_date": "2027-01-11",
+          "nights": 8,
+          "label": "Sun 03 Jan – Mon 11 Jan",
+          "deals": [
+            {
+              "city": "Liverpool",
+              "country": "England",
+              "code": "LPL",
+              "depart_date": "2027-01-03",
+              "return_date": "2027-01-11",
+              "nights": 8,
+              "price": 36.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 16.99,
+              "ret_fare_eur": 19.99,
+              "out_flight": "FR6589",
+              "out_time": "19:50",
+              "ret_flight": "FR6588",
+              "ret_time": "12:15",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2027-01-03&dateIn=2027-01-11&isConnectedFlight=false&isReturn=true&discount=0&originIata=ORK&destinationIata=LPL",
+              "checked_at": "2026-11-16T05:47:01Z",
+              "checked_at_dublin": "16 Nov 2026, 05:47",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "ORK",
+              "seats_note": "out: 3 seats left"
             }
           ]
         },
@@ -1236,7 +1762,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:57",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "return 3 left"
             }
@@ -1272,7 +1798,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:58",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "out 1 left; return 5 left"
             }
@@ -1308,7 +1834,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:54",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK"
             },
             {
@@ -1335,7 +1861,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:56",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "out 5 left; return 2 left"
             }
@@ -1347,6 +1873,34 @@
           "nights": 7,
           "label": "Fri 15 Jan – Fri 22 Jan",
           "deals": [
+            {
+              "city": "Brussels",
+              "country": "Belgium",
+              "code": "CRL",
+              "depart_date": "2027-01-15",
+              "return_date": "2027-01-22",
+              "nights": 7,
+              "price": 42.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 22.99,
+              "ret_fare_eur": 19.99,
+              "out_flight": "FR2976",
+              "out_time": "13:25",
+              "ret_flight": "FR2975",
+              "ret_time": "12:10",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2027-01-15&dateIn=2027-01-22&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=CRL&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2027-01-15&tpEndDate=2027-01-22&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=CRL",
+              "checked_at": "2026-11-16T07:09:00Z",
+              "checked_at_dublin": "16 Nov 2026, 07:09",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "ORK",
+              "seats_note": "return: 5 seats left"
+            },
             {
               "city": "Tenerife",
               "country": "Spain",
@@ -1371,7 +1925,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:57",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "out 5 left; return 2 left"
             }
@@ -1407,7 +1961,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:58",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "out 5 left"
             }
@@ -1443,7 +1997,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:55",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "out 1 left"
             }
@@ -1479,7 +2033,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:55",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "out 5 left; return 5 left"
             }
@@ -1515,7 +2069,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:57",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "out 5 left"
             },
@@ -1543,7 +2097,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:56",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "out 5 left"
             }
@@ -1579,7 +2133,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:56",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "out 5 left"
             },
@@ -1607,7 +2161,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:59",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "return 3 left"
             }
@@ -1643,7 +2197,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:54",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK"
             }
           ]
@@ -1678,7 +2232,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:57",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "out 5 left; return 5 left; out briefly showed 62.87"
             }
@@ -1714,7 +2268,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:55",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "return 5 left"
             }
@@ -1750,7 +2304,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:58",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK"
             }
           ]
@@ -1787,37 +2341,9 @@
               "checked_at_dublin": "13 Nov 2026, 23:10",
               "matched_shortlist": true,
               "trip_type": "3_night",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "Outbound: 3 seats left at this price"
-            },
-            {
-              "city": "Fuerteventura",
-              "country": "Spain",
-              "code": "FUE",
-              "depart_date": "2026-12-13",
-              "return_date": "2026-12-16",
-              "nights": 3,
-              "price": 45.98,
-              "stops": 0,
-              "total_time": "—",
-              "airlines": "Ryanair",
-              "source": "manual",
-              "fare_label": "from, no bags",
-              "out_fare_eur": 21.99,
-              "ret_fare_eur": 23.99,
-              "out_flight": "FR9827",
-              "out_time": "06:05",
-              "ret_flight": "FR9826",
-              "ret_time": "17:55",
-              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-13&dateIn=2026-12-16&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=FUE&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-13&tpEndDate=2026-12-16&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=FUE",
-              "checked_at": "2026-11-13T23:11:00Z",
-              "checked_at_dublin": "13 Nov 2026, 23:11",
-              "matched_shortlist": true,
-              "trip_type": "3_night",
-              "stale": false,
-              "origin_airport": "ORK",
-              "seats_note": "Outbound 5 seats left; return 2 seats left"
             }
           ],
           "trip_type": "3_night"
@@ -1852,7 +2378,7 @@
               "checked_at_dublin": "13 Nov 2026, 23:08",
               "matched_shortlist": true,
               "trip_type": "christmas",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK"
             }
           ],
@@ -1888,7 +2414,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:05",
               "matched_shortlist": true,
               "trip_type": "city_break",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "4 seats left outbound"
             }
@@ -1925,7 +2451,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:17",
               "matched_shortlist": true,
               "trip_type": "st_patricks",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "airport_label": "Beauvais"
             }
@@ -1962,7 +2488,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:19",
               "matched_shortlist": true,
               "trip_type": "easter",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "airport_label": "Beauvais"
             }
@@ -1999,7 +2525,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:19",
               "matched_shortlist": true,
               "trip_type": "easter",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "Both legs: 5 seats left"
             }
@@ -2036,7 +2562,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:20",
               "matched_shortlist": true,
               "trip_type": "easter",
-              "stale": false,
+              "stale": true,
               "origin_airport": "ORK",
               "seats_note": "Return: 5 seats left"
             }
@@ -2044,11 +2570,146 @@
           "trip_type": "easter"
         }
       ],
-      "scanned_utc": "2026-11-14T01:03:21Z"
+      "scanned_utc": "2026-11-16T07:19:00Z"
     },
     "DUB": {
       "name": "Dublin",
       "weekend_boards": [
+        {
+          "depart_date": "2026-12-01",
+          "return_date": "2026-12-03",
+          "nights": 2,
+          "label": "Tue 01 Dec – Thu 03 Dec",
+          "deals": [
+            {
+              "city": "Edinburgh",
+              "country": "Scotland",
+              "code": "EDI",
+              "depart_date": "2026-12-01",
+              "return_date": "2026-12-03",
+              "nights": 2,
+              "price": 29.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 14.99,
+              "ret_fare_eur": 14.99,
+              "out_flight": "FR812",
+              "out_time": "21:25",
+              "ret_flight": "FR815",
+              "ret_time": "07:30",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-01&dateIn=2026-12-03&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=EDI&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-01&tpEndDate=2026-12-03&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=EDI",
+              "checked_at": "2026-11-16T06:34:00Z",
+              "checked_at_dublin": "16 Nov 2026, 06:34",
+              "matched_shortlist": false,
+              "trip_type": "weekend",
+              "stale": false,
+              "origin_airport": "DUB",
+              "seats_note": "return: 2 seats left"
+            },
+            {
+              "city": "London",
+              "country": "England",
+              "code": "STN",
+              "depart_date": "2026-12-01",
+              "return_date": "2026-12-03",
+              "nights": 2,
+              "price": 29.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 14.99,
+              "ret_fare_eur": 14.99,
+              "out_flight": "FR204",
+              "out_time": "12:45",
+              "ret_flight": "FR210",
+              "ret_time": "06:45",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-01&dateIn=2026-12-03&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=STN&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-01&tpEndDate=2026-12-03&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=STN",
+              "checked_at": "2026-11-16T06:40:00Z",
+              "checked_at_dublin": "16 Nov 2026, 06:40",
+              "matched_shortlist": false,
+              "trip_type": "weekend",
+              "stale": false,
+              "origin_airport": "DUB"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-02",
+          "return_date": "2026-12-04",
+          "nights": 2,
+          "label": "Wed 02 Dec – Fri 04 Dec",
+          "deals": [
+            {
+              "city": "Liverpool",
+              "country": "England",
+              "code": "LPL",
+              "depart_date": "2026-12-02",
+              "return_date": "2026-12-04",
+              "nights": 2,
+              "price": 29.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 14.99,
+              "ret_fare_eur": 14.99,
+              "out_flight": "FR3144",
+              "out_time": "22:50",
+              "ret_flight": "FR447",
+              "ret_time": "23:45",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-02&dateIn=2026-12-04&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=LPL&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-02&tpEndDate=2026-12-04&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=LPL",
+              "checked_at": "2026-11-16T06:36:00Z",
+              "checked_at_dublin": "16 Nov 2026, 06:36",
+              "matched_shortlist": false,
+              "trip_type": "weekend",
+              "stale": false,
+              "origin_airport": "DUB"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-03",
+          "return_date": "2026-12-05",
+          "nights": 2,
+          "label": "Thu 03 Dec – Sat 05 Dec",
+          "deals": [
+            {
+              "city": "Paris",
+              "country": "France",
+              "code": "BVA",
+              "depart_date": "2026-12-03",
+              "return_date": "2026-12-05",
+              "nights": 2,
+              "price": 32.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 16.99,
+              "ret_fare_eur": 15.99,
+              "out_flight": "FR24",
+              "out_time": "20:15",
+              "ret_flight": "FR23",
+              "ret_time": "15:25",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-03&dateIn=2026-12-05&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=BVA&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-03&tpEndDate=2026-12-05&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=BVA",
+              "checked_at": "2026-11-16T06:45:00Z",
+              "checked_at_dublin": "16 Nov 2026, 06:45",
+              "matched_shortlist": false,
+              "trip_type": "weekend",
+              "stale": false,
+              "origin_airport": "DUB",
+              "airport_label": "Beauvais",
+              "seats_note": "return: 3 seats left"
+            }
+          ]
+        },
         {
           "depart_date": "2026-12-03",
           "return_date": "2026-12-06",
@@ -2079,9 +2740,44 @@
               "checked_at_dublin": "14 Nov 2026, 00:19",
               "matched_shortlist": true,
               "trip_type": "weekend",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "Outbound: 5 seats left; return: 2 seats left"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-03",
+          "return_date": "2026-12-07",
+          "nights": 4,
+          "label": "Thu 03 Dec – Mon 07 Dec",
+          "deals": [
+            {
+              "city": "Glasgow",
+              "country": "Scotland",
+              "code": "GLA",
+              "depart_date": "2026-12-03",
+              "return_date": "2026-12-07",
+              "nights": 4,
+              "price": 29.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 14.99,
+              "ret_fare_eur": 14.99,
+              "out_flight": "FR5563",
+              "out_time": "08:00",
+              "ret_flight": "FR5150",
+              "ret_time": "22:40",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-03&dateIn=2026-12-07&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=GLA&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-03&tpEndDate=2026-12-07&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=GLA",
+              "checked_at": "2026-11-16T06:35:00Z",
+              "checked_at_dublin": "16 Nov 2026, 06:35",
+              "matched_shortlist": false,
+              "trip_type": "weekend",
+              "stale": false,
+              "origin_airport": "DUB"
             }
           ]
         },
@@ -2115,9 +2811,306 @@
               "checked_at_dublin": "14 Nov 2026, 00:19",
               "matched_shortlist": true,
               "trip_type": "weekend",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "Return: 1 seats left"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-04",
+          "return_date": "2026-12-08",
+          "nights": 4,
+          "label": "Fri 04 Dec – Tue 08 Dec",
+          "deals": [
+            {
+              "city": "Birmingham",
+              "country": "England",
+              "code": "BHX",
+              "depart_date": "2026-12-04",
+              "return_date": "2026-12-08",
+              "nights": 4,
+              "price": 29.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 14.99,
+              "ret_fare_eur": 14.99,
+              "out_flight": "FR666",
+              "out_time": "06:00",
+              "ret_flight": "FR665",
+              "ret_time": "15:10",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-04&dateIn=2026-12-08&isConnectedFlight=false&isReturn=true&discount=0&originIata=DUB&destinationIata=BHX",
+              "checked_at": "2026-11-16T05:47:01Z",
+              "checked_at_dublin": "16 Nov 2026, 05:47",
+              "matched_shortlist": false,
+              "trip_type": "weekend",
+              "stale": false,
+              "origin_airport": "DUB",
+              "seats_note": "out: 1 seat left; return: 4 seats left"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-05",
+          "return_date": "2026-12-08",
+          "nights": 3,
+          "label": "Sat 05 Dec – Tue 08 Dec",
+          "deals": [
+            {
+              "city": "Milan",
+              "country": "Italy",
+              "code": "BGY",
+              "depart_date": "2026-12-05",
+              "return_date": "2026-12-08",
+              "nights": 3,
+              "price": 41.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 19.99,
+              "ret_fare_eur": 21.99,
+              "out_flight": "FR4038",
+              "out_time": "21:00",
+              "ret_flight": "FR4037",
+              "ret_time": "10:20",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-05&dateIn=2026-12-08&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=BGY&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-05&tpEndDate=2026-12-08&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=BGY",
+              "checked_at": "2026-11-16T07:07:00Z",
+              "checked_at_dublin": "16 Nov 2026, 07:07",
+              "matched_shortlist": false,
+              "trip_type": "weekend",
+              "stale": false,
+              "origin_airport": "DUB"
+            },
+            {
+              "city": "Milan",
+              "country": "Italy",
+              "code": "MXP",
+              "depart_date": "2026-12-05",
+              "return_date": "2026-12-08",
+              "nights": 3,
+              "price": 44.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 24.99,
+              "ret_fare_eur": 19.99,
+              "out_flight": "FR7799",
+              "out_time": "18:30",
+              "ret_flight": "FR1455",
+              "ret_time": "14:20",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-05&dateIn=2026-12-08&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=MXP&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-05&tpEndDate=2026-12-08&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=MXP",
+              "checked_at": "2026-11-16T07:17:00Z",
+              "checked_at_dublin": "16 Nov 2026, 07:17",
+              "matched_shortlist": false,
+              "trip_type": "weekend",
+              "stale": false,
+              "origin_airport": "DUB",
+              "airport_label": "Malpensa"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-06",
+          "return_date": "2026-12-10",
+          "nights": 4,
+          "label": "Sun 06 Dec – Thu 10 Dec",
+          "deals": [
+            {
+              "city": "Barcelona",
+              "country": "Spain",
+              "code": "BCN",
+              "depart_date": "2026-12-06",
+              "return_date": "2026-12-10",
+              "nights": 4,
+              "price": 41.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 25.99,
+              "ret_fare_eur": 15.99,
+              "out_flight": "FR6875",
+              "out_time": "06:05",
+              "ret_flight": "FR3976",
+              "ret_time": "06:40",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-06&dateIn=2026-12-10&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=BCN&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-06&tpEndDate=2026-12-10&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=BCN",
+              "checked_at": "2026-11-16T07:05:00Z",
+              "checked_at_dublin": "16 Nov 2026, 07:05",
+              "matched_shortlist": false,
+              "trip_type": "weekend",
+              "stale": false,
+              "origin_airport": "DUB",
+              "seats_note": "return: 1 seat left"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-08",
+          "return_date": "2026-12-10",
+          "nights": 2,
+          "label": "Tue 08 Dec – Thu 10 Dec",
+          "deals": [
+            {
+              "city": "Bristol",
+              "country": "England",
+              "code": "BRS",
+              "depart_date": "2026-12-08",
+              "return_date": "2026-12-10",
+              "nights": 2,
+              "price": 30.16,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 15.17,
+              "ret_fare_eur": 14.99,
+              "out_flight": "FR504",
+              "out_time": "08:30",
+              "ret_flight": "FR509",
+              "ret_time": "09:30",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-08&dateIn=2026-12-10&isConnectedFlight=false&isReturn=true&discount=0&originIata=DUB&destinationIata=BRS",
+              "checked_at": "2026-11-16T05:47:01Z",
+              "checked_at_dublin": "16 Nov 2026, 05:47",
+              "matched_shortlist": false,
+              "trip_type": "weekend",
+              "stale": false,
+              "origin_airport": "DUB"
+            },
+            {
+              "city": "Brussels",
+              "country": "Belgium",
+              "code": "BRU",
+              "depart_date": "2026-12-08",
+              "return_date": "2026-12-10",
+              "nights": 2,
+              "price": 43.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 21.99,
+              "ret_fare_eur": 21.99,
+              "out_flight": "FR1452",
+              "out_time": "14:35",
+              "ret_flight": "FR658",
+              "ret_time": "09:55",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-08&dateIn=2026-12-10&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=BRU&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-08&tpEndDate=2026-12-10&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=BRU",
+              "checked_at": "2026-11-16T07:13:00Z",
+              "checked_at_dublin": "16 Nov 2026, 07:13",
+              "matched_shortlist": false,
+              "trip_type": "weekend",
+              "stale": false,
+              "origin_airport": "DUB",
+              "airport_label": "Zaventem"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-10",
+          "return_date": "2026-12-12",
+          "nights": 2,
+          "label": "Thu 10 Dec – Sat 12 Dec",
+          "deals": [
+            {
+              "city": "Brussels",
+              "country": "Belgium",
+              "code": "CRL",
+              "depart_date": "2026-12-10",
+              "return_date": "2026-12-12",
+              "nights": 2,
+              "price": 34.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 14.99,
+              "ret_fare_eur": 19.99,
+              "out_flight": "FR46",
+              "out_time": "13:30",
+              "ret_flight": "FR47",
+              "ret_time": "18:50",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-10&dateIn=2026-12-12&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=CRL&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-10&tpEndDate=2026-12-12&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=CRL",
+              "checked_at": "2026-11-16T06:47:00Z",
+              "checked_at_dublin": "16 Nov 2026, 06:47",
+              "matched_shortlist": false,
+              "trip_type": "weekend",
+              "stale": false,
+              "origin_airport": "DUB"
+            },
+            {
+              "city": "Pisa",
+              "country": "Italy",
+              "code": "PSA",
+              "depart_date": "2026-12-10",
+              "return_date": "2026-12-12",
+              "nights": 2,
+              "price": 44.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 24.99,
+              "ret_fare_eur": 19.99,
+              "out_flight": "FR5021",
+              "out_time": "06:35",
+              "ret_flight": "FR5020",
+              "ret_time": "13:50",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-10&dateIn=2026-12-12&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=PSA&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-10&tpEndDate=2026-12-12&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=PSA",
+              "checked_at": "2026-11-16T07:17:00Z",
+              "checked_at_dublin": "16 Nov 2026, 07:17",
+              "matched_shortlist": false,
+              "trip_type": "weekend",
+              "stale": false,
+              "origin_airport": "DUB",
+              "seats_note": "return: 5 seats left"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-10",
+          "return_date": "2026-12-14",
+          "nights": 4,
+          "label": "Thu 10 Dec – Mon 14 Dec",
+          "deals": [
+            {
+              "city": "Lanzarote",
+              "country": "Spain",
+              "code": "ACE",
+              "depart_date": "2026-12-10",
+              "return_date": "2026-12-14",
+              "nights": 4,
+              "price": 43.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 18.99,
+              "ret_fare_eur": 24.99,
+              "out_flight": "FR5910",
+              "out_time": "14:50",
+              "ret_flight": "FR7200",
+              "ret_time": "07:55",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-10&dateIn=2026-12-14&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=ACE&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-10&tpEndDate=2026-12-14&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=ACE",
+              "checked_at": "2026-11-16T07:13:00Z",
+              "checked_at_dublin": "16 Nov 2026, 07:13",
+              "matched_shortlist": false,
+              "trip_type": "weekend",
+              "stale": false,
+              "origin_airport": "DUB",
+              "seats_note": "return: 1 seat left"
             }
           ]
         },
@@ -2151,7 +3144,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:05",
               "matched_shortlist": false,
               "trip_type": "weekend",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "4 seats left outbound"
             },
@@ -2179,9 +3172,45 @@
               "checked_at_dublin": "14 Nov 2026, 00:19",
               "matched_shortlist": true,
               "trip_type": "weekend",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "Outbound: 1 seats left"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-13",
+          "return_date": "2026-12-17",
+          "nights": 4,
+          "label": "Sun 13 Dec – Thu 17 Dec",
+          "deals": [
+            {
+              "city": "Faro",
+              "country": "Portugal",
+              "code": "FAO",
+              "depart_date": "2026-12-13",
+              "return_date": "2026-12-17",
+              "nights": 4,
+              "price": 38.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 19.99,
+              "ret_fare_eur": 18.99,
+              "out_flight": "FR7030",
+              "out_time": "07:00",
+              "ret_flight": "FR7031",
+              "ret_time": "09:20",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-13&dateIn=2026-12-17&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=FAO&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-13&tpEndDate=2026-12-17&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=FAO",
+              "checked_at": "2026-11-16T06:55:00Z",
+              "checked_at_dublin": "16 Nov 2026, 06:55",
+              "matched_shortlist": false,
+              "trip_type": "weekend",
+              "stale": false,
+              "origin_airport": "DUB",
+              "seats_note": "return: 5 seats left"
             }
           ]
         },
@@ -2215,7 +3244,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:09",
               "matched_shortlist": false,
               "trip_type": "weekend",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB"
             }
           ]
@@ -2233,26 +3262,97 @@
               "depart_date": "2026-12-16",
               "return_date": "2026-12-18",
               "nights": 2,
-              "price": 43.09,
+              "price": 41.98,
               "stops": 0,
               "total_time": "—",
               "airlines": "Ryanair",
               "source": "manual",
               "fare_label": "from, no bags",
-              "out_fare_eur": 26.1,
+              "out_fare_eur": 24.99,
               "ret_fare_eur": 16.99,
               "out_flight": "FR884",
               "out_time": "14:20",
               "ret_flight": "FR7129",
               "ret_time": "20:35",
               "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-16&dateIn=2026-12-18&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=FUE&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-16&tpEndDate=2026-12-18&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=FUE",
-              "checked_at": "2026-11-13T23:10:00Z",
-              "checked_at_dublin": "13 Nov 2026, 23:10",
-              "matched_shortlist": true,
+              "checked_at": "2026-11-16T07:07:00Z",
+              "checked_at_dublin": "16 Nov 2026, 07:07",
+              "matched_shortlist": false,
               "trip_type": "weekend",
               "stale": false,
               "origin_airport": "DUB",
-              "seats_note": "Return: 2 seats left at this price"
+              "seats_note": "return: 1 seat left"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-17",
+          "return_date": "2026-12-21",
+          "nights": 4,
+          "label": "Thu 17 Dec – Mon 21 Dec",
+          "deals": [
+            {
+              "city": "Alicante",
+              "country": "Spain",
+              "code": "ALC",
+              "depart_date": "2026-12-17",
+              "return_date": "2026-12-21",
+              "nights": 4,
+              "price": 41.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 24.99,
+              "ret_fare_eur": 16.99,
+              "out_flight": "FR261",
+              "out_time": "09:05",
+              "ret_flight": "FR7063",
+              "ret_time": "22:15",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-17&dateIn=2026-12-21&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=ALC&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-17&tpEndDate=2026-12-21&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=ALC",
+              "checked_at": "2026-11-16T07:05:00Z",
+              "checked_at_dublin": "16 Nov 2026, 07:05",
+              "matched_shortlist": false,
+              "trip_type": "weekend",
+              "stale": false,
+              "origin_airport": "DUB",
+              "seats_note": "return: 3 seats left"
+            }
+          ]
+        },
+        {
+          "depart_date": "2027-01-08",
+          "return_date": "2027-01-11",
+          "nights": 3,
+          "label": "Fri 08 Jan – Mon 11 Jan",
+          "deals": [
+            {
+              "city": "Luxembourg",
+              "country": "Luxembourg",
+              "code": "LUX",
+              "depart_date": "2027-01-08",
+              "return_date": "2027-01-11",
+              "nights": 3,
+              "price": 43.78,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 23.79,
+              "ret_fare_eur": 19.99,
+              "out_flight": "FR1948",
+              "out_time": "13:40",
+              "ret_flight": "FR1949",
+              "ret_time": "15:55",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2027-01-08&dateIn=2027-01-11&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=LUX&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2027-01-08&tpEndDate=2027-01-11&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=LUX",
+              "checked_at": "2026-11-16T07:11:00Z",
+              "checked_at_dublin": "16 Nov 2026, 07:11",
+              "matched_shortlist": false,
+              "trip_type": "weekend",
+              "stale": false,
+              "origin_airport": "DUB"
             }
           ]
         },
@@ -2286,7 +3386,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:18",
               "matched_shortlist": true,
               "trip_type": "weekend",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "Return: 4 seats left"
             }
@@ -2322,7 +3422,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:06",
               "matched_shortlist": true,
               "trip_type": "weekend",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "3 seats left return; Malta Air"
             }
@@ -2358,20 +3458,279 @@
               "checked_at_dublin": "14 Nov 2026, 00:07",
               "matched_shortlist": true,
               "trip_type": "weekend",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "5 seats left out, 3 return"
+            }
+          ]
+        },
+        {
+          "depart_date": "2027-01-26",
+          "return_date": "2027-01-30",
+          "nights": 4,
+          "label": "Tue 26 Jan – Sat 30 Jan",
+          "deals": [
+            {
+              "city": "Copenhagen",
+              "country": "Denmark",
+              "code": "CPH",
+              "depart_date": "2027-01-26",
+              "return_date": "2027-01-30",
+              "nights": 4,
+              "price": 45.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 20.99,
+              "ret_fare_eur": 24.99,
+              "out_flight": "FR632",
+              "out_time": "13:30",
+              "ret_flight": "FR5071",
+              "ret_time": "06:10",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2027-01-26&dateIn=2027-01-30&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=CPH&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2027-01-26&tpEndDate=2027-01-30&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=CPH",
+              "checked_at": "2026-11-16T07:21:00Z",
+              "checked_at_dublin": "16 Nov 2026, 07:21",
+              "matched_shortlist": false,
+              "trip_type": "weekend",
+              "stale": false,
+              "origin_airport": "DUB",
+              "seats_note": "return: 3 seats left"
             }
           ]
         }
       ],
       "week_boards": [
         {
+          "depart_date": "2026-11-23",
+          "return_date": "2026-11-30",
+          "nights": 7,
+          "label": "Mon 23 Nov – Mon 30 Nov",
+          "deals": [
+            {
+              "city": "Glasgow",
+              "country": "Scotland",
+              "code": "GLA",
+              "depart_date": "2026-11-23",
+              "return_date": "2026-11-30",
+              "nights": 7,
+              "price": 29.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 14.99,
+              "ret_fare_eur": 14.99,
+              "out_flight": "FR5563",
+              "out_time": "06:25",
+              "ret_flight": "FR5150",
+              "ret_time": "22:40",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-11-23&dateIn=2026-11-30&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=GLA&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-11-23&tpEndDate=2026-11-30&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=GLA",
+              "checked_at": "2026-11-16T06:35:00Z",
+              "checked_at_dublin": "16 Nov 2026, 06:35",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "DUB"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-01",
+          "return_date": "2026-12-08",
+          "nights": 7,
+          "label": "Tue 01 Dec – Tue 08 Dec",
+          "deals": [
+            {
+              "city": "London",
+              "country": "England",
+              "code": "STN",
+              "depart_date": "2026-12-01",
+              "return_date": "2026-12-08",
+              "nights": 7,
+              "price": 29.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 14.99,
+              "ret_fare_eur": 14.99,
+              "out_flight": "FR204",
+              "out_time": "12:45",
+              "ret_flight": "FR205",
+              "ret_time": "14:30",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-01&dateIn=2026-12-08&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=STN&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-01&tpEndDate=2026-12-08&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=STN",
+              "checked_at": "2026-11-16T06:41:00Z",
+              "checked_at_dublin": "16 Nov 2026, 06:41",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "DUB"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-02",
+          "return_date": "2026-12-09",
+          "nights": 7,
+          "label": "Wed 02 Dec – Wed 09 Dec",
+          "deals": [
+            {
+              "city": "Bristol",
+              "country": "England",
+              "code": "BRS",
+              "depart_date": "2026-12-02",
+              "return_date": "2026-12-09",
+              "nights": 7,
+              "price": 29.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 14.99,
+              "ret_fare_eur": 14.99,
+              "out_flight": "FR504",
+              "out_time": "09:35",
+              "ret_flight": "FR507",
+              "ret_time": "19:25",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-02&dateIn=2026-12-09&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=BRS&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-02&tpEndDate=2026-12-09&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=BRS",
+              "checked_at": "2026-11-16T06:34:00Z",
+              "checked_at_dublin": "16 Nov 2026, 06:34",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "DUB"
+            },
+            {
+              "city": "Liverpool",
+              "country": "England",
+              "code": "LPL",
+              "depart_date": "2026-12-02",
+              "return_date": "2026-12-09",
+              "nights": 7,
+              "price": 29.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 14.99,
+              "ret_fare_eur": 14.99,
+              "out_flight": "FR3144",
+              "out_time": "22:50",
+              "ret_flight": "FR443",
+              "ret_time": "21:50",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-02&dateIn=2026-12-09&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=LPL&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-02&tpEndDate=2026-12-09&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=LPL",
+              "checked_at": "2026-11-16T06:36:00Z",
+              "checked_at_dublin": "16 Nov 2026, 06:36",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "DUB"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-02",
+          "return_date": "2026-12-10",
+          "nights": 8,
+          "label": "Wed 02 Dec – Thu 10 Dec",
+          "deals": [
+            {
+              "city": "Bristol",
+              "country": "England",
+              "code": "BRS",
+              "depart_date": "2026-12-02",
+              "return_date": "2026-12-10",
+              "nights": 8,
+              "price": 29.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 14.99,
+              "ret_fare_eur": 14.99,
+              "out_flight": "FR504",
+              "out_time": "09:35",
+              "ret_flight": "FR509",
+              "ret_time": "09:30",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-02&dateIn=2026-12-10&isConnectedFlight=false&isReturn=true&discount=0&originIata=DUB&destinationIata=BRS",
+              "checked_at": "2026-11-16T05:47:01Z",
+              "checked_at_dublin": "16 Nov 2026, 05:47",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "DUB"
+            }
+          ]
+        },
+        {
           "depart_date": "2026-12-03",
           "return_date": "2026-12-10",
           "nights": 7,
           "label": "Thu 03 Dec – Thu 10 Dec",
           "deals": [
+            {
+              "city": "Barcelona",
+              "country": "Spain",
+              "code": "BCN",
+              "depart_date": "2026-12-03",
+              "return_date": "2026-12-10",
+              "nights": 7,
+              "price": 30.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 14.99,
+              "ret_fare_eur": 15.99,
+              "out_flight": "FR6395",
+              "out_time": "21:15",
+              "ret_flight": "FR3976",
+              "ret_time": "06:40",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-03&dateIn=2026-12-10&isConnectedFlight=false&isReturn=true&discount=0&originIata=DUB&destinationIata=BCN",
+              "checked_at": "2026-11-16T05:47:01Z",
+              "checked_at_dublin": "16 Nov 2026, 05:47",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "DUB",
+              "seats_note": "out: 5 seats left; return: 1 seat left"
+            },
+            {
+              "city": "Madrid",
+              "country": "Spain",
+              "code": "MAD",
+              "depart_date": "2026-12-03",
+              "return_date": "2026-12-10",
+              "nights": 7,
+              "price": 37.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 15.99,
+              "ret_fare_eur": 21.99,
+              "out_flight": "FR7156",
+              "out_time": "20:50",
+              "ret_flight": "FR494",
+              "ret_time": "16:40",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-03&dateIn=2026-12-10&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=MAD&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-03&tpEndDate=2026-12-10&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=MAD",
+              "checked_at": "2026-11-16T06:51:00Z",
+              "checked_at_dublin": "16 Nov 2026, 06:51",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "DUB",
+              "seats_note": "return: 3 seats left"
+            },
             {
               "city": "Lanzarote",
               "country": "Spain",
@@ -2396,9 +3755,180 @@
               "checked_at_dublin": "14 Nov 2026, 00:09",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "5 seats left on return"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-04",
+          "return_date": "2026-12-12",
+          "nights": 8,
+          "label": "Fri 04 Dec – Sat 12 Dec",
+          "deals": [
+            {
+              "city": "Birmingham",
+              "country": "England",
+              "code": "BHX",
+              "depart_date": "2026-12-04",
+              "return_date": "2026-12-12",
+              "nights": 8,
+              "price": 30.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 14.99,
+              "ret_fare_eur": 15.99,
+              "out_flight": "FR666",
+              "out_time": "06:00",
+              "ret_flight": "FR671",
+              "ret_time": "23:15",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-04&dateIn=2026-12-12&isConnectedFlight=false&isReturn=true&discount=0&originIata=DUB&destinationIata=BHX",
+              "checked_at": "2026-11-16T05:47:01Z",
+              "checked_at_dublin": "16 Nov 2026, 05:47",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "DUB",
+              "seats_note": "out: 1 seat left; return: 5 seats left"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-05",
+          "return_date": "2026-12-12",
+          "nights": 7,
+          "label": "Sat 05 Dec – Sat 12 Dec",
+          "deals": [
+            {
+              "city": "Brussels",
+              "country": "Belgium",
+              "code": "CRL",
+              "depart_date": "2026-12-05",
+              "return_date": "2026-12-12",
+              "nights": 7,
+              "price": 39.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 19.99,
+              "ret_fare_eur": 19.99,
+              "out_flight": "FR46",
+              "out_time": "15:45",
+              "ret_flight": "FR47",
+              "ret_time": "18:50",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-05&dateIn=2026-12-12&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=CRL&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-05&tpEndDate=2026-12-12&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=CRL",
+              "checked_at": "2026-11-16T06:59:00Z",
+              "checked_at_dublin": "16 Nov 2026, 06:59",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "DUB"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-05",
+          "return_date": "2026-12-13",
+          "nights": 8,
+          "label": "Sat 05 Dec – Sun 13 Dec",
+          "deals": [
+            {
+              "city": "Milan",
+              "country": "Italy",
+              "code": "BGY",
+              "depart_date": "2026-12-05",
+              "return_date": "2026-12-13",
+              "nights": 8,
+              "price": 35.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 19.99,
+              "ret_fare_eur": 15.99,
+              "out_flight": "FR4038",
+              "out_time": "21:00",
+              "ret_flight": "FR9429",
+              "ret_time": "11:15",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-05&dateIn=2026-12-13&isConnectedFlight=false&isReturn=true&discount=0&originIata=DUB&destinationIata=BGY",
+              "checked_at": "2026-11-16T05:47:01Z",
+              "checked_at_dublin": "16 Nov 2026, 05:47",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "DUB",
+              "seats_note": "out: 3 seats left; return: 2 seats left"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-06",
+          "return_date": "2026-12-12",
+          "nights": 6,
+          "label": "Sun 06 Dec – Sat 12 Dec",
+          "deals": [
+            {
+              "city": "Faro",
+              "country": "Portugal",
+              "code": "FAO",
+              "depart_date": "2026-12-06",
+              "return_date": "2026-12-12",
+              "nights": 6,
+              "price": 35.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 17.99,
+              "ret_fare_eur": 17.99,
+              "out_flight": "FR7030",
+              "out_time": "07:00",
+              "ret_flight": "FR7031",
+              "ret_time": "09:40",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-06&dateIn=2026-12-12&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=FAO&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-06&tpEndDate=2026-12-12&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=FAO",
+              "checked_at": "2026-11-16T06:47:00Z",
+              "checked_at_dublin": "16 Nov 2026, 06:47",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "DUB",
+              "seats_note": "return: 1 seat left"
+            },
+            {
+              "city": "Porto",
+              "country": "Portugal",
+              "code": "OPO",
+              "depart_date": "2026-12-06",
+              "return_date": "2026-12-12",
+              "nights": 6,
+              "price": 38.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 18.99,
+              "ret_fare_eur": 19.99,
+              "out_flight": "FR7078",
+              "out_time": "06:30",
+              "ret_flight": "FR7073",
+              "ret_time": "19:50",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-06&dateIn=2026-12-12&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=OPO&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-06&tpEndDate=2026-12-12&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=OPO",
+              "checked_at": "2026-11-16T06:55:00Z",
+              "checked_at_dublin": "16 Nov 2026, 06:55",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "DUB",
+              "seats_note": "return: 5 seats left"
             }
           ]
         },
@@ -2432,7 +3962,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:09",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB"
             }
           ]
@@ -2443,6 +3973,33 @@
           "nights": 7,
           "label": "Thu 10 Dec – Thu 17 Dec",
           "deals": [
+            {
+              "city": "Pisa",
+              "country": "Italy",
+              "code": "PSA",
+              "depart_date": "2026-12-10",
+              "return_date": "2026-12-17",
+              "nights": 7,
+              "price": 40.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 24.99,
+              "ret_fare_eur": 15.99,
+              "out_flight": "FR5021",
+              "out_time": "06:35",
+              "ret_flight": "FR5020",
+              "ret_time": "10:45",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-10&dateIn=2026-12-17&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=PSA&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-10&tpEndDate=2026-12-17&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=PSA",
+              "checked_at": "2026-11-16T07:01:00Z",
+              "checked_at_dublin": "16 Nov 2026, 07:01",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "DUB"
+            },
             {
               "city": "Agadir",
               "country": "Morocco",
@@ -2467,9 +4024,80 @@
               "checked_at_dublin": "13 Nov 2026, 23:12",
               "matched_shortlist": false,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "Return 3 seats left"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-10",
+          "return_date": "2026-12-18",
+          "nights": 8,
+          "label": "Thu 10 Dec – Fri 18 Dec",
+          "deals": [
+            {
+              "city": "Fuerteventura",
+              "country": "Spain",
+              "code": "FUE",
+              "depart_date": "2026-12-10",
+              "return_date": "2026-12-18",
+              "nights": 8,
+              "price": 41.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 24.99,
+              "ret_fare_eur": 16.99,
+              "out_flight": "FR884",
+              "out_time": "15:05",
+              "ret_flight": "FR7129",
+              "ret_time": "20:35",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-10&dateIn=2026-12-18&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=FUE&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-10&tpEndDate=2026-12-18&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=FUE",
+              "checked_at": "2026-11-16T07:07:00Z",
+              "checked_at_dublin": "16 Nov 2026, 07:07",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "DUB",
+              "seats_note": "return: 1 seat left"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-11",
+          "return_date": "2026-12-17",
+          "nights": 6,
+          "label": "Fri 11 Dec – Thu 17 Dec",
+          "deals": [
+            {
+              "city": "Venice",
+              "country": "Italy",
+              "code": "VCE",
+              "depart_date": "2026-12-11",
+              "return_date": "2026-12-17",
+              "nights": 6,
+              "price": 38.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 21.99,
+              "ret_fare_eur": 16.99,
+              "out_flight": "FR831",
+              "out_time": "19:00",
+              "ret_flight": "FR830",
+              "ret_time": "21:45",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-11&dateIn=2026-12-17&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=VCE&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-11&tpEndDate=2026-12-17&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=VCE",
+              "checked_at": "2026-11-16T06:57:00Z",
+              "checked_at_dublin": "16 Nov 2026, 06:57",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "DUB"
             }
           ]
         },
@@ -2503,7 +4131,7 @@
               "checked_at_dublin": "13 Nov 2026, 23:08",
               "matched_shortlist": true,
               "trip_type": "week",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "Return: 2 seats left at this price"
             }
@@ -2522,26 +4150,98 @@
               "depart_date": "2026-12-15",
               "return_date": "2026-12-21",
               "nights": 6,
-              "price": 44.14,
+              "price": 41.98,
               "stops": 0,
               "total_time": "—",
               "airlines": "Ryanair",
               "source": "manual",
               "fare_label": "from, no bags",
-              "out_fare_eur": 27.15,
+              "out_fare_eur": 24.99,
               "ret_fare_eur": 16.99,
               "out_flight": "FR261",
               "out_time": "15:05",
               "ret_flight": "FR7063",
               "ret_time": "22:15",
               "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-15&dateIn=2026-12-21&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=ALC&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-15&tpEndDate=2026-12-21&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=ALC",
-              "checked_at": "2026-11-13T23:10:00Z",
-              "checked_at_dublin": "13 Nov 2026, 23:10",
-              "matched_shortlist": true,
+              "checked_at": "2026-11-16T07:05:00Z",
+              "checked_at_dublin": "16 Nov 2026, 07:05",
+              "matched_shortlist": false,
               "trip_type": "week",
               "stale": false,
               "origin_airport": "DUB",
-              "seats_note": "Return: 1 seat left at this price"
+              "seats_note": "return: 3 seats left"
+            }
+          ]
+        },
+        {
+          "depart_date": "2026-12-15",
+          "return_date": "2026-12-22",
+          "nights": 7,
+          "label": "Tue 15 Dec – Tue 22 Dec",
+          "deals": [
+            {
+              "city": "Paris",
+              "country": "France",
+              "code": "BVA",
+              "depart_date": "2026-12-15",
+              "return_date": "2026-12-22",
+              "nights": 7,
+              "price": 33.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 16.99,
+              "ret_fare_eur": 16.99,
+              "out_flight": "FR24",
+              "out_time": "18:20",
+              "ret_flight": "FR25",
+              "ret_time": "21:20",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-15&dateIn=2026-12-22&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=BVA&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-15&tpEndDate=2026-12-22&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=BVA",
+              "checked_at": "2026-11-16T06:45:00Z",
+              "checked_at_dublin": "16 Nov 2026, 06:45",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "DUB",
+              "airport_label": "Beauvais"
+            }
+          ]
+        },
+        {
+          "depart_date": "2027-01-01",
+          "return_date": "2027-01-09",
+          "nights": 8,
+          "label": "Fri 01 Jan – Sat 09 Jan",
+          "deals": [
+            {
+              "city": "Edinburgh",
+              "country": "Scotland",
+              "code": "EDI",
+              "depart_date": "2027-01-01",
+              "return_date": "2027-01-09",
+              "nights": 8,
+              "price": 36.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 19.99,
+              "ret_fare_eur": 16.99,
+              "out_flight": "FR822",
+              "out_time": "05:55",
+              "ret_flight": "FR813",
+              "ret_time": "06:00",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2027-01-01&dateIn=2027-01-09&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=EDI&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2027-01-01&tpEndDate=2027-01-09&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=EDI",
+              "checked_at": "2026-11-16T06:49:00Z",
+              "checked_at_dublin": "16 Nov 2026, 06:49",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "DUB",
+              "seats_note": "return: 3 seats left"
             }
           ]
         },
@@ -2558,26 +4258,171 @@
               "depart_date": "2027-01-09",
               "return_date": "2027-01-16",
               "nights": 7,
-              "price": 40.98,
+              "price": 41.98,
               "stops": 0,
               "total_time": "—",
               "airlines": "Ryanair",
               "source": "manual",
               "fare_label": "from, no bags",
-              "out_fare_eur": 20.99,
+              "out_fare_eur": 21.99,
               "ret_fare_eur": 19.99,
               "out_flight": "FR7054",
               "out_time": "19:50",
               "ret_flight": "FR7047",
               "ret_time": "06:10",
               "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2027-01-09&dateIn=2027-01-16&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=AGP&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2027-01-09&tpEndDate=2027-01-16&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=AGP",
-              "checked_at": "2026-11-13T23:10:00Z",
-              "checked_at_dublin": "13 Nov 2026, 23:10",
-              "matched_shortlist": true,
+              "checked_at": "2026-11-16T07:03:00Z",
+              "checked_at_dublin": "16 Nov 2026, 07:03",
+              "matched_shortlist": false,
               "trip_type": "week",
               "stale": false,
               "origin_airport": "DUB",
-              "seats_note": "Outbound 3 seats left; return 1 seat left"
+              "seats_note": "return: 4 seats left"
+            }
+          ]
+        },
+        {
+          "depart_date": "2027-01-14",
+          "return_date": "2027-01-20",
+          "nights": 6,
+          "label": "Thu 14 Jan – Wed 20 Jan",
+          "deals": [
+            {
+              "city": "Brussels",
+              "country": "Belgium",
+              "code": "BRU",
+              "depart_date": "2027-01-14",
+              "return_date": "2027-01-20",
+              "nights": 6,
+              "price": 42.38,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 15.99,
+              "ret_fare_eur": 26.39,
+              "out_flight": "FR1452",
+              "out_time": "14:35",
+              "ret_flight": "FR1453",
+              "ret_time": "17:30",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2027-01-14&dateIn=2027-01-20&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=BRU&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2027-01-14&tpEndDate=2027-01-20&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=BRU",
+              "checked_at": "2026-11-16T07:09:00Z",
+              "checked_at_dublin": "16 Nov 2026, 07:09",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "DUB",
+              "airport_label": "Zaventem"
+            }
+          ]
+        },
+        {
+          "depart_date": "2027-01-17",
+          "return_date": "2027-01-24",
+          "nights": 7,
+          "label": "Sun 17 Jan – Sun 24 Jan",
+          "deals": [
+            {
+              "city": "Luxembourg",
+              "country": "Luxembourg",
+              "code": "LUX",
+              "depart_date": "2027-01-17",
+              "return_date": "2027-01-24",
+              "nights": 7,
+              "price": 41.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 21.99,
+              "ret_fare_eur": 19.99,
+              "out_flight": "FR1948",
+              "out_time": "12:25",
+              "ret_flight": "FR1949",
+              "ret_time": "15:50",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2027-01-17&dateIn=2027-01-24&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=LUX&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2027-01-17&tpEndDate=2027-01-24&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=LUX",
+              "checked_at": "2026-11-16T07:09:00Z",
+              "checked_at_dublin": "16 Nov 2026, 07:09",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "DUB",
+              "seats_note": "return: 3 seats left"
+            }
+          ]
+        },
+        {
+          "depart_date": "2027-01-21",
+          "return_date": "2027-01-27",
+          "nights": 6,
+          "label": "Thu 21 Jan – Wed 27 Jan",
+          "deals": [
+            {
+              "city": "Copenhagen",
+              "country": "Denmark",
+              "code": "CPH",
+              "depart_date": "2027-01-21",
+              "return_date": "2027-01-27",
+              "nights": 6,
+              "price": 43.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 21.99,
+              "ret_fare_eur": 21.99,
+              "out_flight": "FR632",
+              "out_time": "20:00",
+              "ret_flight": "FR633",
+              "ret_time": "11:25",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2027-01-21&dateIn=2027-01-27&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=CPH&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2027-01-21&tpEndDate=2027-01-27&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=CPH",
+              "checked_at": "2026-11-16T07:13:00Z",
+              "checked_at_dublin": "16 Nov 2026, 07:13",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "DUB",
+              "seats_note": "return: 5 seats left"
+            }
+          ]
+        },
+        {
+          "depart_date": "2027-01-23",
+          "return_date": "2027-01-30",
+          "nights": 7,
+          "label": "Sat 23 Jan – Sat 30 Jan",
+          "deals": [
+            {
+              "city": "Milan",
+              "country": "Italy",
+              "code": "MXP",
+              "depart_date": "2027-01-23",
+              "return_date": "2027-01-30",
+              "nights": 7,
+              "price": 43.98,
+              "stops": 0,
+              "total_time": "—",
+              "airlines": "Ryanair",
+              "source": "manual",
+              "fare_label": "from, no bags",
+              "out_fare_eur": 27.99,
+              "ret_fare_eur": 15.99,
+              "out_flight": "FR7799",
+              "out_time": "18:30",
+              "ret_flight": "FR7800",
+              "ret_time": "22:25",
+              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2027-01-23&dateIn=2027-01-30&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=MXP&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2027-01-23&tpEndDate=2027-01-30&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=MXP",
+              "checked_at": "2026-11-16T07:15:00Z",
+              "checked_at_dublin": "16 Nov 2026, 07:15",
+              "matched_shortlist": false,
+              "trip_type": "week",
+              "stale": false,
+              "origin_airport": "DUB",
+              "airport_label": "Malpensa",
+              "seats_note": "return: 3 seats left"
             }
           ]
         }
@@ -2613,46 +4458,9 @@
               "checked_at_dublin": "14 Nov 2026, 00:09",
               "matched_shortlist": true,
               "trip_type": "city_break",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "1 seat left on outbound; Malta Air"
-            }
-          ],
-          "trip_type": "city_break"
-        },
-        {
-          "depart_date": "2026-12-03",
-          "return_date": "2026-12-10",
-          "nights": 7,
-          "label": "Thu 03 Dec – Thu 10 Dec",
-          "deals": [
-            {
-              "city": "Barcelona",
-              "country": "Spain",
-              "code": "BCN",
-              "depart_date": "2026-12-03",
-              "return_date": "2026-12-10",
-              "nights": 7,
-              "price": 36.98,
-              "stops": 0,
-              "total_time": "—",
-              "airlines": "Ryanair",
-              "source": "manual",
-              "fare_label": "from, no bags",
-              "out_fare_eur": 19.99,
-              "ret_fare_eur": 16.99,
-              "out_flight": "FR6395",
-              "out_time": "21:15",
-              "ret_flight": "FR3976",
-              "ret_time": "06:40",
-              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-03&dateIn=2026-12-10&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=BCN&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-03&tpEndDate=2026-12-10&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=BCN",
-              "checked_at": "2026-11-13T23:09:00Z",
-              "checked_at_dublin": "13 Nov 2026, 23:09",
-              "matched_shortlist": true,
-              "trip_type": "city_break",
-              "stale": false,
-              "origin_airport": "DUB",
-              "seats_note": "Outbound: 4 seats left at this price"
             }
           ],
           "trip_type": "city_break"
@@ -2663,34 +4471,6 @@
           "nights": 3,
           "label": "Sat 05 Dec – Tue 08 Dec",
           "deals": [
-            {
-              "city": "Milan",
-              "country": "Italy",
-              "code": "MXP",
-              "depart_date": "2026-12-05",
-              "return_date": "2026-12-08",
-              "nights": 3,
-              "price": 45.73,
-              "stops": 0,
-              "total_time": "—",
-              "airlines": "Ryanair",
-              "source": "manual",
-              "fare_label": "from, no bags",
-              "out_fare_eur": 24.99,
-              "ret_fare_eur": 20.74,
-              "out_flight": "FR7799",
-              "out_time": "18:30",
-              "ret_flight": "FR1455",
-              "ret_time": "14:20",
-              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-05&dateIn=2026-12-08&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=MXP&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-05&tpEndDate=2026-12-08&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=MXP",
-              "checked_at": "2026-11-13T23:11:00Z",
-              "checked_at_dublin": "13 Nov 2026, 23:11",
-              "matched_shortlist": true,
-              "trip_type": "3_night",
-              "stale": false,
-              "origin_airport": "DUB",
-              "airport_label": "Malpensa"
-            },
             {
               "city": "Madrid",
               "country": "Spain",
@@ -2715,7 +4495,7 @@
               "checked_at_dublin": "13 Nov 2026, 23:12",
               "matched_shortlist": false,
               "trip_type": "3_night",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "Outbound 1 seat left"
             }
@@ -2752,46 +4532,9 @@
               "checked_at_dublin": "13 Nov 2026, 23:08",
               "matched_shortlist": true,
               "trip_type": "city_break",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "airport_label": "Beauvais",
-              "seats_note": "Outbound 3 seats left; return 5 seats left"
-            }
-          ],
-          "trip_type": "city_break"
-        },
-        {
-          "depart_date": "2026-12-06",
-          "return_date": "2026-12-12",
-          "nights": 6,
-          "label": "Sun 06 Dec – Sat 12 Dec",
-          "deals": [
-            {
-              "city": "Porto",
-              "country": "Portugal",
-              "code": "OPO",
-              "depart_date": "2026-12-06",
-              "return_date": "2026-12-12",
-              "nights": 6,
-              "price": 40.98,
-              "stops": 0,
-              "total_time": "—",
-              "airlines": "Ryanair",
-              "source": "manual",
-              "fare_label": "from, no bags",
-              "out_fare_eur": 17.99,
-              "ret_fare_eur": 22.99,
-              "out_flight": "FR7078",
-              "out_time": "06:30",
-              "ret_flight": "FR7073",
-              "ret_time": "19:50",
-              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-06&dateIn=2026-12-12&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=OPO&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-06&tpEndDate=2026-12-12&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=OPO",
-              "checked_at": "2026-11-13T23:09:00Z",
-              "checked_at_dublin": "13 Nov 2026, 23:09",
-              "matched_shortlist": true,
-              "trip_type": "city_break",
-              "stale": false,
-              "origin_airport": "DUB",
               "seats_note": "Outbound 3 seats left; return 5 seats left"
             }
           ],
@@ -2827,46 +4570,9 @@
               "checked_at_dublin": "13 Nov 2026, 23:08",
               "matched_shortlist": true,
               "trip_type": "city_break",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "Outbound: 5 seats left at this price"
-            }
-          ],
-          "trip_type": "city_break"
-        },
-        {
-          "depart_date": "2026-12-10",
-          "return_date": "2026-12-17",
-          "nights": 7,
-          "label": "Thu 10 Dec – Thu 17 Dec",
-          "deals": [
-            {
-              "city": "Pisa",
-              "country": "Italy",
-              "code": "PSA",
-              "depart_date": "2026-12-10",
-              "return_date": "2026-12-17",
-              "nights": 7,
-              "price": 42.91,
-              "stops": 0,
-              "total_time": "—",
-              "airlines": "Ryanair",
-              "source": "manual",
-              "fare_label": "from, no bags",
-              "out_fare_eur": 26.92,
-              "ret_fare_eur": 15.99,
-              "out_flight": "FR5021",
-              "out_time": "06:35",
-              "ret_flight": "FR5020",
-              "ret_time": "10:45",
-              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-10&dateIn=2026-12-17&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=PSA&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-10&tpEndDate=2026-12-17&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=PSA",
-              "checked_at": "2026-11-13T23:10:00Z",
-              "checked_at_dublin": "13 Nov 2026, 23:10",
-              "matched_shortlist": true,
-              "trip_type": "city_break",
-              "stale": false,
-              "origin_airport": "DUB",
-              "seats_note": "Return: 1 seat left at this price"
             }
           ],
           "trip_type": "city_break"
@@ -2901,7 +4607,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:10",
               "matched_shortlist": true,
               "trip_type": "city_break",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "1 seat left each leg"
             }
@@ -2938,7 +4644,7 @@
               "checked_at_dublin": "13 Nov 2026, 23:12",
               "matched_shortlist": true,
               "trip_type": "christmas",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "Return: 2 seats left at this price"
             },
@@ -2966,7 +4672,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:06",
               "matched_shortlist": true,
               "trip_type": "christmas",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "1 seat left return"
             }
@@ -3003,7 +4709,7 @@
               "checked_at_dublin": "13 Nov 2026, 23:11",
               "matched_shortlist": true,
               "trip_type": "christmas",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB"
             }
           ],
@@ -3039,7 +4745,7 @@
               "checked_at_dublin": "13 Nov 2026, 23:09",
               "matched_shortlist": true,
               "trip_type": "christmas",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "airport_label": "Beauvais"
             }
@@ -3076,7 +4782,7 @@
               "checked_at_dublin": "13 Nov 2026, 23:15",
               "matched_shortlist": true,
               "trip_type": "christmas",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "airport_label": "Zaventem"
             }
@@ -3113,7 +4819,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:08",
               "matched_shortlist": true,
               "trip_type": "christmas",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "5 seats left return"
             }
@@ -3150,7 +4856,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:05",
               "matched_shortlist": true,
               "trip_type": "christmas",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB"
             }
           ],
@@ -3186,7 +4892,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:06",
               "matched_shortlist": true,
               "trip_type": "new_year",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "1 seat left outbound"
             }
@@ -3223,7 +4929,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:18",
               "matched_shortlist": false,
               "trip_type": "new_year",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB"
             }
           ],
@@ -3259,7 +4965,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:18",
               "matched_shortlist": true,
               "trip_type": "new_year",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "Return: 5 seats left"
             }
@@ -3296,7 +5002,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:15",
               "matched_shortlist": true,
               "trip_type": "new_year",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB"
             }
           ],
@@ -3332,7 +5038,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:19",
               "matched_shortlist": true,
               "trip_type": "new_year",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "Outbound: 1 seats left; return: 4 seats left"
             }
@@ -3345,34 +5051,6 @@
           "nights": 8,
           "label": "Fri 01 Jan – Sat 09 Jan",
           "deals": [
-            {
-              "city": "Edinburgh",
-              "country": "Scotland",
-              "code": "EDI",
-              "depart_date": "2027-01-01",
-              "return_date": "2027-01-09",
-              "nights": 8,
-              "price": 34.98,
-              "stops": 0,
-              "total_time": "—",
-              "airlines": "Ryanair",
-              "source": "manual",
-              "fare_label": "from, no bags",
-              "out_fare_eur": 19.99,
-              "ret_fare_eur": 14.99,
-              "out_flight": "FR814",
-              "out_time": "20:50",
-              "ret_flight": "FR813",
-              "ret_time": "06:00",
-              "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2027-01-01&dateIn=2027-01-09&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=DUB&destinationIata=EDI&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2027-01-01&tpEndDate=2027-01-09&tpDiscount=0&tpPromoCode=&tpOriginIata=DUB&tpDestinationIata=EDI",
-              "checked_at": "2026-11-13T23:08:00Z",
-              "checked_at_dublin": "13 Nov 2026, 23:08",
-              "matched_shortlist": true,
-              "trip_type": "new_year",
-              "stale": false,
-              "origin_airport": "DUB",
-              "seats_note": "5 seats left at this price each leg"
-            },
             {
               "city": "Milan",
               "country": "Italy",
@@ -3397,7 +5075,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:14",
               "matched_shortlist": true,
               "trip_type": "new_year",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB"
             }
           ],
@@ -3433,7 +5111,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:19",
               "matched_shortlist": true,
               "trip_type": "city_break",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "Return: 1 seats left"
             }
@@ -3470,7 +5148,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:18",
               "matched_shortlist": true,
               "trip_type": "city_break",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB"
             }
           ],
@@ -3506,7 +5184,7 @@
               "checked_at_dublin": "13 Nov 2026, 23:12",
               "matched_shortlist": true,
               "trip_type": "3_night",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "Outbound: 2 seats left at this price"
             }
@@ -3543,7 +5221,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:17",
               "matched_shortlist": true,
               "trip_type": "st_patricks",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "Outbound: 3 seats left; return: 5 seats left"
             }
@@ -3580,7 +5258,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:20",
               "matched_shortlist": true,
               "trip_type": "easter",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "Outbound: 5 seats left"
             }
@@ -3617,7 +5295,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:19",
               "matched_shortlist": true,
               "trip_type": "easter",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "Both legs: 5 seats left"
             }
@@ -3654,7 +5332,7 @@
               "checked_at_dublin": "14 Nov 2026, 00:20",
               "matched_shortlist": true,
               "trip_type": "easter",
-              "stale": false,
+              "stale": true,
               "origin_airport": "DUB",
               "seats_note": "Return: 5 seats left"
             }
@@ -3662,7 +5340,7 @@
           "trip_type": "easter"
         }
       ],
-      "scanned_utc": "2026-11-14T00:20:06Z"
+      "scanned_utc": "2026-11-16T07:21:00Z"
     }
   },
   "weekend_boards": [
@@ -3696,7 +5374,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:57",
           "matched_shortlist": true,
           "trip_type": "weekend",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "out 1 left; return 4 left"
         }
@@ -3715,25 +5393,61 @@
           "depart_date": "2026-12-04",
           "return_date": "2026-12-06",
           "nights": 2,
-          "price": 41.98,
+          "price": 42.98,
           "stops": 0,
           "total_time": "—",
           "airlines": "Ryanair",
           "source": "manual",
           "fare_label": "from, no bags",
           "out_fare_eur": 21.99,
-          "ret_fare_eur": 19.99,
+          "ret_fare_eur": 20.99,
           "out_flight": "FR361",
           "out_time": "18:15",
           "ret_flight": "FR362",
           "ret_time": "07:25",
           "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-04&dateIn=2026-12-06&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=FAO&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-04&tpEndDate=2026-12-06&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=FAO",
-          "checked_at": "2026-11-14T00:59:45Z",
-          "checked_at_dublin": "14 Nov 2026, 00:59",
-          "matched_shortlist": true,
+          "checked_at": "2026-11-16T07:11:00Z",
+          "checked_at_dublin": "16 Nov 2026, 07:11",
+          "matched_shortlist": false,
           "trip_type": "weekend",
           "stale": false,
           "origin_airport": "ORK"
+        }
+      ]
+    },
+    {
+      "depart_date": "2026-12-05",
+      "return_date": "2026-12-08",
+      "nights": 3,
+      "label": "Sat 05 Dec – Tue 08 Dec",
+      "deals": [
+        {
+          "city": "Manchester",
+          "country": "England",
+          "code": "MAN",
+          "depart_date": "2026-12-05",
+          "return_date": "2026-12-08",
+          "nights": 3,
+          "price": 29.98,
+          "stops": 0,
+          "total_time": "—",
+          "airlines": "Ryanair",
+          "source": "manual",
+          "fare_label": "from, no bags",
+          "out_fare_eur": 14.99,
+          "ret_fare_eur": 14.99,
+          "out_flight": "FR1862",
+          "out_time": "22:40",
+          "ret_flight": "FR767",
+          "ret_time": "06:55",
+          "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-05&dateIn=2026-12-08&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=MAN&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-05&tpEndDate=2026-12-08&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=MAN",
+          "checked_at": "2026-11-16T06:32:36Z",
+          "checked_at_dublin": "16 Nov 2026, 06:32",
+          "matched_shortlist": false,
+          "trip_type": "weekend",
+          "stale": false,
+          "origin_airport": "ORK",
+          "seats_note": "return: 2 seats left"
         }
       ]
     },
@@ -3767,7 +5481,7 @@
           "checked_at_dublin": "14 Nov 2026, 01:02",
           "matched_shortlist": false,
           "trip_type": "weekend",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "outbound fare card showed a whole-euro figure of 271; total is about 532.60"
         }
@@ -3803,9 +5517,115 @@
           "checked_at_dublin": "14 Nov 2026, 00:56",
           "matched_shortlist": true,
           "trip_type": "weekend",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "out 5 left; return 4 left"
+        }
+      ]
+    },
+    {
+      "depart_date": "2026-12-13",
+      "return_date": "2026-12-15",
+      "nights": 2,
+      "label": "Sun 13 Dec – Tue 15 Dec",
+      "deals": [
+        {
+          "city": "Lanzarote",
+          "country": "Spain",
+          "code": "ACE",
+          "depart_date": "2026-12-13",
+          "return_date": "2026-12-15",
+          "nights": 2,
+          "price": 41.98,
+          "stops": 0,
+          "total_time": "—",
+          "airlines": "Ryanair",
+          "source": "manual",
+          "fare_label": "from, no bags",
+          "out_fare_eur": 16.99,
+          "ret_fare_eur": 24.99,
+          "out_flight": "FR7725",
+          "out_time": "19:55",
+          "ret_flight": "FR7726",
+          "ret_time": "08:00",
+          "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-13&dateIn=2026-12-15&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=ACE&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-13&tpEndDate=2026-12-15&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=ACE",
+          "checked_at": "2026-11-16T07:03:00Z",
+          "checked_at_dublin": "16 Nov 2026, 07:03",
+          "matched_shortlist": false,
+          "trip_type": "weekend",
+          "stale": false,
+          "origin_airport": "ORK"
+        }
+      ]
+    },
+    {
+      "depart_date": "2026-12-13",
+      "return_date": "2026-12-16",
+      "nights": 3,
+      "label": "Sun 13 Dec – Wed 16 Dec",
+      "deals": [
+        {
+          "city": "Fuerteventura",
+          "country": "Spain",
+          "code": "FUE",
+          "depart_date": "2026-12-13",
+          "return_date": "2026-12-16",
+          "nights": 3,
+          "price": 45.98,
+          "stops": 0,
+          "total_time": "—",
+          "airlines": "Ryanair",
+          "source": "manual",
+          "fare_label": "from, no bags",
+          "out_fare_eur": 21.99,
+          "ret_fare_eur": 23.99,
+          "out_flight": "FR9827",
+          "out_time": "06:05",
+          "ret_flight": "FR9826",
+          "ret_time": "17:55",
+          "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-13&dateIn=2026-12-16&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=FUE&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-13&tpEndDate=2026-12-16&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=FUE",
+          "checked_at": "2026-11-16T07:19:00Z",
+          "checked_at_dublin": "16 Nov 2026, 07:19",
+          "matched_shortlist": false,
+          "trip_type": "weekend",
+          "stale": false,
+          "origin_airport": "ORK",
+          "seats_note": "return: 2 seats left"
+        }
+      ]
+    },
+    {
+      "depart_date": "2026-12-15",
+      "return_date": "2026-12-17",
+      "nights": 2,
+      "label": "Tue 15 Dec – Thu 17 Dec",
+      "deals": [
+        {
+          "city": "London",
+          "country": "England",
+          "code": "STN",
+          "depart_date": "2026-12-15",
+          "return_date": "2026-12-17",
+          "nights": 2,
+          "price": 29.98,
+          "stops": 0,
+          "total_time": "—",
+          "airlines": "Ryanair",
+          "source": "manual",
+          "fare_label": "from, no bags",
+          "out_fare_eur": 14.99,
+          "ret_fare_eur": 14.99,
+          "out_flight": "FR906",
+          "out_time": "08:00",
+          "ret_flight": "FR901",
+          "ret_time": "06:00",
+          "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-15&dateIn=2026-12-17&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=STN&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-15&tpEndDate=2026-12-17&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=STN",
+          "checked_at": "2026-11-16T06:32:36Z",
+          "checked_at_dublin": "16 Nov 2026, 06:32",
+          "matched_shortlist": false,
+          "trip_type": "weekend",
+          "stale": false,
+          "origin_airport": "ORK"
         }
       ]
     },
@@ -3839,7 +5659,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:19",
           "matched_shortlist": true,
           "trip_type": "weekend",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "Outbound: 1 seats left"
         }
@@ -3875,7 +5695,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:54",
           "matched_shortlist": true,
           "trip_type": "weekend",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "return 2 left"
         }
@@ -3911,9 +5731,80 @@
           "checked_at_dublin": "14 Nov 2026, 00:55",
           "matched_shortlist": true,
           "trip_type": "weekend",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "out 4 left; return 2 left"
+        }
+      ]
+    },
+    {
+      "depart_date": "2026-12-20",
+      "return_date": "2026-12-24",
+      "nights": 4,
+      "label": "Sun 20 Dec – Thu 24 Dec",
+      "deals": [
+        {
+          "city": "Birmingham",
+          "country": "England",
+          "code": "BHX",
+          "depart_date": "2026-12-20",
+          "return_date": "2026-12-24",
+          "nights": 4,
+          "price": 34.06,
+          "stops": 0,
+          "total_time": "—",
+          "airlines": "Ryanair",
+          "source": "manual",
+          "fare_label": "from, no bags",
+          "out_fare_eur": 16.99,
+          "ret_fare_eur": 17.07,
+          "out_flight": "FR3737",
+          "out_time": "23:35",
+          "ret_flight": "FR2993",
+          "ret_time": "13:10",
+          "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-20&dateIn=2026-12-24&isConnectedFlight=false&isReturn=true&discount=0&originIata=ORK&destinationIata=BHX",
+          "checked_at": "2026-11-16T05:47:01Z",
+          "checked_at_dublin": "16 Nov 2026, 05:47",
+          "matched_shortlist": false,
+          "trip_type": "weekend",
+          "stale": false,
+          "origin_airport": "ORK",
+          "seats_note": "out: 5 seats left; return: 2 seats left"
+        }
+      ]
+    },
+    {
+      "depart_date": "2026-12-21",
+      "return_date": "2026-12-24",
+      "nights": 3,
+      "label": "Mon 21 Dec – Thu 24 Dec",
+      "deals": [
+        {
+          "city": "Liverpool",
+          "country": "England",
+          "code": "LPL",
+          "depart_date": "2026-12-21",
+          "return_date": "2026-12-24",
+          "nights": 3,
+          "price": 39.48,
+          "stops": 0,
+          "total_time": "—",
+          "airlines": "Ryanair",
+          "source": "manual",
+          "fare_label": "from, no bags",
+          "out_fare_eur": 21.99,
+          "ret_fare_eur": 17.49,
+          "out_flight": "FR6589",
+          "out_time": "13:50",
+          "ret_flight": "FR6588",
+          "ret_time": "15:20",
+          "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-21&dateIn=2026-12-24&isConnectedFlight=false&isReturn=true&discount=0&originIata=ORK&destinationIata=LPL",
+          "checked_at": "2026-11-16T05:47:01Z",
+          "checked_at_dublin": "16 Nov 2026, 05:47",
+          "matched_shortlist": false,
+          "trip_type": "weekend",
+          "stale": false,
+          "origin_airport": "ORK"
         }
       ]
     },
@@ -3946,6 +5837,41 @@
           "checked_at": "2026-11-14T00:40:05Z",
           "checked_at_dublin": "14 Nov 2026, 00:40",
           "matched_shortlist": true,
+          "trip_type": "weekend",
+          "stale": true,
+          "origin_airport": "ORK"
+        }
+      ]
+    },
+    {
+      "depart_date": "2026-12-23",
+      "return_date": "2026-12-27",
+      "nights": 4,
+      "label": "Wed 23 Dec – Sun 27 Dec",
+      "deals": [
+        {
+          "city": "Edinburgh",
+          "country": "Scotland",
+          "code": "EDI",
+          "depart_date": "2026-12-23",
+          "return_date": "2026-12-27",
+          "nights": 4,
+          "price": 33.86,
+          "stops": 0,
+          "total_time": "—",
+          "airlines": "Ryanair",
+          "source": "manual",
+          "fare_label": "from, no bags",
+          "out_fare_eur": 18.07,
+          "ret_fare_eur": 15.79,
+          "out_flight": "FR320",
+          "out_time": "22:20",
+          "ret_flight": "FR3732",
+          "ret_time": "05:55",
+          "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-23&dateIn=2026-12-27&isConnectedFlight=false&isReturn=true&discount=0&originIata=ORK&destinationIata=EDI",
+          "checked_at": "2026-11-16T05:47:01Z",
+          "checked_at_dublin": "16 Nov 2026, 05:47",
+          "matched_shortlist": false,
           "trip_type": "weekend",
           "stale": false,
           "origin_airport": "ORK"
@@ -3982,7 +5908,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:57",
           "matched_shortlist": true,
           "trip_type": "weekend",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "out 5 left"
         }
@@ -4018,7 +5944,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:54",
           "matched_shortlist": true,
           "trip_type": "weekend",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK"
         }
       ]
@@ -4053,7 +5979,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:54",
           "matched_shortlist": true,
           "trip_type": "weekend",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "return 1 left"
         }
@@ -4089,9 +6015,46 @@
           "checked_at_dublin": "14 Nov 2026, 00:56",
           "matched_shortlist": true,
           "trip_type": "weekend",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "out 5 left; return 4 left"
+        }
+      ]
+    },
+    {
+      "depart_date": "2027-01-22",
+      "return_date": "2027-01-24",
+      "nights": 2,
+      "label": "Fri 22 Jan – Sun 24 Jan",
+      "deals": [
+        {
+          "city": "Paris",
+          "country": "France",
+          "code": "BVA",
+          "depart_date": "2027-01-22",
+          "return_date": "2027-01-24",
+          "nights": 2,
+          "price": 45.98,
+          "stops": 0,
+          "total_time": "—",
+          "airlines": "Ryanair",
+          "source": "manual",
+          "fare_label": "from, no bags",
+          "out_fare_eur": 25.99,
+          "ret_fare_eur": 19.99,
+          "out_flight": "FR3054",
+          "out_time": "13:55",
+          "ret_flight": "FR3053",
+          "ret_time": "11:45",
+          "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2027-01-22&dateIn=2027-01-24&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=BVA&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2027-01-22&tpEndDate=2027-01-24&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=BVA",
+          "checked_at": "2026-11-16T07:19:00Z",
+          "checked_at_dublin": "16 Nov 2026, 07:19",
+          "matched_shortlist": false,
+          "trip_type": "weekend",
+          "stale": false,
+          "origin_airport": "ORK",
+          "airport_label": "Beauvais",
+          "seats_note": "return: 5 seats left"
         }
       ]
     },
@@ -4125,7 +6088,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:55",
           "matched_shortlist": true,
           "trip_type": "weekend",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "out 3 left; return 5 left"
         }
@@ -4161,7 +6124,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:54",
           "matched_shortlist": true,
           "trip_type": "weekend",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK"
         }
       ]
@@ -4196,7 +6159,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:56",
           "matched_shortlist": true,
           "trip_type": "weekend",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "out 3 left"
         }
@@ -4232,7 +6195,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:55",
           "matched_shortlist": true,
           "trip_type": "weekend",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "return 5 left"
         },
@@ -4260,7 +6223,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:58",
           "matched_shortlist": true,
           "trip_type": "weekend",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "return 5 left"
         }
@@ -4296,7 +6259,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:57",
           "matched_shortlist": true,
           "trip_type": "weekend",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "out 3 left; return 5 left; return briefly showed 79.99"
         }
@@ -4304,6 +6267,112 @@
     }
   ],
   "week_boards": [
+    {
+      "depart_date": "2026-11-25",
+      "return_date": "2026-12-02",
+      "nights": 7,
+      "label": "Wed 25 Nov – Wed 02 Dec",
+      "deals": [
+        {
+          "city": "Manchester",
+          "country": "England",
+          "code": "MAN",
+          "depart_date": "2026-11-25",
+          "return_date": "2026-12-02",
+          "nights": 7,
+          "price": 29.98,
+          "stops": 0,
+          "total_time": "—",
+          "airlines": "Ryanair",
+          "source": "manual",
+          "fare_label": "from, no bags",
+          "out_fare_eur": 14.99,
+          "ret_fare_eur": 14.99,
+          "out_flight": "FR768",
+          "out_time": "06:10",
+          "ret_flight": "FR767",
+          "ret_time": "07:50",
+          "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-11-25&dateIn=2026-12-02&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=MAN&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-11-25&tpEndDate=2026-12-02&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=MAN",
+          "checked_at": "2026-11-16T06:32:36Z",
+          "checked_at_dublin": "16 Nov 2026, 06:32",
+          "matched_shortlist": false,
+          "trip_type": "week",
+          "stale": false,
+          "origin_airport": "ORK",
+          "seats_note": "return: 4 seats left"
+        }
+      ]
+    },
+    {
+      "depart_date": "2026-11-25",
+      "return_date": "2026-12-03",
+      "nights": 8,
+      "label": "Wed 25 Nov – Thu 03 Dec",
+      "deals": [
+        {
+          "city": "London",
+          "country": "England",
+          "code": "STN",
+          "depart_date": "2026-11-25",
+          "return_date": "2026-12-03",
+          "nights": 8,
+          "price": 29.98,
+          "stops": 0,
+          "total_time": "—",
+          "airlines": "Ryanair",
+          "source": "manual",
+          "fare_label": "from, no bags",
+          "out_fare_eur": 14.99,
+          "ret_fare_eur": 14.99,
+          "out_flight": "FR906",
+          "out_time": "21:40",
+          "ret_flight": "FR901",
+          "ret_time": "06:00",
+          "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-11-25&dateIn=2026-12-03&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=STN&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-11-25&tpEndDate=2026-12-03&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=STN",
+          "checked_at": "2026-11-16T06:32:36Z",
+          "checked_at_dublin": "16 Nov 2026, 06:32",
+          "matched_shortlist": false,
+          "trip_type": "week",
+          "stale": false,
+          "origin_airport": "ORK"
+        }
+      ]
+    },
+    {
+      "depart_date": "2026-11-28",
+      "return_date": "2026-12-06",
+      "nights": 8,
+      "label": "Sat 28 Nov – Sun 06 Dec",
+      "deals": [
+        {
+          "city": "Edinburgh",
+          "country": "Scotland",
+          "code": "EDI",
+          "depart_date": "2026-11-28",
+          "return_date": "2026-12-06",
+          "nights": 8,
+          "price": 29.98,
+          "stops": 0,
+          "total_time": "—",
+          "airlines": "Ryanair",
+          "source": "manual",
+          "fare_label": "from, no bags",
+          "out_fare_eur": 14.99,
+          "ret_fare_eur": 14.99,
+          "out_flight": "FR320",
+          "out_time": "18:35",
+          "ret_flight": "FR3732",
+          "ret_time": "05:55",
+          "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-11-28&dateIn=2026-12-06&isConnectedFlight=false&isReturn=true&discount=0&originIata=ORK&destinationIata=EDI",
+          "checked_at": "2026-11-16T05:47:01Z",
+          "checked_at_dublin": "16 Nov 2026, 05:47",
+          "matched_shortlist": false,
+          "trip_type": "week",
+          "stale": false,
+          "origin_airport": "ORK"
+        }
+      ]
+    },
     {
       "depart_date": "2026-12-03",
       "return_date": "2026-12-10",
@@ -4334,7 +6403,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:57",
           "matched_shortlist": true,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "out 1 left"
         }
@@ -4370,7 +6439,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:52",
           "matched_shortlist": true,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "out 2 left"
         }
@@ -4382,6 +6451,34 @@
       "nights": 7,
       "label": "Sat 05 Dec – Sat 12 Dec",
       "deals": [
+        {
+          "city": "Birmingham",
+          "country": "England",
+          "code": "BHX",
+          "depart_date": "2026-12-05",
+          "return_date": "2026-12-12",
+          "nights": 7,
+          "price": 30.98,
+          "stops": 0,
+          "total_time": "—",
+          "airlines": "Ryanair",
+          "source": "manual",
+          "fare_label": "from, no bags",
+          "out_fare_eur": 14.99,
+          "ret_fare_eur": 15.99,
+          "out_flight": "FR2994",
+          "out_time": "19:50",
+          "ret_flight": "FR2993",
+          "ret_time": "21:30",
+          "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-05&dateIn=2026-12-12&isConnectedFlight=false&isReturn=true&discount=0&originIata=ORK&destinationIata=BHX",
+          "checked_at": "2026-11-16T05:47:01Z",
+          "checked_at_dublin": "16 Nov 2026, 05:47",
+          "matched_shortlist": false,
+          "trip_type": "week",
+          "stale": false,
+          "origin_airport": "ORK",
+          "seats_note": "return: 2 seats left"
+        },
         {
           "city": "Tenerife",
           "country": "Spain",
@@ -4406,7 +6503,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:53",
           "matched_shortlist": true,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK"
         },
         {
@@ -4433,7 +6530,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:55",
           "matched_shortlist": false,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "out 2 left"
         }
@@ -4469,7 +6566,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:28",
           "matched_shortlist": true,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "out 4 left"
         }
@@ -4488,22 +6585,57 @@
           "depart_date": "2026-12-06",
           "return_date": "2026-12-13",
           "nights": 7,
-          "price": 35.98,
+          "price": 38.98,
           "stops": 0,
           "total_time": "—",
           "airlines": "Ryanair",
           "source": "manual",
           "fare_label": "from, no bags",
           "out_fare_eur": 14.99,
-          "ret_fare_eur": 20.99,
+          "ret_fare_eur": 23.99,
           "out_flight": "FR361",
           "out_time": "10:30",
           "ret_flight": "FR362",
           "ret_time": "07:25",
-          "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-06&dateIn=2026-12-13&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=FAO&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-06&tpEndDate=2026-12-13&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=FAO",
-          "checked_at": "2026-11-14T00:49:38Z",
-          "checked_at_dublin": "14 Nov 2026, 00:49",
-          "matched_shortlist": true,
+          "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-06&dateIn=2026-12-13&isConnectedFlight=false&isReturn=true&discount=0&originIata=ORK&destinationIata=FAO",
+          "checked_at": "2026-11-16T05:47:01Z",
+          "checked_at_dublin": "16 Nov 2026, 05:47",
+          "matched_shortlist": false,
+          "trip_type": "week",
+          "stale": false,
+          "origin_airport": "ORK"
+        }
+      ]
+    },
+    {
+      "depart_date": "2026-12-11",
+      "return_date": "2026-12-17",
+      "nights": 6,
+      "label": "Fri 11 Dec – Thu 17 Dec",
+      "deals": [
+        {
+          "city": "Tenerife",
+          "country": "Spain",
+          "code": "TFS",
+          "depart_date": "2026-12-11",
+          "return_date": "2026-12-17",
+          "nights": 6,
+          "price": 45.98,
+          "stops": 0,
+          "total_time": "—",
+          "airlines": "Ryanair",
+          "source": "manual",
+          "fare_label": "from, no bags",
+          "out_fare_eur": 20.99,
+          "ret_fare_eur": 24.99,
+          "out_flight": "FR526",
+          "out_time": "11:40",
+          "ret_flight": "FR527",
+          "ret_time": "06:25",
+          "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-11&dateIn=2026-12-17&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=TFS&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-11&tpEndDate=2026-12-17&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=TFS",
+          "checked_at": "2026-11-16T07:19:00Z",
+          "checked_at_dublin": "16 Nov 2026, 07:19",
+          "matched_shortlist": false,
           "trip_type": "week",
           "stale": false,
           "origin_airport": "ORK"
@@ -4540,7 +6672,7 @@
           "checked_at_dublin": "13 Nov 2026, 23:12",
           "matched_shortlist": true,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "5 seats left at this price each leg"
         }
@@ -4559,22 +6691,22 @@
           "depart_date": "2026-12-13",
           "return_date": "2026-12-20",
           "nights": 7,
-          "price": 37.48,
+          "price": 33.66,
           "stops": 0,
           "total_time": "—",
           "airlines": "Ryanair",
           "source": "manual",
           "fare_label": "from, no bags",
           "out_fare_eur": 14.99,
-          "ret_fare_eur": 22.49,
+          "ret_fare_eur": 18.67,
           "out_flight": "FR3054",
           "out_time": "12:50",
           "ret_flight": "FR3053",
           "ret_time": "11:45",
-          "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-13&dateIn=2026-12-20&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=BVA&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-13&tpEndDate=2026-12-20&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=BVA",
-          "checked_at": "2026-11-14T00:52:21Z",
-          "checked_at_dublin": "14 Nov 2026, 00:52",
-          "matched_shortlist": true,
+          "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-13&dateIn=2026-12-20&isConnectedFlight=false&isReturn=true&discount=0&originIata=ORK&destinationIata=BVA",
+          "checked_at": "2026-11-16T05:47:01Z",
+          "checked_at_dublin": "16 Nov 2026, 05:47",
+          "matched_shortlist": false,
           "trip_type": "week",
           "stale": false,
           "origin_airport": "ORK",
@@ -4612,9 +6744,45 @@
           "checked_at_dublin": "14 Nov 2026, 00:58",
           "matched_shortlist": true,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "out 1 left; return 5 left"
+        }
+      ]
+    },
+    {
+      "depart_date": "2026-12-14",
+      "return_date": "2026-12-22",
+      "nights": 8,
+      "label": "Mon 14 Dec – Tue 22 Dec",
+      "deals": [
+        {
+          "city": "Lanzarote",
+          "country": "Spain",
+          "code": "ACE",
+          "depart_date": "2026-12-14",
+          "return_date": "2026-12-22",
+          "nights": 8,
+          "price": 43.98,
+          "stops": 0,
+          "total_time": "—",
+          "airlines": "Ryanair",
+          "source": "manual",
+          "fare_label": "from, no bags",
+          "out_fare_eur": 18.99,
+          "ret_fare_eur": 24.99,
+          "out_flight": "FR7725",
+          "out_time": "06:30",
+          "ret_flight": "FR7726",
+          "ret_time": "08:00",
+          "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-14&dateIn=2026-12-22&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=ACE&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-14&tpEndDate=2026-12-22&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=ACE",
+          "checked_at": "2026-11-16T07:11:00Z",
+          "checked_at_dublin": "16 Nov 2026, 07:11",
+          "matched_shortlist": false,
+          "trip_type": "week",
+          "stale": false,
+          "origin_airport": "ORK",
+          "seats_note": "return: 4 seats left"
         }
       ]
     },
@@ -4648,7 +6816,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:53",
           "matched_shortlist": true,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK"
         },
         {
@@ -4675,7 +6843,7 @@
           "checked_at_dublin": "14 Nov 2026, 01:03",
           "matched_shortlist": false,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "fare cards showed 90/53 vs 92.27/54.95; small unexplained gap, recheck"
         }
@@ -4711,7 +6879,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:53",
           "matched_shortlist": true,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "return 5 left"
         },
@@ -4739,7 +6907,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:53",
           "matched_shortlist": true,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "out 1 left; return 5 left"
         },
@@ -4767,7 +6935,7 @@
           "checked_at_dublin": "14 Nov 2026, 01:02",
           "matched_shortlist": false,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK"
         }
       ]
@@ -4802,7 +6970,7 @@
           "checked_at_dublin": "14 Nov 2026, 01:03",
           "matched_shortlist": false,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK"
         },
         {
@@ -4829,7 +6997,7 @@
           "checked_at_dublin": "14 Nov 2026, 01:03",
           "matched_shortlist": false,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "2 fares left"
         },
@@ -4857,9 +7025,45 @@
           "checked_at_dublin": "14 Nov 2026, 01:03",
           "matched_shortlist": false,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "4 fares left on return"
+        }
+      ]
+    },
+    {
+      "depart_date": "2027-01-03",
+      "return_date": "2027-01-11",
+      "nights": 8,
+      "label": "Sun 03 Jan – Mon 11 Jan",
+      "deals": [
+        {
+          "city": "Liverpool",
+          "country": "England",
+          "code": "LPL",
+          "depart_date": "2027-01-03",
+          "return_date": "2027-01-11",
+          "nights": 8,
+          "price": 36.98,
+          "stops": 0,
+          "total_time": "—",
+          "airlines": "Ryanair",
+          "source": "manual",
+          "fare_label": "from, no bags",
+          "out_fare_eur": 16.99,
+          "ret_fare_eur": 19.99,
+          "out_flight": "FR6589",
+          "out_time": "19:50",
+          "ret_flight": "FR6588",
+          "ret_time": "12:15",
+          "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2027-01-03&dateIn=2027-01-11&isConnectedFlight=false&isReturn=true&discount=0&originIata=ORK&destinationIata=LPL",
+          "checked_at": "2026-11-16T05:47:01Z",
+          "checked_at_dublin": "16 Nov 2026, 05:47",
+          "matched_shortlist": false,
+          "trip_type": "week",
+          "stale": false,
+          "origin_airport": "ORK",
+          "seats_note": "out: 3 seats left"
         }
       ]
     },
@@ -4893,7 +7097,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:57",
           "matched_shortlist": true,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "return 3 left"
         }
@@ -4929,7 +7133,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:58",
           "matched_shortlist": true,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "out 1 left; return 5 left"
         }
@@ -4965,7 +7169,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:54",
           "matched_shortlist": true,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK"
         },
         {
@@ -4992,7 +7196,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:56",
           "matched_shortlist": true,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "out 5 left; return 2 left"
         }
@@ -5004,6 +7208,34 @@
       "nights": 7,
       "label": "Fri 15 Jan – Fri 22 Jan",
       "deals": [
+        {
+          "city": "Brussels",
+          "country": "Belgium",
+          "code": "CRL",
+          "depart_date": "2027-01-15",
+          "return_date": "2027-01-22",
+          "nights": 7,
+          "price": 42.98,
+          "stops": 0,
+          "total_time": "—",
+          "airlines": "Ryanair",
+          "source": "manual",
+          "fare_label": "from, no bags",
+          "out_fare_eur": 22.99,
+          "ret_fare_eur": 19.99,
+          "out_flight": "FR2976",
+          "out_time": "13:25",
+          "ret_flight": "FR2975",
+          "ret_time": "12:10",
+          "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2027-01-15&dateIn=2027-01-22&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=CRL&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2027-01-15&tpEndDate=2027-01-22&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=CRL",
+          "checked_at": "2026-11-16T07:09:00Z",
+          "checked_at_dublin": "16 Nov 2026, 07:09",
+          "matched_shortlist": false,
+          "trip_type": "week",
+          "stale": false,
+          "origin_airport": "ORK",
+          "seats_note": "return: 5 seats left"
+        },
         {
           "city": "Tenerife",
           "country": "Spain",
@@ -5028,7 +7260,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:57",
           "matched_shortlist": true,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "out 5 left; return 2 left"
         }
@@ -5064,7 +7296,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:58",
           "matched_shortlist": true,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "out 5 left"
         }
@@ -5100,7 +7332,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:55",
           "matched_shortlist": true,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "out 1 left"
         }
@@ -5136,7 +7368,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:55",
           "matched_shortlist": true,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "out 5 left; return 5 left"
         }
@@ -5172,7 +7404,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:57",
           "matched_shortlist": true,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "out 5 left"
         },
@@ -5200,7 +7432,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:56",
           "matched_shortlist": true,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "out 5 left"
         }
@@ -5236,7 +7468,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:56",
           "matched_shortlist": true,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "out 5 left"
         },
@@ -5264,7 +7496,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:59",
           "matched_shortlist": true,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "return 3 left"
         }
@@ -5300,7 +7532,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:54",
           "matched_shortlist": true,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK"
         }
       ]
@@ -5335,7 +7567,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:57",
           "matched_shortlist": true,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "out 5 left; return 5 left; out briefly showed 62.87"
         }
@@ -5371,7 +7603,7 @@
           "checked_at_dublin": "14 Nov 2026, 00:55",
           "matched_shortlist": true,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK",
           "seats_note": "return 5 left"
         }
@@ -5407,45 +7639,45 @@
           "checked_at_dublin": "14 Nov 2026, 00:58",
           "matched_shortlist": true,
           "trip_type": "week",
-          "stale": false,
+          "stale": true,
           "origin_airport": "ORK"
         }
       ]
     }
   ],
   "week_board": {
-    "depart_date": "2026-12-03",
-    "return_date": "2026-12-10",
+    "depart_date": "2026-11-25",
+    "return_date": "2026-12-02",
     "nights": 7,
-    "label": "Thu 03 Dec – Thu 10 Dec",
+    "label": "Wed 25 Nov – Wed 02 Dec",
     "deals": [
       {
-        "city": "Las Palmas",
-        "country": "Spain",
-        "code": "LPA",
-        "depart_date": "2026-12-03",
-        "return_date": "2026-12-10",
+        "city": "Manchester",
+        "country": "England",
+        "code": "MAN",
+        "depart_date": "2026-11-25",
+        "return_date": "2026-12-02",
         "nights": 7,
-        "price": 49.98,
+        "price": 29.98,
         "stops": 0,
         "total_time": "—",
         "airlines": "Ryanair",
         "source": "manual",
         "fare_label": "from, no bags",
-        "out_fare_eur": 24.99,
-        "ret_fare_eur": 24.99,
-        "out_flight": "FR7028",
-        "out_time": "14:55",
-        "ret_flight": "FR7027",
-        "ret_time": "19:30",
-        "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-03&dateIn=2026-12-10&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=LPA&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-12-03&tpEndDate=2026-12-10&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=LPA",
-        "checked_at": "2026-11-14T00:57:47Z",
-        "checked_at_dublin": "14 Nov 2026, 00:57",
-        "matched_shortlist": true,
+        "out_fare_eur": 14.99,
+        "ret_fare_eur": 14.99,
+        "out_flight": "FR768",
+        "out_time": "06:10",
+        "ret_flight": "FR767",
+        "ret_time": "07:50",
+        "source_url": "https://www.ryanair.com/ie/en/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-11-25&dateIn=2026-12-02&isConnectedFlight=false&isReturn=true&discount=0&promoCode=&originIata=ORK&destinationIata=MAN&tpAdults=1&tpTeens=0&tpChildren=0&tpInfants=0&tpStartDate=2026-11-25&tpEndDate=2026-12-02&tpDiscount=0&tpPromoCode=&tpOriginIata=ORK&tpDestinationIata=MAN",
+        "checked_at": "2026-11-16T06:32:36Z",
+        "checked_at_dublin": "16 Nov 2026, 06:32",
+        "matched_shortlist": false,
         "trip_type": "week",
         "stale": false,
         "origin_airport": "ORK",
-        "seats_note": "out 1 left"
+        "seats_note": "return: 4 seats left"
       }
     ]
   }
